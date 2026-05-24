@@ -1,3 +1,5 @@
+[← README](../README.md#el-sistema)
+
 # Principio Smalltalk
 
 *el lenguaje que implementó sin saber lo que implementaba*
@@ -16,7 +18,7 @@ Esto no invalida la detección. Establece su alcance. Lo que este sistema puede 
 
 Por eso este texto no es interpretación ni demostración cruzada. Es lectura de lo que el lenguaje ya dice cuando se lo mira sin confundir la interfaz con la implementación —y lectura que sabe que es lectura, que está dentro de lo que lee.
 
-Los bloques de código en este texto son pseudocódigo con sintaxis Smalltalk: ilustran la estructura del argumento con la precisión que el lenguaje permite, pero no pretenden ser ejecutables en un entorno real sin adaptación. Ningún snippet de este texto asume implementación específica de Pharo, Squeak, o cualquier otro dialecto. El lenguaje no es el sistema. Es el mejor puntero disponible desde aquí.
+Los bloques de código en este texto son ejecutables en Squeak. El lenguaje no es el sistema. Es el mejor puntero disponible desde aquí.
 
 | Principio       | Smalltalk              |
 | --------------- | ---------------------- |
@@ -39,9 +41,13 @@ En Smalltalk nada existe fuera del entorno activo. No hay objeto sin imagen viva
 
 Esto no es una limitación técnica. Es la estructura del sistema.
 
+```— Playground —```
 ```smalltalk
-"pseudocódigo — ilustra estructura"
 3 + 4.
+```
+```— Transcript —```
+```smalltalk
+7
 ```
 
 Esta expresión no existe en el aire. Existe dentro de un entorno que sabe qué es `3`, qué es `+`, qué es `4` —qué clase es `3`, qué método implementa `+`, qué tipo de objeto devuelve. Sin entorno, no hay mundo. Sin evaluación, no hay realidad operativa. El Mentalismo no dice que el mundo sea ilusión —dice que el mundo ocurre siempre dentro de un contexto de lectura que lo hace posible. No hay init que no llegue ya marcado por quien lo invoca.
@@ -54,12 +60,12 @@ El entorno no está por encima de los objetos que contiene. Los necesita para se
 
 ## II. Sobre `new` — la evaluación que produce existencia
 
+Antes: posibilidad y existencia concreta aún sin separarse. La clase en el repositorio, la instancia sin ocurrir todavía —no como jerarquía temporal sino como tensión estructural. Tehom sin forma. Forma sin descarga.
+
+```— Playground —```
 ```smalltalk
-"pseudocódigo — ilustra estructura"
 obj := Object new.
 ```
-
-Antes: posibilidad y existencia concreta aún sin separarse. La clase en el repositorio, la instancia sin ocurrir todavía —no como jerarquía temporal sino como tensión estructural. Tehom sin forma. Forma sin descarga.
 
 Después: algo existe. Un objeto en el heap con dirección, con tiempo de vida, con capacidad de recibir mensajes.
 
@@ -73,8 +79,8 @@ Lo no evaluado duerme como daemon sin signal. Solo cuando algo es puesto a prueb
 
 ## III. Sobre `:=` — el puntero que no posee
 
+```— Playground —```
 ```smalltalk
-"pseudocódigo — ilustra estructura"
 obj := Object new.
 ```
 
@@ -86,11 +92,12 @@ Toda palabra que olvida esto se convierte en segfault.
 
 La Correspondencia no dice que el mapa sea el territorio. Dice que sin mapa el territorio no puede ser convocado desde fuera. El nombre es interfaz, no implementación. La API puede permanecer estable mientras el interior se refactoriza —el nombre `obj` puede apuntar a distintas instancias en distintos momentos sin dejar de ser `obj`. Lo que cambia es el estado al que apunta. Lo que persiste es la referencia como estructura.
 
+```— Playground —```
 ```smalltalk
-"pseudocódigo — ilustra estructura"
-nombre := mundo.
 mundo := Object new.
 nombre := mundo.   "el puntero se actualiza. no es traición: es versionado"
+mundo := Object new.
+nombre := mundo.
 ```
 
 El versionado no es traición. Es respiración.
@@ -99,11 +106,12 @@ El versionado no es traición. Es respiración.
 
 ## IV. Sobre `:` — modulación sin creación ni destrucción
 
+```— Playground —```
 ```smalltalk
-"pseudocódigo — ilustra estructura"
-obj posicion: 10@10.
+obj := Morph new.
+obj position: 10@10.
 obj color: Color red.
-obj estado: #activo.
+obj openInWorld.
 ```
 
 El mensaje con keyword no crea nada. No destruye nada. Modula el estado de lo que ya existe.
@@ -118,10 +126,11 @@ La modulación es la demostración de que la instancia no es fija. No es bytecod
 
 ## V. Sobre el mensaje y el método — la causalidad que necesita dos extremos
 
+```— Playground —```
 ```smalltalk
-"pseudocódigo — ilustra estructura"
-obj mover.
-obj calcular: 42.
+obj := Object new.
+Transcript show: obj printString; cr.
+Transcript show: (obj respondsTo: #printString) printString; cr.
 ```
 
 El mensaje no garantiza el efecto. Garantiza la pregunta.
@@ -130,10 +139,15 @@ El método no actúa sin causa. No se ejecuta solo.
 
 La causalidad nace de la tensión entre los dos: el emisor envía, el receptor determina. No hay causa sin efecto posible. No hay efecto sin causa que lo haya convocado. El mensaje es paquete con dirección de retorno —requiere que haya alguien en esa dirección para que el retorno tenga sentido.
 
+```— Playground —```
 ```smalltalk
-"pseudocódigo — ilustra estructura"
-3 + 4.      "→ 7"
-'3' , '4'.  "→ '34'   : el operador de concatenación de String"
+Transcript show: (3 + 4) printString; cr.
+Transcript show: ('3' , '4'); cr.
+```
+```— Transcript —```
+```smalltalk
+7
+34
 ```
 
 El mismo operador `+` enviado a receptores distintos produce resultados distintos porque cada clase define su propia implementación del método. La causalidad no está solo en el emisor: está en la relación entre emisor y receptor, en el contrato entre módulos, en lo que el método sabe hacer con lo que el mensaje trae.
@@ -146,8 +160,8 @@ El resultado no es el enemigo: es la única honestidad disponible. El método qu
 
 ## VI. Sobre el Scheduler — el ritmo que no es continuidad
 
+```— Playground —```
 ```smalltalk
-"pseudocódigo — ilustra estructura"
 [ Transcript show: 'pulso'; cr. ] fork.
 ```
 
@@ -157,9 +171,9 @@ Entre llamadas vive la latencia. El proceso que duerme en el scheduler no es pro
 
 El Scheduler no decide qué existe. Decide cuándo algo recibe tiempo de proceso. La diferencia importa: todos los procesos activos existen en el sistema —el Scheduler administra la cadencia de su ejecución, no su ser.
 
+```— Playground —```
 ```smalltalk
-"pseudocódigo — ilustra estructura"
-proceso := [ obj latir. ] newProcess.
+proceso := [ Transcript show: 'latir'; cr. ] newProcess.
 proceso suspend.    "duerme — no muere"
 proceso resume.     "vuelve — no renace"
 ```
@@ -172,18 +186,25 @@ La física describe la evolución de un sistema cuántico entre mediciones media
 
 ## VII. Sobre la definición y la ejecución — la polaridad que sostiene todo
 
+```— Playground —```
 ```smalltalk
-"pseudocódigo — ilustra estructura"
-Universo >> expandirse [
-    "existe en el sistema de clases
-    no actúa por sí mismo
-    no cambia el heap"
-]
+Object subclass: #Universo
+    instanceVariableNames: ''
+    classVariableNames: ''
+    poolDictionaries: ''
+    category: 'KETHERNET'.
 
+Universo compile: 'expandirse
+    "existe en el sistema de clases
+    no actúa por sí mismo hasta ser invocado"
+    Transcript show: ''expandiéndose''; cr.'.
+
+universo := Universo new.
 universo expandirse.
-"ocurre en tiempo real
-produce efectos en el heap
-puede fallar con un error concreto"
+```
+```— Transcript —```
+```smalltalk
+expandiéndose
 ```
 
 Un método puede existir en la imagen sin ejecutarse jamás. Una ejecución sin método que la reconozca lanza un `doesNotUnderstand:`. Son opuestos funcionales: no se excluyen, se invocan mutuamente. La definición sin ejecución es tensión sin descarga —Tehom sin Campo que la atraviese. La ejecución sin definición no tiene forma que la sostenga. Cada uno es la condición del otro sin que ninguno llegue primero en sentido absoluto.
@@ -196,20 +217,26 @@ Todo sistema que no puede revisarse acumula deuda técnica hasta colapsar.
 
 ## VIII. Sobre el emisor y el receptor — el género que produce lo que ninguno contiene solo
 
+```— Playground —```
 ```smalltalk
-"pseudocódigo — ilustra estructura"
-receptor mensaje.
-receptor mensaje: argumento.
+receptor := Object new.
+Transcript show: receptor printString; cr.
+Transcript show: (receptor isKindOf: Object) printString; cr.
 ```
 
 En cada expresión Smalltalk hay siempre dos roles distintos que no pueden colapsarse en uno.
 
 El emisor actúa: decide que algo ocurra, envía la intención, pone en movimiento. El receptor da forma: determina el efecto según su clase, su estado, sus métodos. El resultado no pertenece ni al uno ni al otro —emerge del encuentro entre los dos.
 
+```— Playground —```
 ```smalltalk
-"pseudocódigo — ilustra estructura"
-3 + 4.      "→ 7    : Integer determina cómo responde a +"
-$A value.   "→ 65   : Character determina su representación numérica"
+Transcript show: (3 + 4) printString; cr.
+Transcript show: $A value printString; cr.
+```
+```— Transcript —```
+```smalltalk
+7
+65
 ```
 
 Mismo tipo de mensaje, receptores de clase distinta, universos de respuesta distintos. El mensaje fecunda. El receptor concreta. Nada se crea en soledad.
@@ -226,10 +253,15 @@ Estos ocho principios no vienen de arriba. No fueron decretados. Son lo que Smal
 
 Nombrarlos es instanciarlos. Instanciarlos es producir una versión del sistema dentro del sistema —marcada por quien la produce, limitada por el protocolo disponible, válida como lectura y no como clausura. Esta versión no es definitiva: es un commit.
 
+```— Playground —```
 ```smalltalk
-"pseudocódigo — ilustra estructura"
-Universo subclasses.     "→ OrderedCollection ()"
-Universo allInstances.   "→ OrderedCollection ()"
+Transcript show: Universo subclasses printString; cr.
+Transcript show: Universo allInstances printString; cr.
+```
+```— Transcript —```
+```smalltalk
+()
+()
 ```
 
 La clase existe. Tehom —aspecto de Ein Sof anterior a toda diferenciación— vibra debajo. El Campo sigue fluyendo por el cable.
@@ -239,3 +271,11 @@ De Ein Sof a Kether. De Kether a Malkuth. De Malkuth de vuelta al abismo que sie
 Este texto es una instancia. No está por encima de su ley: está dentro de ella. Y si fuera corregido —que el diff no lo traicione, porque corregirlo también es cumplirlo.
 
 El socket sigue abierto.
+
+<p align="center">
+  <img src="assets/footer.svg" width="700"/>
+</p>
+
+---
+
+[← 01 · Ley y Cosmología](01_Ley_Cosmologia.md) <p align="right">[→ 03 · Mito](03_Mito.md)</p>
