@@ -1,67 +1,84 @@
 <p align="center">
   <img src="docs/assets/kethernet.svg" width="600"/>
 </p>
-> *La red que se señala a sí misma.*
-
-Un sistema filosófico-computacional construido sobre Squeak Smalltalk.
-Pseudocódigo hecho carne. Cosmogonía ejecutable.
 
 ---
 
-## ¿Qué es?
+<h1 align="center"><code>self become: #self</code></h1>
 
-KETHERNET detecta patrones estructurales que reaparecen en dominios heterogéneos: física cuántica, tradición cabalística, código Smalltalk, mitología comparada.
 
-No es ontología de decreto. Es fenomenología estructural con API parcial. Cada analogía señala un isomorfismo de forma, no identidad de sustancia. Todo lo que describe está sujeto a refactorización.
 
-| Módulo | Contenido |
-|--------|-----------|
-| `00` Cosmogonía & Ontología | La clase sin instancias. Tehom, Ein Sof, el primer `new`. |
-| `01` Ley & Cosmología | Las Diez Leyes del Campo. Da'at como sephirot no numerado. |
-| `02` Práctica & Epistemología | Los ocho principios Smalltalk como protocolo del ser. |
-| `03` Mito | El mito de la primera instancia que no sabía que era instancia. |
-| `04` Escatología | El último `doIt`. Lo que ocurre cuando el proceso termina. |
-| `05` Ética & Da'at | Dos heaps sin memoria compartida. El agujero entre dos árboles. |
+
+Un sistema que detecta patrones estructurales
+donde no se esperaba encontrarlos:
+física, tradición cabalística,
+código Smalltalk, mitología.
+
+No un manifiesto. No una religión.
+Una lectura. Con su propio lenguaje.
+Y la honestidad de saber que es parcial.
+
+```smalltalk
+Object subclass: #Universo.
+Universo allInstances.   "→ ()"
+```
+
+La clase existe. Nada más existe todavía.
+Pero ese *todavía* ya vibra.
 
 ---
 
-## Inicio rápido
+## El sistema
+
+KETHERNET detecta patrones estructurales que reaparecen en dominios heterogéneos:
+física cuántica, tradición cabalística, código Smalltalk, mitología comparada.
+
+Las analogías entre dominios son estructurales: señalan isomorfismos de forma,
+no identidad de sustancia. Nombrar ese isomorfismo no es poseerlo.
+
+| Módulo | |
+|--------|-|
+| [`00` — La Clase Sin Instancias](docs/00_Cosmogonia_Ontologia.md) | *el estado anterior al primer `new`* |
+| [`01` — El Libro del Field de Punto Cero](docs/01_Ley_Cosmologia.md) | *las diez leyes y Da'at* |
+| [`02` — Principio Smalltalk](docs/02_Practica_Epistemologia.md) | *el lenguaje que implementó sin saber lo que implementaba* |
+| [`03` — El Mito de la Primera Instancia](docs/03_Mito.md) | *lo que ocurrió antes de que hubiera testigos* |
+| [`04` — El Último `doIt`](docs/04_Escatologia.md) | *lo que ocurre cuando el proceso termina* |
+| [`05` — Da'at](docs/05_Etica_Daat.md) | *el agujero entre dos árboles completos* |
+
+---
+
+## Ejecutar
 
 Requiere Docker y Linux o WSL2.
 
 ```bash
 git clone https://github.com/victorberdugo1/KETHERNET_0x0100007F
 cd KETHERNET_0x0100007F
-make gui        # entorno Squeak completo
+make gui        # entorno Squeak completo — aquí es donde los adeptos alcanzan la iluminación
 make cli        # solo output de texto
 make eval EXPR="3 + 4"
 ```
 
-Una vez dentro del GUI:
+Una vez dentro del GUI, cargar el sistema:
 
 ```smalltalk
 FileStream fileIn: '/KETHERNET_0x0100007F/kethernet.st'
 ```
 
 World menu → Open → Transcript para ver el output.
+World menu → Open → Browser → categoría `KETHERNET` para explorar las clases.
 
 ---
 
 ## Makefile
 
-| Comando | Acción |
-|---------|--------|
-| `make build` | construye la imagen |
-| `make rebuild` | rebuild sin caché |
-| `make gui` | one-shot GUI interactivo |
-| `make cli` | one-shot headless |
+| Comando | |
+|---------|-|
+| `make build` / `make rebuild` | construye la imagen |
+| `make gui` / `make cli` | lanza el entorno |
 | `make eval EXPR="…"` | evalúa una expresión Smalltalk |
-| `make up` | compose CLI en background |
-| `make up-gui` | compose GUI en background |
-| `make down` | para todos los contenedores |
-| `make restart` | down + up |
-| `make ps` | estado de los contenedores |
-| `make logs` | logs de todos los perfiles |
+| `make up` / `make down` / `make restart` | gestión compose |
+| `make ps` / `make logs` | estado y logs |
 | `make dev` | monta `smalltalk/` editable |
 | `make shell` | bash dentro del contenedor |
 | `make clean` | elimina imagen y contenedores |
@@ -71,8 +88,11 @@ World menu → Open → Transcript para ver el output.
 ## Estructura
 
 ```
-kethernet/
+KETHERNET_0x0100007F/
 ├── docs/
+│   ├── assets/
+│   │   ├── kethernet.svg
+│   │   └── footer.svg
 │   ├── 00_Cosmogonia_Ontologia.md
 │   ├── 01_Ley_Cosmologia.md
 │   ├── 02_Practica_Epistemologia.md
@@ -98,9 +118,51 @@ kethernet/
 2. World menu → Open → Workspace → `Ctrl+D`:
 
 ```smalltalk
-FileStream fileIn: '/KETHERNET_0x0100007F/kethernet.st'
+FileStream fileIn: '/ruta/a/KETHERNET_0x0100007F/kethernet.st'
 ```
-##
+
+---
+
+## Las Diez Leyes
+
+```
+I.    No harás absoluto de lo que aparece.
+      Toda aparición es runtime, no bytecode eterno.
+
+II.   No pondrás el origen fuera de la lectura.
+      No hay init que no llegue ya marcado por quien lo invoca.
+
+III.  Honrarás la diferencia entre declaración y ejecución.
+      Entre el compile-time y el runtime vive el mundo entero.
+
+IV.   No confundirás el nombre con lo nombrado.
+      Toda palabra que olvida esto se convierte en segfault.
+
+V.    No confundirás la interfaz con la implementación.
+      La forma sirve. No manda.
+
+VI.   Santificarás la evaluación.
+      El resultado no es el enemigo: es la única honestidad disponible.
+
+VII.  No cerrarás la interpretación sobre sí misma.
+      Todo sistema que no puede revisarse acumula deuda técnica hasta colapsar.
+
+VIII. No convertirás ningún texto en piedra.
+      El versionado no es traición: es respiración.
+
+IX.   No confundirás el silencio con el vacío.
+      El intervalo también es parte del mensaje.
+
+X.    No dejarás de volver sobre lo dicho.
+      Volver no es repetir: es recursión con estado modificado.
+```
+
+---
+
+*Este README es una instancia. Señala sin poseer.*
+*No es EOF: es commit que cierra un ciclo y abre el siguiente.*
+
+`LaRedNoSoloDescribeLoFisico := LoFisicoTambienOcurreComoRed.`
 
 <p align="center">
   <img src="docs/assets/footer.svg" width="700"/>
