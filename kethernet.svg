@@ -1,0 +1,475 @@
+<svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="55%" r="75%">
+      <stop offset="0%" stop-color="#07051a"/>
+      <stop offset="60%" stop-color="#030210"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+
+    <radialGradient id="glowBlue" cx="50%" cy="52%" r="50%">
+      <stop offset="0%" stop-color="#3dd8ff" stop-opacity="0.85"/>
+      <stop offset="60%" stop-color="#2090cc" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#3dd8ff" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="glowPurple" cx="50%" cy="52%" r="50%">
+      <stop offset="0%" stop-color="#c060ff" stop-opacity="0.8"/>
+      <stop offset="55%" stop-color="#7020bb" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#c060ff" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="outerHalo" cx="50%" cy="52%" r="65%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="35%" stop-color="#e080ff" stop-opacity="0.18"/>
+      <stop offset="55%" stop-color="#40d8ff" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#00d1ff" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="accretionRing" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="70%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="82%" stop-color="#a0f0ff" stop-opacity="0.5"/>
+      <stop offset="88%" stop-color="#ffffff" stop-opacity="0.85"/>
+      <stop offset="93%" stop-color="#c080ff" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#4040ff" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="infoSqStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b9fbff" stop-opacity="0.9"/>
+      <stop offset="50%" stop-color="#9d8fff" stop-opacity="0.88"/>
+      <stop offset="100%" stop-color="#f1a7ff" stop-opacity="0.88"/>
+    </linearGradient>
+
+    <filter id="softGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0 0 0 0 0.4
+                0 0 0 0 0.8
+                0 0 0 0 1
+                0 0 0 0.85 0" result="glow"/>
+      <feBlend in="SourceGraphic" in2="glow" mode="screen"/>
+    </filter>
+
+    <filter id="glowViolet" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0 0 0 0 0.65
+                0 0 0 0 0.15
+                0 0 0 0 1
+                0 0 0 0.85 0" result="glow"/>
+      <feBlend in="SourceGraphic" in2="glow" mode="screen"/>
+    </filter>
+
+    <filter id="glowWhite" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feBlend in="SourceGraphic" in2="blur" mode="screen"/>
+    </filter>
+
+    <!-- Blur suave para suavizar los rayos -->
+    <filter id="rayBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.2"/>
+    </filter>
+
+    <filter id="glitch" x="-20%" y="-20%" width="140%" height="140%">
+      <feOffset in="SourceGraphic" dx="2.5" dy="0" result="r"/>
+      <feColorMatrix in="r" type="matrix"
+        values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="rCol"/>
+      <feOffset in="SourceGraphic" dx="-2.5" dy="0" result="b"/>
+      <feColorMatrix in="b" type="matrix"
+        values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="bCol"/>
+      <feBlend in="rCol" in2="bCol" mode="screen" result="glitchMix"/>
+      <feBlend in="SourceGraphic" in2="glitchMix" mode="screen"/>
+    </filter>
+
+    <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+
+    <g id="sq">
+      <rect width="32" height="32" rx="5" ry="5"
+            fill="none" stroke="url(#infoSqStroke)" stroke-width="1.4"
+            filter="url(#softGlow)"/>
+    </g>
+
+    <style><![CDATA[
+      text { font-family: "IBM Plex Mono", Menlo, monospace; }
+
+      .title {
+        font-size: 64px;
+        letter-spacing: 0.35em;
+        fill: #f5f5ff;
+        filter: url(#glitch);
+        animation: titleGlitch 1.4s infinite steps(2, end);
+      }
+      .code {
+        font-size: 22px;
+        fill: #8f9bff;
+        opacity: 0.85;
+        animation: codeBlink 2.6s infinite;
+      }
+      .info-symbol {
+        font-size: 14px;
+        fill: #ffffff;
+        opacity: 0.95;
+        text-anchor: middle;
+        dominant-baseline: middle;
+        pointer-events: none;
+      }
+      .fall {
+        animation: fallIn var(--t) linear infinite;
+        transform-box: fill-box;
+        transform-origin: center;
+      }
+
+      /* Contenedor giratorio de rayos — pivota sobre el centro del agujero */
+      .bolt-spin {
+        transform-origin: 600px 420px;
+        animation: spinRays var(--spin-dur, 28s) linear infinite;
+      }
+
+      @keyframes spinRays {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+      }
+
+      @keyframes fallIn {
+        0%   { opacity: 0; transform: translate(var(--x0), var(--y0)) scale(1); }
+        10%  { opacity: 1; }
+        85%  { opacity: 1; transform: translate(var(--x1), var(--y1)) scale(0.45); }
+        100% { opacity: 0; transform: translate(var(--x1), var(--y1)) scale(0.25); }
+      }
+
+      @keyframes orbit {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+      }
+      .orbit { transform-origin: 600px 420px; animation: orbit var(--speed) linear infinite; }
+
+      @keyframes titleGlitch {
+        0%   { transform: translate(0,0); }
+        15%  { transform: translate(-1px,0); }
+        30%  { transform: translate(2px,0); }
+        45%  { transform: translate(-3px,0); }
+        60%  { transform: translate(1px,0); }
+        75%  { transform: translate(-1px,0); }
+        100% { transform: translate(0,0); }
+      }
+      @keyframes codeBlink {
+        0%,70% { opacity: 0.85; }
+        75%,80% { opacity: 0.25; }
+        85%,90% { opacity: 1; }
+        100%    { opacity: 0.85; }
+      }
+
+      /* Pulso suave para las líneas de rayo estáticas */
+      @keyframes rayPulse {
+        0%,100% { opacity: var(--peak, 0.22); }
+        50%     { opacity: calc(var(--peak, 0.22) * 0.4); }
+      }
+    ]]></style>
+  </defs>
+
+  <!-- Fondo -->
+  <rect width="100%" height="100%" fill="url(#bg)"/>
+
+  <!-- Estrellas orbitales -->
+  <g class="orbit" style="--speed:22s;">
+    <circle cx="600" cy="180" r="3"   fill="url(#starGlow)" opacity="0.8"/>
+    <circle cx="820" cy="420" r="2.4" fill="url(#starGlow)" opacity="0.7"/>
+    <circle cx="600" cy="660" r="2.8" fill="url(#starGlow)" opacity="0.75"/>
+    <circle cx="380" cy="420" r="2.2" fill="url(#starGlow)" opacity="0.7"/>
+  </g>
+  <g class="orbit" style="--speed:35s;">
+    <circle cx="600" cy="120" r="2.2" fill="url(#starGlow)" opacity="0.6"/>
+    <circle cx="880" cy="420" r="1.8" fill="url(#starGlow)" opacity="0.6"/>
+    <circle cx="600" cy="720" r="2"   fill="url(#starGlow)" opacity="0.65"/>
+    <circle cx="320" cy="420" r="1.8" fill="url(#starGlow)" opacity="0.6"/>
+  </g>
+
+  <!-- Estrellas fijas -->
+  <g>
+    <circle cx="150"  cy="140" r="1.4" fill="#dfeaff" opacity="0.6"/>
+    <circle cx="320"  cy="260" r="1.2" fill="#dfeaff" opacity="0.5"/>
+    <circle cx="1040" cy="180" r="1.5" fill="#dfeaff" opacity="0.6"/>
+    <circle cx="980"  cy="620" r="1.3" fill="#dfeaff" opacity="0.5"/>
+    <circle cx="260"  cy="640" r="1.1" fill="#dfeaff" opacity="0.6"/>
+    <circle cx="560"  cy="720" r="1.2" fill="#dfeaff" opacity="0.55"/>
+    <circle cx="880"  cy="320" r="1.4" fill="#dfeaff" opacity="0.6"/>
+    <circle cx="420"  cy="200" r="1.3" fill="#dfeaff" opacity="0.5"/>
+    <circle cx="100"  cy="400" r="1.1" fill="#dfeaff" opacity="0.4"/>
+    <circle cx="1100" cy="580" r="1.2" fill="#dfeaff" opacity="0.45"/>
+  </g>
+
+  <!-- Brillo nebulosa -->
+  <circle cx="600" cy="420" r="350" fill="url(#glowBlue)"   opacity="0.38"/>
+  <circle cx="600" cy="420" r="400" fill="url(#glowPurple)" opacity="0.28"/>
+  <circle cx="600" cy="420" r="440" fill="url(#outerHalo)"  opacity="0.45"/>
+
+  <!-- TÍTULO -->
+  <g text-anchor="middle">
+    <text x="600" y="120" class="title">KETHERNET</text>
+    <text x="600" y="155" class="code">0x0100007F</text>
+  </g>
+
+  <!-- ============================================================
+       RAYOS — todo dentro de un grupo que GIRA lentamente
+       pivot: 600,420  velocidad: 28s por vuelta (muy suave)
+       ============================================================ -->
+  <g class="bolt-spin" style="--spin-dur:28s;" filter="url(#rayBlur)">
+
+    <!-- Cada rayo: trail ancho semitransparente + línea central + ramificaciones -->
+    <!-- Transiciones lentas con dur=0.9–1.4s, opacidades reducidas a ~0.18-0.35 -->
+
+    <!-- RAYO E (→) cian -->
+    <g stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="#4fd5ff" stroke-width="5" fill="none" opacity="0">
+        <animate attributeName="d" dur="0.9s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
+          values="M600,420 L745,412 L910,426 L1070,408 L1200,395;
+                  M600,420 L745,428 L910,410 L1070,432 L1200,448;
+                  M600,420 L745,416 L910,438 L1070,414 L1200,402;
+                  M600,420 L745,412 L910,426 L1070,408 L1200,395"/>
+        <animate attributeName="opacity" values="0;0.18;0.08;0" dur="1.2s" begin="0s" repeatCount="indefinite"/>
+      </path>
+      <path stroke="#4fd5ff" stroke-width="1.8" fill="none" opacity="0">
+        <animate attributeName="d" dur="0.9s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
+          values="M600,420 L745,412 L910,426 L1070,408 L1200,395;
+                  M600,420 L745,428 L910,410 L1070,432 L1200,448;
+                  M600,420 L745,416 L910,438 L1070,414 L1200,402;
+                  M600,420 L745,412 L910,426 L1070,408 L1200,395"/>
+        <animate attributeName="opacity" values="0;0.35;0.12;0" dur="1.2s" begin="0s" repeatCount="indefinite"/>
+      </path>
+      <path stroke="#a0ecff" stroke-width="1" fill="none" opacity="0">
+        <animate attributeName="d" dur="0.9s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
+          values="M910,426 L945,395 L978,372;M910,410 L948,378 L985,355;M910,438 L935,408 L968,385;M910,426 L945,395 L978,372"/>
+        <animate attributeName="opacity" values="0;0.28;0" dur="0.6s" begin="0.2s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <!-- RAYO NE (↗) violeta -->
+    <g stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="#c060ff" stroke-width="5" fill="none" opacity="0">
+        <animate attributeName="d" dur="1.1s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
+          values="M600,420 L705,338 L848,268 L968,198 L1120,108;
+                  M600,420 L705,328 L848,252 L968,182 L1100,78;
+                  M600,420 L705,348 L848,282 L968,214 L1142,122;
+                  M600,420 L705,338 L848,268 L968,198 L1120,108"/>
+        <animate attributeName="opacity" values="0;0.16;0.06;0" dur="1.4s" begin="0.18s" repeatCount="indefinite"/>
+      </path>
+      <path stroke="#c060ff" stroke-width="1.6" fill="none" opacity="0">
+        <animate attributeName="d" dur="1.1s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
+          values="M600,420 L705,338 L848,268 L968,198 L1120,108;
+                  M600,420 L705,328 L848,252 L968,182 L1100,78;
+                  M600,420 L705,348 L848,282 L968,214 L1142,122;
+                  M600,420 L705,338 L848,268 L968,198 L1120,108"/>
+        <animate attributeName="opacity" values="0;0.32;0.1;0" dur="1.4s" begin="0.18s" repeatCount="indefinite"/>
+      </path>
+      <path stroke="#e0a0ff" stroke-width="1" fill="none" opacity="0">
+        <animate attributeName="d" dur="1.1s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
+          values="M848,268 L875,218 L918,178;M848,252 L880,198 L925,162;M848,282 L870,238 L905,200;M848,268 L875,218 L918,178"/>
+        <animate attributeName="opacity" values="0;0.26;0" dur="0.7s" begin="0.3s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <!-- RAYO N (↑) blanco -->
+    <g stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="#e0f8ff" stroke-width="5" fill="none" opacity="0">
+        <animate attributeName="d" dur="0.8s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
+          values="M600,420 L612,298 L628,168 L620,48 L608,-32;
+                  M600,420 L610,292 L622,158 L614,38 L602,-52;
+                  M600,420 L614,308 L632,176 L624,54 L612,-22;
+                  M600,420 L612,298 L628,168 L620,48 L608,-32"/>
+        <animate attributeName="opacity" values="0;0.2;0.07;0" dur="1.1s" begin="0.07s" repeatCount="indefinite"/>
+      </path>
+      <path stroke="#e0f8ff" stroke-width="1.8" fill="none" opacity="0">
+        <animate attributeName="d" dur="0.8s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
+          values="M600,420 L612,298 L628,168 L620,48 L608,-32;
+                  M600,420 L610,292 L622,158 L614,38 L602,-52;
+                  M600,420 L614,308 L632,176 L624,54 L612,-22;
+                  M600,420 L612,298 L628,168 L620,48 L608,-32"/>
+        <animate attributeName="opacity" values="0;0.38;0.12;0" dur="1.1s" begin="0.07s" repeatCount="indefinite"/>
+      </path>
+      <path stroke="#a0ecff" stroke-width="1" fill="none" opacity="0">
+        <animate attributeName="d" dur="0.8s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
+          values="M628,168 L668,142 L705,122;M622,158 L662,130 L698,110;M632,176 L670,150 L708,128;M628,168 L668,142 L705,122"/>
+        <animate attributeName="opacity" values="0;0.28;0" dur="0.55s" begin="0.12s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <!-- RAYO NO (↖) violeta-cian -->
+    <g stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="#a86bff" stroke-width="5" fill="none" opacity="0">
+        <animate attributeName="d" dur="1.3s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
+          values="M600,420 L498,338 L378,263 L248,198 L78,128;
+                  M600,420 L496,330 L374,250 L242,186 L68,108;
+                  M600,420 L500,346 L380,270 L253,206 L83,138;
+                  M600,420 L498,338 L378,263 L248,198 L78,128"/>
+        <animate attributeName="opacity" values="0;0.16;0.06;0" dur="1.6s" begin="0.30s" repeatCount="indefinite"/>
+      </path>
+      <path stroke="#a86bff" stroke-width="1.6" fill="none" opacity="0">
+        <animate attributeName="d" dur="1.3s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
+          values="M600,420 L498,338 L378,263 L248,198 L78,128;
+                  M600,420 L496,330 L374,250 L242,186 L68,108;
+                  M600,420 L500,346 L380,270 L253,206 L83,138;
+                  M600,420 L498,338 L378,263 L248,198 L78,128"/>
+        <animate attributeName="opacity" values="0;0.3;0.1;0" dur="1.6s" begin="0.30s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <!-- RAYO O (←) cian -->
+    <g stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="#4fd5ff" stroke-width="5" fill="none" opacity="0">
+        <animate attributeName="d" dur="1.0s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
+          values="M600,420 L458,415 L298,424 L138,411 L0,418;
+                  M600,420 L458,424 L298,411 L138,426 L0,408;
+                  M600,420 L458,409 L298,428 L138,406 L0,428;
+                  M600,420 L458,415 L298,424 L138,411 L0,418"/>
+        <animate attributeName="opacity" values="0;0.18;0.07;0" dur="1.3s" begin="0.14s" repeatCount="indefinite"/>
+      </path>
+      <path stroke="#4fd5ff" stroke-width="1.8" fill="none" opacity="0">
+        <animate attributeName="d" dur="1.0s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
+          values="M600,420 L458,415 L298,424 L138,411 L0,418;
+                  M600,420 L458,424 L298,411 L138,426 L0,408;
+                  M600,420 L458,409 L298,428 L138,406 L0,428;
+                  M600,420 L458,415 L298,424 L138,411 L0,418"/>
+        <animate attributeName="opacity" values="0;0.32;0.1;0" dur="1.3s" begin="0.14s" repeatCount="indefinite"/>
+      </path>
+      <path stroke="#9ff0ff" stroke-width="1" fill="none" opacity="0">
+        <animate attributeName="d" dur="1.0s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
+          values="M298,424 L262,393 L228,372;M298,411 L260,380 L224,358;M298,428 L264,398 L230,380;M298,424 L262,393 L228,372"/>
+        <animate attributeName="opacity" values="0;0.24;0" dur="0.65s" begin="0.18s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <!-- RAYO S (↓) violeta-rosa -->
+    <g stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="#c040c0" stroke-width="5" fill="none" opacity="0">
+        <animate attributeName="d" dur="1.2s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
+          values="M600,420 L591,558 L576,678 L566,788 L558,868;
+                  M600,420 L593,553 L578,670 L568,786 L560,858;
+                  M600,420 L589,563 L573,686 L563,793 L556,873;
+                  M600,420 L591,558 L576,678 L566,788 L558,868"/>
+        <animate attributeName="opacity" values="0;0.16;0.06;0" dur="1.5s" begin="0.22s" repeatCount="indefinite"/>
+      </path>
+      <path stroke="#c040c0" stroke-width="1.7" fill="none" opacity="0">
+        <animate attributeName="d" dur="1.2s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
+          values="M600,420 L591,558 L576,678 L566,788 L558,868;
+                  M600,420 L593,553 L578,670 L568,786 L560,858;
+                  M600,420 L589,563 L573,686 L563,793 L556,873;
+                  M600,420 L591,558 L576,678 L566,788 L558,868"/>
+        <animate attributeName="opacity" values="0;0.3;0.1;0" dur="1.5s" begin="0.22s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <!-- RAYO SE (↘) cian-suave -->
+    <g stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="#38c8f0" stroke-width="5" fill="none" opacity="0">
+        <animate attributeName="d" dur="1.15s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
+          values="M600,420 L702,502 L822,592 L952,682 L1102,792;
+                  M600,420 L704,510 L827,602 L957,690 L1107,802;
+                  M600,420 L700,497 L817,584 L947,674 L1094,780;
+                  M600,420 L702,502 L822,592 L952,682 L1102,792"/>
+        <animate attributeName="opacity" values="0;0.16;0.06;0" dur="1.45s" begin="0.36s" repeatCount="indefinite"/>
+      </path>
+      <path stroke="#38c8f0" stroke-width="1.7" fill="none" opacity="0">
+        <animate attributeName="d" dur="1.15s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
+          values="M600,420 L702,502 L822,592 L952,682 L1102,792;
+                  M600,420 L704,510 L827,602 L957,690 L1107,802;
+                  M600,420 L700,497 L817,584 L947,674 L1094,780;
+                  M600,420 L702,502 L822,592 L952,682 L1102,792"/>
+        <animate attributeName="opacity" values="0;0.28;0.08;0" dur="1.45s" begin="0.36s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <!-- RAYO SO (↙) violeta-medio -->
+    <g stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="#8855ee" stroke-width="5" fill="none" opacity="0">
+        <animate attributeName="d" dur="1.25s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
+          values="M600,420 L496,507 L375,600 L238,694 L82,802;
+                  M600,420 L494,512 L372,607 L235,702 L78,812;
+                  M600,420 L498,502 L377,594 L242,688 L85,797;
+                  M600,420 L496,507 L375,600 L238,694 L82,802"/>
+        <animate attributeName="opacity" values="0;0.15;0.05;0" dur="1.55s" begin="0.42s" repeatCount="indefinite"/>
+      </path>
+      <path stroke="#8855ee" stroke-width="1.6" fill="none" opacity="0">
+        <animate attributeName="d" dur="1.25s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
+          values="M600,420 L496,507 L375,600 L238,694 L82,802;
+                  M600,420 L494,512 L372,607 L235,702 L78,812;
+                  M600,420 L498,502 L377,594 L242,688 L85,797;
+                  M600,420 L496,507 L375,600 L238,694 L82,802"/>
+        <animate attributeName="opacity" values="0;0.28;0.08;0" dur="1.55s" begin="0.42s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+  </g><!-- /bolt-spin -->
+
+  <!-- Líneas circuito tenues (no giran, son fijas) -->
+  <g stroke="#3dd8ff" stroke-width="0.6" opacity="0.1" fill="none">
+    <path d="M600,420 L652,382 L722,380 L782,342"/>
+    <path d="M600,420 L622,482 L682,522 L682,582 L722,582"/>
+    <path d="M600,420 L542,382 L482,362 L422,360 L382,322"/>
+    <path d="M600,420 L582,492 L542,532 L502,532 L462,562"/>
+  </g>
+
+  <!-- Agujero negro -->
+  <circle cx="600" cy="420" r="118" fill="#000000"/>
+
+  <!-- Anillo de acreción -->
+  <circle cx="600" cy="420" r="135" fill="none" stroke="url(#accretionRing)" stroke-width="14" opacity="0.5">
+    <animate attributeName="opacity" values="0.5;0.32;0.5" dur="4s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Halos pulsantes -->
+  <circle cx="600" cy="420" r="148" fill="none" stroke="#6ae8ff" stroke-width="1.2" opacity="0.25">
+    <animate attributeName="stroke-width" values="1.2;2.8;1.2" dur="5.5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity"       values="0.25;0.07;0.25" dur="5.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="600" cy="420" r="160" fill="none" stroke="#a060ff" stroke-width="0.8" opacity="0.16">
+    <animate attributeName="stroke-width" values="0.8;2.0;0.8" dur="7s" repeatCount="indefinite"/>
+    <animate attributeName="opacity"       values="0.16;0.04;0.16" dur="7s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- CUADRADOS cayendo -->
+  <g id="info-flow">
+    <g class="fall" style="--x0:-240px;--y0:120px;--x1:520px;--y1:360px;--t:6s;">
+      <use href="#sq"/><text x="16" y="16" class="info-symbol">{}</text>
+    </g>
+    <g class="fall" style="--x0:1300px;--y0:180px;--x1:680px;--y1:360px;--t:7s;">
+      <use href="#sq"/><text x="16" y="16" class="info-symbol">[]</text>
+    </g>
+    <g class="fall" style="--x0:200px;--y0:900px;--x1:600px;--y1:520px;--t:8s;">
+      <use href="#sq"/><text x="16" y="16" class="info-symbol">&lt;&gt;</text>
+    </g>
+    <g class="fall" style="--x0:900px;--y0:-200px;--x1:600px;--y1:300px;--t:6.5s;">
+      <use href="#sq"/><text x="16" y="16" class="info-symbol">:=</text>
+    </g>
+    <g class="fall" style="--x0:-200px;--y0:800px;--x1:520px;--y1:450px;--t:7.4s;">
+      <use href="#sq"/><text x="16" y="16" class="info-symbol">{}</text>
+    </g>
+    <g class="fall" style="--x0:1400px;--y0:700px;--x1:700px;--y1:480px;--t:7.8s;">
+      <use href="#sq"/><text x="16" y="16" class="info-symbol">[]</text>
+    </g>
+  </g>
+
+</svg>

@@ -1,0 +1,22 @@
+# KETHERNET .gitignore
+# Lo no versionado duerme como daemon sin signal.
+
+# Squeak runtime (descargado por Docker — no versionar)
+*.image
+*.changes
+*.sources
+squeak-vm/
+*.log
+
+# Docker
+.docker/
+
+# Temporales
+*.tmp
+*~
+.DS_Store
+Thumbs.db
+
+# Pero sí versionar los .st y los .md:
+!smalltalk/*.st
+!docs/*.md

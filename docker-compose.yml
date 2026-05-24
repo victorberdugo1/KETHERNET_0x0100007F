@@ -1,0 +1,35 @@
+# KETHERNET — docker-compose
+
+services:
+  kethernet:
+    build: .
+    container_name: kethernet-cli
+    profiles: [cli]
+    # --cap-add SYS_NICE silencia el warning de pthread_setschedparam en WSL/Docker
+    cap_add:
+      - SYS_NICE
+
+  kethernet-gui:
+    build: .
+    container_name: kethernet-gui
+    profiles: [gui]
+    command: --gui
+    cap_add:
+      - SYS_NICE
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+
+  kethernet-dev:
+    build: .
+    container_name: kethernet-dev
+    profiles: [dev]
+    command: --shell
+    cap_add:
+      - SYS_NICE
+    volumes:
+      - ./smalltalk:/kethernet/smalltalk:rw
+      - ./docs:/kethernet/docs:ro
+    stdin_open: true
+    tty: true
