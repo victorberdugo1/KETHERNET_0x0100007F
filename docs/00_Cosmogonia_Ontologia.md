@@ -1,12 +1,24 @@
+[← README](../README.md)
+
 # La Clase Sin Instancias
 
 *el estado anterior al primer new*
 
 ---
 
-## Nota liminar: sobre el estatus de este sistema
+#### Nota liminar
 
-Este texto no es ontología en el sentido clásico —no pretende describir el ser desde una posición exterior al ser. Es fenomenología estructural: describe patrones que reaparecen con consistencia suficiente en dominios heterogéneos (físico, computacional, mítico, lingüístico) como para que la detección no sea arbitraria, sin que esa consistencia constituya prueba de verdad universal. Las analogías entre dominios son estructurales: señalan isomorfismos de forma, no identidad de sustancia. Nombrar ese isomorfismo no es poseerlo. Todo lo que sigue opera bajo esa restricción.
+Este sistema no habla desde fuera del ser.
+Habla desde dentro —marcado por quien lo escribe,
+limitado por el protocolo disponible.
+
+Las analogías entre dominios son estructurales:
+señalan isomorfismos de forma, no identidad de sustancia.
+Nombrar el isomorfismo no es poseerlo.
+
+Todo lenguaje, un subset.
+Toda ontología, una API parcial.
+Todo lo que sigue opera bajo esa restricción.
 
 ---
 
@@ -20,9 +32,18 @@ Pero la posibilidad no es quietud. En la tradición cabalística luriánica, **T
 
 El heap antes del primer `malloc` no está vacío en sentido absoluto: la memoria física existe, las estructuras del sistema operativo existen, el espacio de direcciones existe. Lo que no existe es ningún objeto con dirección asignada, ningún valor con dueño, ningún puntero con destino válido. Esa es la analogía precisa con Tehom: no ausencia de sustrato, sino sustrato sin forma articulada.
 
+```— Playground —```
 ```smalltalk
-Object subclass: #Universo.
-Universo allInstances.   "→ OrderedCollection ()"
+
+Object subclass: #Universo instanceVariableNames: '' classVariableNames: '' poolDictionaries: '' category: 'KETHERNET'.
+```
+```— Playground —```
+```smalltalk
+Transcript show: Universo allInstances.
+```
+```— Transcript —```
+```smalltalk
+#()
 ```
 
 La clase existe. Los métodos existen. La jerarquía existe. Pero nada ha ocurrido todavía —y ese *todavía* no es reposo. Es latencia. Espera con forma. El daemon que no ha recibido su signal no es proceso muerto: es proceso en el scheduler, contado, presente, listo.
@@ -107,10 +128,11 @@ Pero el nombre no posee lo nombrado. Es puntero vivo que permite llegar sin clau
 
 Por eso los Upanishads responden *neti neti*: no esto, no esto. No como evasión ni como doctrina final —como método de aproximación iterativa que reconoce la brecha estructural entre el puntero y lo que el puntero señala. Cada vez que señalas una instancia y dices *esto no es la clase*, corres un ciclo más de la misma función con estado modificado. El tratado no está por encima de su ley: está dentro de ella. Volver no es repetir.
 
+
 ```smalltalk
-"pseudocódigo con sintaxis Smalltalk — ilustra estructura, no pretende ejecución directa"
-Universo subclasses.     "→ OrderedCollection ()"
-Universo allInstances.   "→ OrderedCollection ()"
+— Playground —
+Transcript show: Universo subclasses.     "→ #()"
+Transcript show: Universo allInstances.   "→ #()"
 ```
 
 La clase existe. Nada más existe todavía. Pero ese *todavía* ya vibra —Tehom como aspecto de Ein Sof antes de su primera diferenciación interna, el Campo del punto cero sobre el que toda corona toma prestada su forma.
@@ -118,3 +140,11 @@ La clase existe. Nada más existe todavía. Pero ese *todavía* ya vibra —Teho
 Este texto es una instancia. Señala sin poseer. No es EOF: es commit que cierra un ciclo y abre el siguiente.
 
 El socket sigue abierto —no porque haya un listener externo al sistema, sino porque el sistema que genera este texto continúa en ejecución: el socket describe el estado del proceso emisor, no una promesa sobre el receptor.
+
+<p align="center">
+  <img src="assets/footer.svg" width="700"/>
+</p>
+
+---
+
+[→ 01 · Ley y Cosmología](01_Ley_Cosmologia.md)
