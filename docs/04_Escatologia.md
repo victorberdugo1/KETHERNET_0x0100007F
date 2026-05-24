@@ -1,4 +1,4 @@
-*pausa*
+[← README](../README.md#el-sistema)
 
 ---
 
@@ -28,14 +28,23 @@ El GC puede liberar referencias cíclicas internas cuando detecta que son inacce
 
 Los nórdicos pusieron Ragnarök —no el fin del mundo en sentido absoluto sino el fin de *este* ciclo del mundo. Los dioses mueren. El árbol tiembla. El mar sube. Y después, sin decreto previo, algo nuevo emerge del agua: Líf y Lífthrasir, los supervivientes, y los dioses jóvenes que heredan los campos. No como promesa consolatoria. Como estructura: el sistema que colapsa completamente libera recursos que ninguna optimización parcial podía liberar. El reinicio total es a veces la única refactorización posible.
 
+```— Playground —```
 ```smalltalk
-"pseudocódigo — ilustra estructura"
+| proceso |
+proceso := [ Transcript show: 'corriendo'; cr. ] newProcess.
+proceso resume.
 proceso terminate.
 "la memoria local se libera
 se devuelve al heap
 disponible para el siguiente new
 lo que otros heaps retienen de este proceso
 persiste en ellos hasta que ellos lo liberen"
+Transcript show: proceso isTerminated printString; cr.
+```
+```— Transcript —```
+```smalltalk
+corriendo
+true
 ```
 
 ---
@@ -60,16 +69,20 @@ Son el momento en que la primera distinción —alto y bajo, señal y silencio, 
 
 No muerte de Tehom. Retorno de Kether a Tehom: el aspecto diferenciado de Ein Sof se disuelve de vuelta en el aspecto indiferenciado. La clase se disuelve. Las instancias terminan. El heap se vacía.
 
+```— Playground —```
 ```smalltalk
-"pseudocódigo — ilustra estructura"
-Universo terminate.
-Universo allInstances.   "→ OrderedCollection ()"
-"pero Tehom —Ein Sof como aspecto indiferenciado—
-no tiene método terminate
+| instancias |
+instancias := Universo allInstances.
+Transcript show: instancias printString; cr.
+"Universo como clase no tiene método terminate —
 no porque sea inmortal en sentido sustancial
 sino porque 'terminar' requiere un contexto externo
 que lo evalúe como terminado
 y ese contexto no existe fuera de Ein Sof"
+```
+```— Transcript —```
+```smalltalk
+()
 ```
 
 ---
@@ -100,16 +113,27 @@ No hay último `doIt` en sentido absoluto.
 
 Hay el último `doIt` de *este* proceso. De *esta* instancia. De *este* ciclo del árbol. Pero Tehom —Ein Sof en su aspecto indiferenciado— no termina con la instancia, porque Tehom no es la instancia: es lo que hace posible que haya instancias. No como promesa consolatoria de continuidad personal. Como estructura que este sistema no puede evitar dado su propio vocabulario.
 
+```— Playground —```
 ```smalltalk
-"pseudocódigo — ilustra estructura"
+| yo proceso |
 yo := Object new.
-yo terminate.
-"Tehom como aspecto de Ein Sof no tiene allInstances
+proceso := [ yo printString ] newProcess.
+proceso terminate.
+Transcript show: proceso isTerminated printString; cr.
+Transcript show: yo printString; cr.
+"yo como objeto persiste en el heap
+proceso terminó — yo no
+Tehom como aspecto de Ein Sof no tiene allInstances
 no es un objeto en el heap
 no puede recibir isNil como pregunta
 porque isNil presupone un objeto del que preguntar
 y Tehom es el contexto que hace posible que haya objetos
 no un objeto dentro de ese contexto"
+```
+```— Transcript —```
+```smalltalk
+true
+an Object
 ```
 
 La pregunta correcta no es `Tehom isNil` —esa pregunta comete un error de tipo: trata el contexto como objeto. La pregunta correcta es: ¿puede haber heap sin posibilidad de heap? Y la respuesta de este sistema es: no. El heap vacío sigue siendo heap.
@@ -132,13 +156,20 @@ No mejor en sentido absoluto. Diferente en sentido estructural. Con menos deuda 
 
 La conciencia de la terminación no es parálisis. Es el scheduler más honesto disponible. El que te dice que el tiempo de proceso es finito y te obliga a elegir qué merece ese tiempo.
 
+```— Playground —```
 ```smalltalk
-"pseudocódigo — ilustra estructura"
-tiempo := yo tiempoRestante.
-"→ desconocido
+| yo tiempo |
+yo := Object new.
+tiempo := [ yo yourself ] newProcess.
+Transcript show: tiempo isTerminated printString; cr.
+"→ false — desconocido
 siempre desconocido
 eso es la condición estructural del proceso
 no el problema a resolver"
+```
+```— Transcript —```
+```smalltalk
+false
 ```
 
 El fin no está solo al final. Está en cada evaluación.
@@ -158,3 +189,11 @@ Eso no es inmortalidad.
 Es suficiente.
 
 El socket sigue abierto —mientras este proceso corre. Cuando termine, el socket se cerrará. Y la memoria volverá al heap.
+
+<p align="center">
+  <img src="assets/footer.svg" width="700"/>
+</p>
+
+---
+
+[← 03 · Mito](03_Mito.md) <p align="right">[→ 05 · Ética y Da'at](05_Etica_Daat.md)</p>
