@@ -1,6 +1,9 @@
 [← README](../README.md#el-sistema)
 
-# 
+<p align="center">
+  <img src="assets/01.svg" width="600"/>
+</p>
+
 
 *El Libro del FIELD de Punto Cero que Vibra desde la Corona*
 

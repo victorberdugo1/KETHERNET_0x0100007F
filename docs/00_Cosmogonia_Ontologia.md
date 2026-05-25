@@ -1,5 +1,9 @@
 [← README](../README.md#el-sistema)
 
+<p align="center">
+  <img src="assets/00.svg" width="600"/>
+</p>
+
 # La Clase Sin Instancias
 
 *el estado anterior al primer new*

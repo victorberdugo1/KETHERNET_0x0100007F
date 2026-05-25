@@ -1,5 +1,9 @@
 [← README](../README.md#el-sistema)
 
+<p align="center">
+  <img src="assets/05.svg" width="600"/>
+</p>
+
 # Da'at
 
 *el agujero entre dos árboles completos*

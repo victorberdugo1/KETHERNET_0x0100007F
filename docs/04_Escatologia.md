@@ -1,5 +1,9 @@
 [← README](../README.md#el-sistema)
 
+<p align="center">
+  <img src="assets/04.svg" width="600"/>
+</p>
+
 ---
 
 # El Último `doIt`

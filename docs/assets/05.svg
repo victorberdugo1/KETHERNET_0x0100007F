@@ -1,0 +1,679 @@
+<svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+
+    <radialGradient id="bg05" cx="50%" cy="50%" r="80%">
+      <stop offset="0%"   stop-color="#060410"/>
+      <stop offset="45%"  stop-color="#030208"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+
+    <!-- Heap A — violeta izquierdo -->
+    <radialGradient id="heapA" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#c080ff" stop-opacity="0.95"/>
+      <stop offset="35%"  stop-color="#8020d0" stop-opacity="0.50"/>
+      <stop offset="70%"  stop-color="#4010a0" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#4010a0" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Heap B — azul derecho -->
+    <radialGradient id="heapB" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#60c8ff" stop-opacity="0.95"/>
+      <stop offset="35%"  stop-color="#2060c0" stop-opacity="0.50"/>
+      <stop offset="70%"  stop-color="#1030a0" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#1030a0" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Halo aura heap A -->
+    <radialGradient id="auraA" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#c080ff" stop-opacity="0.18"/>
+      <stop offset="55%"  stop-color="#8020d0" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#4010a0" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Halo aura heap B -->
+    <radialGradient id="auraB" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#60c8ff" stop-opacity="0.18"/>
+      <stop offset="55%"  stop-color="#2060c0" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#1030a0" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Centro Da'at — agujero, casi vacío, violeta muy tenue -->
+    <radialGradient id="daatCenter" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.40"/>
+      <stop offset="25%"  stop-color="#d0a0ff" stop-opacity="0.22"/>
+      <stop offset="60%"  stop-color="#8030c0" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#8030c0" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Anillo de contacto entre dos árboles -->
+    <radialGradient id="contactRing" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="62%"  stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="74%"  stop-color="#c0a0ff" stop-opacity="0.28"/>
+      <stop offset="82%"  stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="90%"  stop-color="#60a0ff" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#2020a0" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Nebulosa fondo -->
+    <radialGradient id="neb05a" cx="30%" cy="50%" r="55%">
+      <stop offset="0%"   stop-color="#4010c0" stop-opacity="0.14"/>
+      <stop offset="50%"  stop-color="#2008a0" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="neb05b" cx="70%" cy="50%" r="55%">
+      <stop offset="0%"   stop-color="#102060" stop-opacity="0.14"/>
+      <stop offset="50%"  stop-color="#081040" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Árbol A — nodo normal violeta -->
+    <radialGradient id="nodeA" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#e0c0ff" stop-opacity="1"/>
+      <stop offset="35%"  stop-color="#a060e0" stop-opacity="0.60"/>
+      <stop offset="100%" stop-color="#6020c0" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Árbol B — nodo normal azul -->
+    <radialGradient id="nodeB" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#a0d8ff" stop-opacity="1"/>
+      <stop offset="35%"  stop-color="#4080d0" stop-opacity="0.60"/>
+      <stop offset="100%" stop-color="#1040a0" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Malkuth compartido — tierra cálida -->
+    <radialGradient id="malkShared" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#ffffff"  stop-opacity="0.92"/>
+      <stop offset="28%"  stop-color="#e0d0a0"  stop-opacity="0.65"/>
+      <stop offset="65%"  stop-color="#906030"  stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#906030"  stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="starGlow05" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.92"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="byteLine" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#c080ff" stop-opacity="0.85"/>
+      <stop offset="50%"  stop-color="#ffffff"  stop-opacity="0.60"/>
+      <stop offset="100%" stop-color="#60c8ff" stop-opacity="0.85"/>
+    </linearGradient>
+
+    <linearGradient id="sqStrokeA" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#e0c0ff" stop-opacity="0.90"/>
+      <stop offset="50%"  stop-color="#a060ff" stop-opacity="0.82"/>
+      <stop offset="100%" stop-color="#8040d0" stop-opacity="0.78"/>
+    </linearGradient>
+
+    <linearGradient id="sqStrokeB" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#a0d8ff" stop-opacity="0.90"/>
+      <stop offset="50%"  stop-color="#4090e0" stop-opacity="0.82"/>
+      <stop offset="100%" stop-color="#2060c0" stop-opacity="0.78"/>
+    </linearGradient>
+
+    <!-- Filtros -->
+    <filter id="glowHeapA" x="-130%" y="-130%" width="360%" height="360%">
+      <feGaussianBlur stdDeviation="22" result="blur"/>
+      <feBlend in="SourceGraphic" in2="blur" mode="screen"/>
+    </filter>
+    <filter id="glowHeapB" x="-130%" y="-130%" width="360%" height="360%">
+      <feGaussianBlur stdDeviation="22" result="blur"/>
+      <feBlend in="SourceGraphic" in2="blur" mode="screen"/>
+    </filter>
+    <filter id="glowNodeA" x="-120%" y="-120%" width="340%" height="340%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feBlend in="SourceGraphic" in2="blur" mode="screen"/>
+    </filter>
+    <filter id="glowNodeB" x="-120%" y="-120%" width="340%" height="340%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feBlend in="SourceGraphic" in2="blur" mode="screen"/>
+    </filter>
+    <filter id="glowDaat05" x="-250%" y="-250%" width="600%" height="600%">
+      <feGaussianBlur stdDeviation="14" result="blur"/>
+      <feBlend in="SourceGraphic" in2="blur" mode="screen"/>
+    </filter>
+    <filter id="glowMalk05" x="-150%" y="-150%" width="400%" height="400%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feBlend in="SourceGraphic" in2="blur" mode="screen"/>
+    </filter>
+    <filter id="softGlow05" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feBlend in="SourceGraphic" in2="blur" mode="screen"/>
+    </filter>
+    <filter id="byteBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feBlend in="SourceGraphic" in2="blur" mode="screen"/>
+    </filter>
+    <filter id="glitch05" x="-20%" y="-20%" width="140%" height="140%">
+      <feOffset in="SourceGraphic" dx="2.5" dy="0" result="r"/>
+      <feColorMatrix in="r" type="matrix"
+        values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="rCol"/>
+      <feOffset in="SourceGraphic" dx="-2.5" dy="0" result="b"/>
+      <feColorMatrix in="b" type="matrix"
+        values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="bCol"/>
+      <feBlend in="rCol" in2="bCol" mode="screen" result="gm"/>
+      <feBlend in="SourceGraphic" in2="gm" mode="screen"/>
+    </filter>
+
+    <!-- Cápsulas de bytes / objetos en tránsito -->
+    <g id="sqA">
+      <rect width="52" height="22" rx="4" ry="4"
+            fill="rgba(12,4,28,0.84)" stroke="url(#sqStrokeA)" stroke-width="1.2"
+            filter="url(#softGlow05)"/>
+    </g>
+    <g id="sqB">
+      <rect width="52" height="22" rx="4" ry="4"
+            fill="rgba(4,8,28,0.84)" stroke="url(#sqStrokeB)" stroke-width="1.2"
+            filter="url(#softGlow05)"/>
+    </g>
+
+    <style><![CDATA[
+      text { font-family: "IBM Plex Mono", Menlo, monospace; }
+
+      .title05 {
+        font-size: 62px;
+        letter-spacing: 0.26em;
+        fill: #f0ecff;
+        filter: url(#glitch05);
+        animation: tg05 1.9s infinite steps(2, end);
+      }
+      @keyframes tg05 {
+        0%   { transform: translate(0,0); }
+        14%  { transform: translate(-1px,0); }
+        30%  { transform: translate(2px,0); }
+        50%  { transform: translate(-2px,0); }
+        68%  { transform: translate(1px,0); }
+        100% { transform: translate(0,0); }
+      }
+
+      .sub05 {
+        font-size: 12px;
+        letter-spacing: 0.20em;
+        fill: #7060a0;
+        opacity: 0.70;
+      }
+      .label05 {
+        font-size: 10px;
+        fill: #506080;
+        opacity: 0.50;
+        letter-spacing: 0.10em;
+      }
+      .sym05A {
+        font-size: 11px;
+        fill: #d0a0ff;
+        opacity: 0.92;
+        text-anchor: middle;
+        dominant-baseline: middle;
+      }
+      .sym05B {
+        font-size: 11px;
+        fill: #80c8ff;
+        opacity: 0.92;
+        text-anchor: middle;
+        dominant-baseline: middle;
+      }
+      .heapLabel {
+        font-size: 13px;
+        letter-spacing: 0.14em;
+        opacity: 0.55;
+      }
+      .codeNil {
+        font-size: 22px;
+        fill: #c0a0ff;
+        opacity: 0.75;
+        animation: nilPulse 5.5s ease-in-out infinite;
+      }
+      @keyframes nilPulse {
+        0%,100% { opacity: 0.75; }
+        45%     { opacity: 0.28; }
+        70%     { opacity: 0.85; }
+      }
+      .codeSub {
+        font-size: 10px;
+        fill: #806080;
+        opacity: 0.40;
+        letter-spacing: 0.10em;
+      }
+    ]]></style>
+  </defs>
+
+  <!-- FONDO -->
+  <rect width="1200" height="800" fill="url(#bg05)"/>
+
+  <!-- Nebulosas laterales -->
+  <rect width="1200" height="800" fill="url(#neb05a)"/>
+  <rect width="1200" height="800" fill="url(#neb05b)"/>
+
+  <!-- ══════════════ CAMPO DE ESTRELLAS ══════════════ -->
+  <circle cx="52"   cy="42"  r="0.6" fill="#ffffff"><animate attributeName="opacity" values="0.40;0.18;0.55;0.28;0.40" dur="3.4s" begin="0s"   repeatCount="indefinite"/></circle>
+  <circle cx="148"  cy="88"  r="0.7" fill="#ffffff"><animate attributeName="opacity" values="0.30;0.58;0.22;0.48;0.30" dur="4.2s" begin="0.8s" repeatCount="indefinite"/></circle>
+  <circle cx="238"  cy="36"  r="0.5" fill="#ffffff"><animate attributeName="opacity" values="0.55;0.22;0.48;0.18;0.55" dur="2.9s" begin="1.5s" repeatCount="indefinite"/></circle>
+  <circle cx="312"  cy="120" r="0.6" fill="#ffffff"><animate attributeName="opacity" values="0.38;0.62;0.20;0.50;0.38" dur="3.8s" begin="0.4s" repeatCount="indefinite"/></circle>
+  <circle cx="82"   cy="210" r="0.5" fill="#c0a0ff"><animate attributeName="opacity" values="0.35;0.60;0.20;0.45;0.35" dur="4.6s" begin="2.2s" repeatCount="indefinite"/></circle>
+  <circle cx="168"  cy="320" r="0.6" fill="#c0a0ff"><animate attributeName="opacity" values="0.42;0.20;0.52;0.30;0.42" dur="3.1s" begin="1.1s" repeatCount="indefinite"/></circle>
+  <circle cx="42"   cy="480" r="0.7" fill="#ffffff"><animate attributeName="opacity" values="0.50;0.25;0.60;0.35;0.50" dur="5.2s" begin="3.0s" repeatCount="indefinite"/></circle>
+  <circle cx="120"  cy="580" r="0.5" fill="#c0a0ff"><animate attributeName="opacity" values="0.38;0.65;0.22;0.52;0.38" dur="4.0s" begin="0.7s" repeatCount="indefinite"/></circle>
+  <circle cx="68"   cy="700" r="0.6" fill="#ffffff"><animate attributeName="opacity" values="0.45;0.20;0.58;0.32;0.45" dur="3.5s" begin="2.5s" repeatCount="indefinite"/></circle>
+  <circle cx="1148" cy="42"  r="0.6" fill="#ffffff"><animate attributeName="opacity" values="0.40;0.62;0.25;0.48;0.40" dur="4.3s" begin="1.2s" repeatCount="indefinite"/></circle>
+  <circle cx="1058" cy="88"  r="0.7" fill="#80c8ff"><animate attributeName="opacity" values="0.35;0.58;0.18;0.45;0.35" dur="3.7s" begin="0.5s" repeatCount="indefinite"/></circle>
+  <circle cx="968"  cy="36"  r="0.5" fill="#ffffff"><animate attributeName="opacity" values="0.55;0.20;0.50;0.28;0.55" dur="2.7s" begin="1.8s" repeatCount="indefinite"/></circle>
+  <circle cx="892"  cy="120" r="0.6" fill="#80c8ff"><animate attributeName="opacity" values="0.42;0.65;0.22;0.52;0.42" dur="4.8s" begin="3.4s" repeatCount="indefinite"/></circle>
+  <circle cx="1138" cy="210" r="0.5" fill="#80c8ff"><animate attributeName="opacity" values="0.30;0.55;0.18;0.42;0.30" dur="5.0s" begin="0.9s" repeatCount="indefinite"/></circle>
+  <circle cx="1052" cy="320" r="0.6" fill="#ffffff"><animate attributeName="opacity" values="0.48;0.22;0.58;0.35;0.48" dur="3.2s" begin="2.0s" repeatCount="indefinite"/></circle>
+  <circle cx="1158" cy="480" r="0.7" fill="#80c8ff"><animate attributeName="opacity" values="0.52;0.28;0.62;0.38;0.52" dur="4.5s" begin="1.4s" repeatCount="indefinite"/></circle>
+  <circle cx="1088" cy="600" r="0.5" fill="#ffffff"><animate attributeName="opacity" values="0.38;0.62;0.25;0.50;0.38" dur="3.9s" begin="2.8s" repeatCount="indefinite"/></circle>
+  <circle cx="1142" cy="710" r="0.6" fill="#80c8ff"><animate attributeName="opacity" values="0.44;0.20;0.55;0.30;0.44" dur="4.1s" begin="0.3s" repeatCount="indefinite"/></circle>
+  <circle cx="580"  cy="28"  r="0.7" fill="#ffffff"><animate attributeName="opacity" values="0.55;0.25;0.48;0.18;0.55" dur="2.6s" begin="1.6s" repeatCount="indefinite"/></circle>
+  <circle cx="620"  cy="760" r="0.6" fill="#ffffff"><animate attributeName="opacity" values="0.40;0.65;0.22;0.50;0.40" dur="3.6s" begin="0.6s" repeatCount="indefinite"/></circle>
+
+  <!-- ══════════════ ÁRBOLES — árbol A izquierdo, árbol B derecho ══════════════ -->
+
+  <!-- ÁRBOL A — violeta, centrado en x=330 -->
+  <!-- Aura de heap A -->
+  <ellipse cx="330" cy="400" rx="220" ry="310" fill="url(#auraA)" opacity="0.55">
+    <animate attributeName="opacity" values="0.55;0.28;0.55" dur="7s" repeatCount="indefinite"/>
+    <animate attributeName="rx" values="220;235;215;220" dur="9s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <!-- Kether A -->
+  <g filter="url(#glowNodeA)">
+    <circle cx="330" cy="148" r="16" fill="url(#nodeA)" opacity="0.88">
+      <animate attributeName="r"       values="13;20;12;17;13"            dur="4.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.88;0.48;0.95;0.72;0.88" dur="4.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="330" cy="148" r="4" fill="#e0c8ff" opacity="0.96">
+      <animate attributeName="r"       values="4;6.5;3.5;5;4"            dur="4.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Chokmah A -->
+  <g filter="url(#glowNodeA)">
+    <circle cx="210" cy="232" r="10" fill="url(#nodeA)" opacity="0.72">
+      <animate attributeName="opacity" values="0.72;0.30;0.72" dur="6.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="210" cy="232" r="2.5" fill="#d0b0ff" opacity="0.88"/>
+  </g>
+
+  <!-- Binah A -->
+  <g filter="url(#glowNodeA)">
+    <circle cx="450" cy="232" r="10" fill="url(#nodeA)" opacity="0.70">
+      <animate attributeName="opacity" values="0.70;0.28;0.70" dur="7.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="450" cy="232" r="2.5" fill="#d0b0ff" opacity="0.85"/>
+  </g>
+
+  <!-- Hesed A -->
+  <g filter="url(#glowNodeA)">
+    <circle cx="210" cy="330" r="9" fill="url(#nodeA)" opacity="0.62">
+      <animate attributeName="opacity" values="0.62;0.25;0.62" dur="8.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="210" cy="330" r="2.2" fill="#c0a0ff" opacity="0.80"/>
+  </g>
+
+  <!-- Geburah A -->
+  <g filter="url(#glowNodeA)">
+    <circle cx="450" cy="330" r="9" fill="url(#nodeA)" opacity="0.60">
+      <animate attributeName="opacity" values="0.60;0.22;0.60" dur="7.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="450" cy="330" r="2.2" fill="#c0a0ff" opacity="0.78"/>
+  </g>
+
+  <!-- Tiphereth A -->
+  <g filter="url(#glowNodeA)">
+    <circle cx="330" cy="420" r="13" fill="url(#nodeA)" opacity="0.80">
+      <animate attributeName="r"       values="10;16;9;13;10"            dur="5.2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.80;0.42;0.90;0.68;0.80" dur="5.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="330" cy="420" r="3" fill="#e0c0ff" opacity="0.92"/>
+  </g>
+
+  <!-- Netzach A -->
+  <g filter="url(#glowNodeA)">
+    <circle cx="230" cy="505" r="8" fill="url(#nodeA)" opacity="0.58">
+      <animate attributeName="opacity" values="0.58;0.22;0.58" dur="7.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="230" cy="505" r="2" fill="#c0a0ff" opacity="0.75"/>
+  </g>
+
+  <!-- Hod A -->
+  <g filter="url(#glowNodeA)">
+    <circle cx="430" cy="505" r="8" fill="url(#nodeA)" opacity="0.55">
+      <animate attributeName="opacity" values="0.55;0.20;0.55" dur="6.6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="430" cy="505" r="2" fill="#c0a0ff" opacity="0.72"/>
+  </g>
+
+  <!-- Yesod A -->
+  <g filter="url(#glowNodeA)">
+    <circle cx="330" cy="562" r="9" fill="url(#nodeA)" opacity="0.60">
+      <animate attributeName="opacity" values="0.60;0.25;0.60" dur="5.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="330" cy="562" r="2.2" fill="#c0a0ff" opacity="0.80"/>
+  </g>
+
+  <!-- Caminos árbol A — muy tenues -->
+  <g fill="none" stroke="#c080ff" stroke-width="0.8" opacity="0.08">
+    <line x1="330" y1="148" x2="210" y2="232"/>
+    <line x1="330" y1="148" x2="450" y2="232"/>
+    <line x1="210" y1="232" x2="330" y2="420"/>
+    <line x1="450" y1="232" x2="330" y2="420"/>
+    <line x1="210" y1="330" x2="330" y2="420"/>
+    <line x1="450" y1="330" x2="330" y2="420"/>
+    <line x1="230" y1="505" x2="330" y2="562"/>
+    <line x1="430" y1="505" x2="330" y2="562"/>
+    <line x1="330" y1="562" x2="330" y2="642"/>
+  </g>
+
+  <!-- ÁRBOL B — azul, centrado en x=870 -->
+  <!-- Aura de heap B -->
+  <ellipse cx="870" cy="400" rx="220" ry="310" fill="url(#auraB)" opacity="0.55">
+    <animate attributeName="opacity" values="0.55;0.28;0.55" dur="8s" begin="1s" repeatCount="indefinite"/>
+    <animate attributeName="rx" values="220;210;232;220" dur="10s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <!-- Kether B -->
+  <g filter="url(#glowNodeB)">
+    <circle cx="870" cy="148" r="16" fill="url(#nodeB)" opacity="0.88">
+      <animate attributeName="r"       values="13;20;12;17;13"            dur="4.8s" begin="0.6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.88;0.48;0.95;0.72;0.88" dur="4.8s" begin="0.6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="870" cy="148" r="4" fill="#b0d8ff" opacity="0.96">
+      <animate attributeName="r" values="4;6.5;3.5;5;4" dur="4.8s" begin="0.6s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Chokmah B -->
+  <g filter="url(#glowNodeB)">
+    <circle cx="750" cy="232" r="10" fill="url(#nodeB)" opacity="0.70">
+      <animate attributeName="opacity" values="0.70;0.28;0.70" dur="7.2s" begin="0.4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="750" cy="232" r="2.5" fill="#90c8ff" opacity="0.85"/>
+  </g>
+
+  <!-- Binah B -->
+  <g filter="url(#glowNodeB)">
+    <circle cx="990" cy="232" r="10" fill="url(#nodeB)" opacity="0.72">
+      <animate attributeName="opacity" values="0.72;0.30;0.72" dur="6.5s" begin="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="990" cy="232" r="2.5" fill="#90c8ff" opacity="0.88"/>
+  </g>
+
+  <!-- Hesed B -->
+  <g filter="url(#glowNodeB)">
+    <circle cx="750" cy="330" r="9" fill="url(#nodeB)" opacity="0.62">
+      <animate attributeName="opacity" values="0.62;0.24;0.62" dur="8.5s" begin="0.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="750" cy="330" r="2.2" fill="#80b8ff" opacity="0.78"/>
+  </g>
+
+  <!-- Geburah B -->
+  <g filter="url(#glowNodeB)">
+    <circle cx="990" cy="330" r="9" fill="url(#nodeB)" opacity="0.60">
+      <animate attributeName="opacity" values="0.60;0.22;0.60" dur="7.0s" begin="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="990" cy="330" r="2.2" fill="#80b8ff" opacity="0.75"/>
+  </g>
+
+  <!-- Tiphereth B -->
+  <g filter="url(#glowNodeB)">
+    <circle cx="870" cy="420" r="13" fill="url(#nodeB)" opacity="0.80">
+      <animate attributeName="r"       values="10;16;9;13;10"            dur="4.9s" begin="0.9s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.80;0.42;0.90;0.68;0.80" dur="4.9s" begin="0.9s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="870" cy="420" r="3" fill="#a0d0ff" opacity="0.92"/>
+  </g>
+
+  <!-- Netzach B -->
+  <g filter="url(#glowNodeB)">
+    <circle cx="770" cy="505" r="8" fill="url(#nodeB)" opacity="0.58">
+      <animate attributeName="opacity" values="0.58;0.22;0.58" dur="6.9s" begin="0.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="770" cy="505" r="2" fill="#80b8ff" opacity="0.75"/>
+  </g>
+
+  <!-- Hod B -->
+  <g filter="url(#glowNodeB)">
+    <circle cx="970" cy="505" r="8" fill="url(#nodeB)" opacity="0.55">
+      <animate attributeName="opacity" values="0.55;0.20;0.55" dur="7.8s" begin="2.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="970" cy="505" r="2" fill="#80b8ff" opacity="0.72"/>
+  </g>
+
+  <!-- Yesod B -->
+  <g filter="url(#glowNodeB)">
+    <circle cx="870" cy="562" r="9" fill="url(#nodeB)" opacity="0.60">
+      <animate attributeName="opacity" values="0.60;0.25;0.60" dur="5.5s" begin="1.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="870" cy="562" r="2.2" fill="#80b8ff" opacity="0.80"/>
+  </g>
+
+  <!-- Caminos árbol B — muy tenues -->
+  <g fill="none" stroke="#4080d0" stroke-width="0.8" opacity="0.08">
+    <line x1="870" y1="148" x2="750" y2="232"/>
+    <line x1="870" y1="148" x2="990" y2="232"/>
+    <line x1="750" y1="232" x2="870" y2="420"/>
+    <line x1="990" y1="232" x2="870" y2="420"/>
+    <line x1="750" y1="330" x2="870" y2="420"/>
+    <line x1="990" y1="330" x2="870" y2="420"/>
+    <line x1="770" y1="505" x2="870" y2="562"/>
+    <line x1="970" y1="505" x2="870" y2="562"/>
+    <line x1="870" y1="562" x2="870" y2="642"/>
+  </g>
+
+  <!-- ══════════════ MALKUTH COMPARTIDO — suelo que ambos tocan ══════════════ -->
+  <!-- Zona de suelo compartido entre los dos árboles -->
+  <g filter="url(#glowMalk05)">
+    <!-- Malkuth A -->
+    <circle cx="330" cy="642" r="14" fill="url(#malkShared)" opacity="0.78">
+      <animate attributeName="r"       values="11;17;10;14;11"            dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.78;0.40;0.88;0.65;0.78" dur="6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="330" cy="642" r="3.5" fill="#f0e0a0" opacity="0.92">
+      <animate attributeName="r" values="3.5;5.5;3;4.5;3.5" dur="6s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <g filter="url(#glowMalk05)">
+    <!-- Malkuth B -->
+    <circle cx="870" cy="642" r="14" fill="url(#malkShared)" opacity="0.78">
+      <animate attributeName="r"       values="11;17;10;14;11"            dur="6.4s" begin="1.2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.78;0.40;0.88;0.65;0.78" dur="6.4s" begin="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="870" cy="642" r="3.5" fill="#f0e0a0" opacity="0.92">
+      <animate attributeName="r" values="3.5;5.5;3;4.5;3.5" dur="6.4s" begin="1.2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Línea de suelo compartido — Tehom -->
+  <line x1="330" y1="642" x2="870" y2="642" stroke="#d0c080" stroke-width="0.6" opacity="0.12" stroke-dasharray="4,6"/>
+
+  <!-- ══════════════ DA'AT — AGUJERO CENTRAL ══════════════ -->
+
+  <!-- Anillo de contacto — el agujero entre los dos árboles -->
+  <circle cx="600" cy="400" r="90" fill="url(#contactRing)" opacity="0.50">
+    <animate attributeName="opacity" values="0.50;0.22;0.50" dur="6.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="600" cy="400" r="70" fill="none" stroke="#c0a0ff" stroke-width="0.7" opacity="0.15">
+    <animate attributeName="r"       values="65;82;60;70;65"      dur="7s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.15;0.04;0.15" dur="7s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="600" cy="400" r="48" fill="none" stroke="#60a0ff" stroke-width="0.5" opacity="0.10">
+    <animate attributeName="r"       values="42;58;40;48;42"      dur="9s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.10;0.03;0.10" dur="9s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Núcleo Da'at — agujero casi vacío -->
+  <g filter="url(#glowDaat05)">
+    <circle cx="600" cy="400" r="28" fill="url(#daatCenter)" opacity="0.80">
+      <animate attributeName="r"       values="22;32;20;28;22"            dur="5.8s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.80;0.35;0.90;0.60;0.80" dur="5.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="600" cy="400" r="5" fill="#ffffff" opacity="0.45">
+      <animate attributeName="r"       values="5;8;4;6;5"               dur="5.8s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.45;0.12;0.55;0.32;0.45" dur="5.8s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- ══════════════ CANAL DE BYTES entre los dos heaps ══════════════ -->
+  <!-- Línea de transmisión central — muy tenue -->
+  <line x1="460" y1="400" x2="740" y2="400" stroke="url(#byteLine)" stroke-width="0.8" opacity="0.18" filter="url(#byteBlur)">
+    <animate attributeName="opacity" values="0.18;0.06;0.18" dur="4s" repeatCount="indefinite"/>
+  </line>
+  <line x1="460" y1="395" x2="740" y2="395" stroke="url(#byteLine)" stroke-width="0.4" opacity="0.10"/>
+  <line x1="460" y1="405" x2="740" y2="405" stroke="url(#byteLine)" stroke-width="0.4" opacity="0.10"/>
+
+  <!-- Partículas de byte A→B -->
+  <circle r="2" fill="#c080ff" opacity="0">
+    <animateMotion dur="4.2s" repeatCount="indefinite" begin="0s" path="M460,400 C520,398 560,400 600,400"/>
+    <animate attributeName="opacity" values="0;0.80;0.80;0" keyTimes="0;0.1;0.8;1" dur="4.2s" repeatCount="indefinite" begin="0s"/>
+  </circle>
+  <circle r="1.5" fill="#d0a0ff" opacity="0">
+    <animateMotion dur="4.8s" repeatCount="indefinite" begin="1.4s" path="M460,398 C510,396 555,398 600,400"/>
+    <animate attributeName="opacity" values="0;0.70;0.70;0" keyTimes="0;0.1;0.8;1" dur="4.8s" repeatCount="indefinite" begin="1.4s"/>
+  </circle>
+  <circle r="2" fill="#a060ff" opacity="0">
+    <animateMotion dur="3.8s" repeatCount="indefinite" begin="2.6s" path="M460,402 C515,400 558,401 600,400"/>
+    <animate attributeName="opacity" values="0;0.75;0.75;0" keyTimes="0;0.1;0.8;1" dur="3.8s" repeatCount="indefinite" begin="2.6s"/>
+  </circle>
+
+  <!-- Partículas de byte B→A -->
+  <circle r="2" fill="#60c8ff" opacity="0">
+    <animateMotion dur="4.5s" repeatCount="indefinite" begin="0.8s" path="M740,400 C680,400 640,400 600,400"/>
+    <animate attributeName="opacity" values="0;0.80;0.80;0" keyTimes="0;0.1;0.8;1" dur="4.5s" repeatCount="indefinite" begin="0.8s"/>
+  </circle>
+  <circle r="1.5" fill="#40a8ff" opacity="0">
+    <animateMotion dur="5.2s" repeatCount="indefinite" begin="2.2s" path="M740,402 C682,401 638,400 600,400"/>
+    <animate attributeName="opacity" values="0;0.70;0.70;0" keyTimes="0;0.1;0.8;1" dur="5.2s" repeatCount="indefinite" begin="2.2s"/>
+  </circle>
+  <circle r="2" fill="#80c0ff" opacity="0">
+    <animateMotion dur="3.9s" repeatCount="indefinite" begin="3.8s" path="M740,398 C685,398 638,399 600,400"/>
+    <animate attributeName="opacity" values="0;0.75;0.75;0" keyTimes="0;0.1;0.8;1" dur="3.9s" repeatCount="indefinite" begin="3.8s"/>
+  </circle>
+
+  <!-- ══════════════ OBJETOS EN TRÁNSITO desde árbol A hacia centro ══════════════ -->
+
+  <!-- become: — desde A hacia centro (bloqueado) -->
+  <g opacity="0">
+    <animateMotion dur="8s" repeatCount="indefinite" begin="0s"
+      path="M330,420 C420,415 510,408 600,400"/>
+    <animate attributeName="opacity" values="0;0.85;0.85;0" keyTimes="0;0.10;0.72;1" dur="8s" repeatCount="indefinite" begin="0s"/>
+    <use href="#sqA"/>
+    <text x="26" y="11" class="sym05A">become:</text>
+  </g>
+
+  <!-- true — desde A hacia derecha -->
+  <g opacity="0">
+    <animateMotion dur="7s" repeatCount="indefinite" begin="2.4s"
+      path="M330,148 C420,200 520,300 600,400"/>
+    <animate attributeName="opacity" values="0;0.85;0.85;0" keyTimes="0;0.10;0.74;1" dur="7s" repeatCount="indefinite" begin="2.4s"/>
+    <use href="#sqA"/>
+    <text x="26" y="11" class="sym05A">true</text>
+  </g>
+
+  <!-- false — desde A abajo -->
+  <g opacity="0">
+    <animateMotion dur="9s" repeatCount="indefinite" begin="4.8s"
+      path="M330,562 C420,510 520,458 600,400"/>
+    <animate attributeName="opacity" values="0;0.85;0.85;0" keyTimes="0;0.10;0.72;1" dur="9s" repeatCount="indefinite" begin="4.8s"/>
+    <use href="#sqA"/>
+    <text x="26" y="11" class="sym05A">false</text>
+  </g>
+
+  <!-- ══════════════ OBJETOS EN TRÁNSITO desde árbol B hacia centro ══════════════ -->
+
+  <!-- = — desde B hacia centro -->
+  <g opacity="0">
+    <animateMotion dur="7.5s" repeatCount="indefinite" begin="1.2s"
+      path="M870,420 C780,415 690,408 600,400"/>
+    <animate attributeName="opacity" values="0;0.85;0.85;0" keyTimes="0;0.10;0.74;1" dur="7.5s" repeatCount="indefinite" begin="1.2s"/>
+    <use href="#sqB"/>
+    <text x="26" y="11" class="sym05B">a = b</text>
+  </g>
+
+  <!-- == — desde B arriba -->
+  <g opacity="0">
+    <animateMotion dur="8.5s" repeatCount="indefinite" begin="3.6s"
+      path="M870,148 C780,200 680,300 600,400"/>
+    <animate attributeName="opacity" values="0;0.85;0.85;0" keyTimes="0;0.10;0.74;1" dur="8.5s" repeatCount="indefinite" begin="3.6s"/>
+    <use href="#sqB"/>
+    <text x="26" y="11" class="sym05B">a == b</text>
+  </g>
+
+  <!-- bytes — desde B abajo -->
+  <g opacity="0">
+    <animateMotion dur="7.8s" repeatCount="indefinite" begin="6.0s"
+      path="M870,562 C785,510 690,455 600,400"/>
+    <animate attributeName="opacity" values="0;0.85;0.85;0" keyTimes="0;0.10;0.72;1" dur="7.8s" repeatCount="indefinite" begin="6.0s"/>
+    <use href="#sqB"/>
+    <text x="26" y="11" class="sym05B">bytes</text>
+  </g>
+
+  <!-- ══════════════ TEXTO CENTRAL en Da'at ══════════════ -->
+  <text x="600" y="486" text-anchor="middle" class="codeNil">nil</text>
+  <text x="600" y="502" text-anchor="middle" class="codeSub">el único estado que no colapsa</text>
+
+  <!-- ══════════════ TIPOGRAFÍA PRINCIPAL ══════════════ -->
+
+  <!-- Sombra título -->
+  <text x="600" y="78" text-anchor="middle"
+    font-family="'IBM Plex Mono',Menlo,monospace" font-size="62"
+    fill="#5020a0" opacity="0.10" filter="url(#softGlow05)">DA'AT</text>
+
+  <!-- Título con glitch -->
+  <text x="600" y="78" text-anchor="middle" class="title05">DA'AT</text>
+
+  <!-- Subtítulo -->
+  <text x="600" y="106" text-anchor="middle" class="sub05">
+    el agujero entre dos árboles completos
+  </text>
+
+  <line x1="430" y1="118" x2="770" y2="118" stroke="#5040a0" stroke-width="0.4" opacity="0.30"/>
+
+  <text x="600" y="131" text-anchor="middle"
+    font-family="'IBM Plex Mono',Menlo,monospace" font-size="9"
+    fill="#9070c0" opacity="0.42" letter-spacing="1.4">
+    become: no puede cruzar entre Images
+  </text>
+
+  <!-- Etiquetas de los heaps -->
+  <text x="330" y="745" text-anchor="middle"
+    font-family="'IBM Plex Mono',Menlo,monospace" font-size="13"
+    fill="#c080ff" opacity="0.50" letter-spacing="0.12em">imageA</text>
+  <text x="330" y="762" text-anchor="middle"
+    font-family="'IBM Plex Mono',Menlo,monospace" font-size="9.5"
+    fill="#9060c0" opacity="0.35">heap · no compartido</text>
+
+  <text x="870" y="745" text-anchor="middle"
+    font-family="'IBM Plex Mono',Menlo,monospace" font-size="13"
+    fill="#60c8ff" opacity="0.50" letter-spacing="0.12em">imageB</text>
+  <text x="870" y="762" text-anchor="middle"
+    font-family="'IBM Plex Mono',Menlo,monospace" font-size="9.5"
+    fill="#4090c0" opacity="0.35">heap · no compartido</text>
+
+  <text x="600" y="745" text-anchor="middle"
+    font-family="'IBM Plex Mono',Menlo,monospace" font-size="11"
+    fill="#d0c080" opacity="0.38" letter-spacing="0.10em">Tehom</text>
+  <text x="600" y="761" text-anchor="middle"
+    font-family="'IBM Plex Mono',Menlo,monospace" font-size="9"
+    fill="#908060" opacity="0.28">suelo compartido · Malkuth</text>
+
+  <!-- Etiquetas de esquina -->
+  <g text-anchor="start">
+    <text x="38" y="50" class="label05">05</text>
+    <text x="38" y="64" class="label05">DA'AT · ÉTICA</text>
+  </g>
+  <g text-anchor="end">
+    <text x="1162" y="50" class="label05">KETHERNET</text>
+    <text x="1162" y="64" class="label05">dos heaps · un suelo · nil como honestidad</text>
+  </g>
+  <g text-anchor="start">
+    <text x="38" y="782" class="label05">imageA = imageB  →  false</text>
+    <text x="38" y="796" class="label05">imageA key == imageB key  →  true</text>
+  </g>
+  <g text-anchor="end">
+    <text x="1162" y="782" class="label05">el socket sigue abierto</text>
+    <text x="1162" y="796" class="label05">si alguien responde · eso es Da'at ejecutándose</text>
+  </g>
+
+</svg>
