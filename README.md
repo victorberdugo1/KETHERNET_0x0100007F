@@ -118,7 +118,7 @@ KETHERNET_0x0100007F/
 2. World menu → Open → Workspace → `Ctrl+D`:
 
 ```smalltalk
-FileStream fileIn: '/ruta/a/KETHERNET_0x0100007F/kethernet.st'
+FileStream fileIn: '/KETHERNET_0x0100007F/smalltalk/*.st'
 ```
 
 ---
