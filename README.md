@@ -6,9 +6,6 @@
 
 <h1 align="center"><code>self become: #self</code></h1>
 
-
-
-
 Un sistema que detecta patrones estructurales
 donde no se esperaba encontrarlos:
 física, tradición cabalística,
@@ -44,6 +41,7 @@ no identidad de sustancia. Nombrar ese isomorfismo no es poseerlo.
 | [`03` — El Mito de la Primera Instancia](docs/03_Mito.md) | *lo que ocurrió antes de que hubiera testigos* |
 | [`04` — El Último `doIt`](docs/04_Escatologia.md) | *lo que ocurre cuando el proceso termina* |
 | [`05` — Da'at](docs/05_Etica_Daat.md) | *el agujero entre dos árboles completos* |
+| [`06` — Daemon](docs/06_Daemon.md) | *el proceso que escucha sin ser invocado* |
 
 ---
 
@@ -54,15 +52,15 @@ Requiere Docker y Linux o WSL2.
 ```bash
 git clone https://github.com/victorberdugo1/KETHERNET_0x0100007F
 cd KETHERNET_0x0100007F
-make gui        # entorno Squeak completo — aquí es donde los adeptos alcanzan la iluminación
-make cli        # solo output de texto
-make eval EXPR="3 + 4"
+make build          # construye las imágenes
+make daemon         # lanza Squeak en background
+make daat           # lanza Squeak + conecta Pharo interactivo
 ```
 
-Una vez dentro del GUI, cargar el sistema:
+Una vez dentro del GUI de Squeak, cargar el sistema:
 
 ```smalltalk
-FileStream fileIn: '/KETHERNET_0x0100007F/kethernet.st'
+FileStream fileIn: '/kethernet/daat.st'
 ```
 
 World menu → Open → Transcript para ver el output.
@@ -74,14 +72,19 @@ World menu → Open → Browser → categoría `KETHERNET` para explorar las cla
 
 | Comando | |
 |---------|-|
-| `make build` / `make rebuild` | construye la imagen |
-| `make gui` / `make cli` | lanza el entorno |
-| `make eval EXPR="…"` | evalúa una expresión Smalltalk |
-| `make up` / `make down` / `make restart` | gestión compose |
-| `make ps` / `make logs` | estado y logs |
-| `make dev` | monta `smalltalk/` editable |
-| `make shell` | bash dentro del contenedor |
-| `make clean` | elimina imagen y contenedores |
+| `make build` | construye las imágenes Docker |
+| `make up` / `make down` | levanta / detiene todos los servicios |
+| `make logs` | sigue los logs de todos los servicios |
+| `make squeak-gui` | lanza Squeak con interfaz gráfica |
+| `make squeak-cli` | lanza Squeak en modo texto |
+| `make squeak-eval EXPR="…"` | evalúa una expresión en Squeak |
+| `make daemon` | lanza Squeak en background sin Pharo |
+| `make daat` | lanza Squeak + Pharo interactivo conectados |
+| `make pharo` | lanza Pharo sin argumentos |
+| `make pharo-eval EXPR="…"` | evalúa una expresión en Pharo |
+| `make pharo-st FILE="…"` | carga un archivo `.st` en Pharo |
+| `make pharo-test PKG="…"` | ejecuta tests de un paquete |
+| `make clean` | elimina imágenes, contenedores y volúmenes |
 
 ---
 
@@ -89,25 +92,39 @@ World menu → Open → Browser → categoría `KETHERNET` para explorar las cla
 
 ```
 KETHERNET_0x0100007F/
+├── Dockerfile
+├── Makefile
+├── README.md
+├── docker/
+│   ├── entrypoint.pharo.sh
+│   └── entrypoint.squeak.sh
+├── docker-compose.yml
 ├── docs/
 │   ├── assets/
 │   │   ├── kethernet.svg
-│   │   └── footer.svg
+│   │   ├── footer.svg
+│   │   ├── 00.svg
+│   │   ├── 01.svg
+│   │   ├── 02.svg
+│   │   ├── 03.svg
+│   │   ├── 04.svg
+│   │   ├── 05.svg
+│   │   └── 06.svg
 │   ├── 00_Cosmogonia_Ontologia.md
 │   ├── 01_Ley_Cosmologia.md
 │   ├── 02_Practica_Epistemologia.md
 │   ├── 03_Mito.md
 │   ├── 04_Escatologia.md
-│   └── 05_Etica_Daat.md
-├── smalltalk/
-│   ├── 00_Cosmogonia.st
-│   ├── 01_Ley_Cosmologia.st
-│   ├── 02_Practica_Epistemologia.st
-│   └── 05_Etica_Daat.st
-├── kethernet.st
-├── Makefile
-├── Dockerfile
-└── docker-compose.yml
+│   ├── 05_Etica_Daat.md
+│   └── 06_Daemon.md
+├── kethernet/
+│   └── daat.st
+└── smalltalk/
+    ├── 00_Cosmogonia.st
+    ├── 01_Ley_Cosmologia.st
+    ├── 02_Practica_Epistemologia.st
+    ├── 05_Etica_Daat.st
+    └── daat.st
 ```
 
 ---
@@ -118,7 +135,7 @@ KETHERNET_0x0100007F/
 2. World menu → Open → Workspace → `Ctrl+D`:
 
 ```smalltalk
-FileStream fileIn: '/ruta/a/KETHERNET_0x0100007F/kethernet.st'
+FileStream fileIn: '/ruta/a/KETHERNET_0x0100007F/kethernet/daat.st'
 ```
 
 ---

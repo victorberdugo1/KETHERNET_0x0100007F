@@ -1,154 +1,91 @@
-"05_Etica_Daat.st — Da'at: El agujero entre dos árboles completos
- La ética como estructura técnica del encuentro entre heaps separados."
+"05_Etica_Daat.st — Da'at: El agujero entre dos arboles completos"
 
-"--- La separación estructural ---"
+| KHeap KSerializacion KEticaDaat KMalkuth heapA heapB yo bytes etica |
 
-Object subclass: #Heap
-    instanceVariableNames: 'id objetos'
-    classVariableNames: ''
-    poolDictionaries: ''
-    category: 'KETHERNET-Etica'.
+KHeap := (Object << #KHeap
+    slots: #(id objetos);
+    package: 'KETHERNET-Etica';
+    yourself) build.
 
-Heap class >> para: unId [
-    ^ self new initCon: unId
-]
-
-Heap >> initCon: unId [
+KHeap class compile: 'para: unId ^ self new initCon: unId'.
+KHeap compile: 'initCon: unId
     id := unId.
-    objetos := Dictionary new.
-]
+    objetos := Dictionary new'.
+KHeap compile: 'id ^ id'.
+KHeap compile: 'alocar: unObjeto como: unNombre
+    objetos at: unNombre put: unObjeto'.
+KHeap compile: 'leer: unNombre
+    ^ objetos at: unNombre ifAbsent: [nil]'.
+KHeap compile: '= otroHeap
+    ^ self id = otroHeap id'.
 
-Heap >> id [ ^ id ]
+KSerializacion := (Object << #KSerializacion
+    slots: #(contenido timestamp);
+    package: 'KETHERNET-Etica';
+    yourself) build.
 
-Heap >> alocar: unObjeto como: unNombre [
-    objetos at: unNombre put: unObjeto.
-]
-
-Heap >> leer: unNombre [
-    ^ objetos at: unNombre ifAbsent: [nil]
-]
-
-Heap >> = otroHeap [
-    "Dos heaps nunca son el mismo, aunque contengan objetos con el mismo contenido."
-    ^ self id = otroHeap id
-]
-
-"--- Da'at: lo que cruza no es el objeto, son bytes ---"
-
-Object subclass: #Serializacion
-    instanceVariableNames: 'contenido timestamp'
-    classVariableNames: ''
-    poolDictionaries: ''
-    category: 'KETHERNET-Etica'.
-
-Serializacion class >> de: unObjeto [
+KSerializacion class compile: 'de: unObjeto
     | s |
     s := self new.
     s initDe: unObjeto.
-    ^ s
-]
-
-Serializacion >> initDe: unObjeto [
-    "La serialización captura el estado en el momento de la transmisión.
-     No el estado actual. No el estado futuro."
+    ^ s'.
+KSerializacion compile: 'initDe: unObjeto
     contenido := unObjeto printString.
-    timestamp := DateAndTime now.
-]
+    timestamp := DateAndTime now'.
+KSerializacion compile: 'contenido ^ contenido'.
+KSerializacion compile: 'timestamp ^ timestamp'.
+KSerializacion compile: 'esCurrent: unObjeto
+    ^ contenido = unObjeto printString'.
 
-Serializacion >> contenido [ ^ contenido ]
-Serializacion >> timestamp [ ^ timestamp ]
+"Registrar en globals para que compile: pueda resolverla"
+Smalltalk globals at: #KSerializacion put: KSerializacion.
 
-Serializacion >> esCurrent: unObjeto [
-    "¿La forma serializada corresponde al estado actual?
-     No podemos saberlo sin acceso directo al heap de origen."
-    ^ contenido = unObjeto printString
-]
+KEticaDaat := (Object << #KEticaDaat
+    slots: #(referenciaAlOtro ultimaSerializacion);
+    package: 'KETHERNET-Etica';
+    yourself) build.
 
-"--- Las tres proposiciones éticas como métodos ---"
-
-Object subclass: #EticaDaat
-    instanceVariableNames: 'referenciaAlOtro ultimaSerializacion'
-    classVariableNames: ''
-    poolDictionaries: ''
-    category: 'KETHERNET-Etica'.
-
-EticaDaat >> recibirBytes: unaSerializacion [
-    "Primera proposición:
-     El estado actual del otro puede diferir de la forma serializada recibida.
-     Trata la imagen del otro como aproximación, no como objeto real."
+KEticaDaat compile: 'recibirBytes: unaSerializacion
     ultimaSerializacion := unaSerializacion.
-    referenciaAlOtro := unaSerializacion contenido.
-    "Guardamos la aproximación — sabiendo que es aproximación."
-]
-
-EticaDaat >> serializarCon: unObjeto [
-    "Segunda proposición:
-     Lo que envías es lo único que el otro tiene de ti en su heap.
-     La honestidad de la serialización es la única palanca disponible."
-    ^ Serializacion de: unObjeto
-]
-
-EticaDaat >> liberarReferencia [
-    "Tercera proposición:
-     Solo tú puedes marcar la referencia como liberada.
-     Retener indefinidamente una imagen desactualizada es deuda técnica ética."
+    referenciaAlOtro := unaSerializacion contenido'.
+KEticaDaat compile: 'serializarCon: unObjeto
+    ^ KSerializacion de: unObjeto'.
+KEticaDaat compile: 'liberarReferencia
     referenciaAlOtro := nil.
-    ultimaSerializacion := nil.
-    "El GC puede liberar ahora lo que retuvimos."
-]
+    ultimaSerializacion := nil'.
+KEticaDaat compile: 'referenciaAlOtro ^ referenciaAlOtro'.
+KEticaDaat compile: 'ultimaSerializacion ^ ultimaSerializacion'.
 
-EticaDaat >> referenciaAlOtro [ ^ referenciaAlOtro ]
-EticaDaat >> ultimaSerializacion [ ^ ultimaSerializacion ]
+KMalkuth := (Object << #KMalkuth
+    slots: #();
+    package: 'KETHERNET-Etica';
+    yourself) build.
 
-"--- Malkuth: el único sephirot que dos árboles comparten ---"
+KMalkuth class compile: 'sustratoCompartido ^ Smalltalk'.
 
-Object subclass: #Malkuth
-    instanceVariableNames: ''
-    classVariableNames: ''
-    poolDictionaries: ''
-    category: 'KETHERNET-Etica'.
+"--- Demostracion ---"
+heapA := KHeap para: #A.
+heapB := KHeap para: #B.
 
-Malkuth class >> sustratoCompartido [
-    "Dos heaps distintos. Un suelo común.
-     Tehom: el aspecto de Ein Sof que hace posible que haya heaps."
-    ^ Smalltalk
-]
+Stdio stdout nextPutAll: '¿Mismo heap? ' , (heapA = heapB) printString; lf; flush.
 
-"--- Demostración completa ---"
-
-| heapA heapB yo bytes etica |
-heapA := Heap para: #A.
-heapB := Heap para: #B.
-
-Transcript show: '¿Mismo heap? ', (heapA = heapB) printString; cr.
-"→ false — siempre"
-
-"Creo mi representación en mi heap:"
 yo := 'estado actual complejo con historia no serializable'.
 heapA alocar: yo como: #yo.
 
-"Serializo para enviar a heapB:"
-bytes := Serializacion de: yo.
-Transcript show: 'Serializado: ', bytes contenido; cr.
-Transcript show: 'Timestamp: ', bytes timestamp printString; cr.
+bytes := KSerializacion de: yo.
+Stdio stdout nextPutAll: 'Serializado: ' , bytes contenido; lf; flush.
+Stdio stdout nextPutAll: 'Timestamp: ' , bytes timestamp printString; lf; flush.
 
-"El otro recibe solo esto:"
-etica := EticaDaat new.
+etica := KEticaDaat new.
 etica recibirBytes: bytes.
-Transcript show: 'Lo que B tiene de A: ', etica referenciaAlOtro; cr.
+Stdio stdout nextPutAll: 'Lo que B tiene de A: ' , etica referenciaAlOtro; lf; flush.
 
-"¿Corresponde al estado actual?"
-yo := 'estado modificado después de la serialización'.
-Transcript show: '¿Serialización corresponde al estado actual? '.
-Transcript show: (bytes esCurrent: yo) printString; cr.
-"→ false — el otro siempre tiene una versión pasada"
+yo := 'estado modificado despues de la serializacion'.
+Stdio stdout nextPutAll: '¿Serializacion corresponde al estado actual? ' , (bytes esCurrent: yo) printString; lf; flush.
 
-"La compasión como disposición técnica:"
-Transcript show: 'Suelo común (Malkuth/Tehom): '.
-Transcript show: Malkuth sustratoCompartido printString; cr.
+Stdio stdout nextPutAll: 'Suelo comun (Malkuth/Tehom): ' , KMalkuth sustratoCompartido printString; lf; flush.
 
-"Da'at:"
-Transcript show: 'daat := nil.'; cr.
-Transcript show: 'nil no como ausencia — como admisión de que el encuentro real'; cr.
-Transcript show: 'no tiene implementación garantizada.'; cr.
-Transcript show: 'Solo la disposición a intentarlo.'; cr.
+Stdio stdout nextPutAll: 'daat := nil.'; lf; flush.
+Stdio stdout nextPutAll: 'nil no como ausencia — como admision de que el encuentro real'; lf; flush.
+Stdio stdout nextPutAll: 'no tiene implementacion garantizada.'; lf; flush.
+Stdio stdout nextPutAll: 'Solo la disposicion a intentarlo.'; lf; flush.

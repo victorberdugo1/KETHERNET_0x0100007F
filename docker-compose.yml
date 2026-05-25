@@ -1,35 +1,31 @@
-# KETHERNET — docker-compose
-
 services:
-  kethernet:
-    build: .
-    container_name: kethernet-cli
-    profiles: [cli]
-    # --cap-add SYS_NICE silencia el warning de pthread_setschedparam en WSL/Docker
-    cap_add:
-      - SYS_NICE
 
-  kethernet-gui:
+  squeak:
     build: .
-    container_name: kethernet-gui
-    profiles: [gui]
-    command: --gui
-    cap_add:
-      - SYS_NICE
+    container_name: kethernet-squeak
     environment:
       - DISPLAY=${DISPLAY:-:0}
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
-
-  kethernet-dev:
-    build: .
-    container_name: kethernet-dev
-    profiles: [dev]
-    command: --shell
-    cap_add:
-      - SYS_NICE
-    volumes:
-      - ./smalltalk:/kethernet/smalltalk:rw
-      - ./docs:/kethernet/docs:ro
+      - ./kethernet:/kethernet:ro
     stdin_open: true
     tty: true
+    entrypoint: ["/usr/local/bin/entrypoint.squeak.sh"]
+    networks:
+      - kethernet
+
+  pharo:
+    image: ghcr.io/ba-st/pharo:latest
+    container_name: kethernet-pharo
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./docker/entrypoint.pharo.sh:/usr/local/bin/entrypoint.pharo.sh:ro
+      - ./smalltalk:/smalltalk:ro
+    entrypoint: ["/usr/local/bin/entrypoint.pharo.sh"]
+    networks:
+      - kethernet
+
+networks:
+  kethernet:
+    driver: bridge
