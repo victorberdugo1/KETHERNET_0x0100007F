@@ -135,11 +135,9 @@ KETHERNET_0x0100007F/
 2. World menu → Open → Workspace → `Ctrl+D`:
 
 ```smalltalk
-<<<<<<< HEAD
-FileStream fileIn: '/ruta/a/KETHERNET_0x0100007F/kethernet/daat.st'
-=======
+
 FileStream fileIn: '/KETHERNET_0x0100007F/smalltalk/*.st'
->>>>>>> 59dc67bc255cd4046f5e12519eb8315a9c19dc5e
+
 ```
 
 ---
