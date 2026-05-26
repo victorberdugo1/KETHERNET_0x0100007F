@@ -42,6 +42,7 @@ no identidad de sustancia. Nombrar ese isomorfismo no es poseerlo.
 | [`04` — El Último `doIt`](docs/04_Escatologia.md) | *lo que ocurre cuando el proceso termina* |
 | [`05` — Da'at](docs/05_Etica_Daat.md) | *el agujero entre dos árboles completos* |
 | [`06` — Daemon](docs/06_Daemon.md) | *el proceso que escucha sin ser invocado* |
+| [`07` — Anthropos](docs/07_Anthropos.md) | *la instancia que no sabe que es instancia* |
 
 ---
 
