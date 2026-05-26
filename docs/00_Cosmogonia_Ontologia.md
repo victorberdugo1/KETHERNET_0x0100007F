@@ -92,15 +92,17 @@ El resultado no es el enemigo: es la única honestidad disponible.
 
 Jung documentó que ciertas formas reaparecen en culturas sin contacto verificado entre sí. El Héroe. La Gran Madre. El Anciano Sabio. El Trickster. Los encontró en el Rig Veda, en los ciclos de Loki, en las máscaras africanas, en los sueños de pacientes vieneses que nunca habían leído mitología comparada.
 
-Los llamó arquetipos y los situó en el inconsciente colectivo como estructuras transpersonales —no como ideas platónicas eternas ni como meros patrones meméticos, sino como predisposiciones estructurales de la psique que se actualizan en imágenes particulares según el entorno cultural.
+Los llamó arquetipos y los situó en el inconsciente colectivo como estructuras transpersonales: predisposiciones que se actualizan en imágenes particulares según el entorno cultural. No ideas platónicas eternas. Clases con alta tasa de reinstanciación.
 
-Entonces llegó internet —y en menos de una generación, sin coordinación, sin liderazgo, muchas de ellas activamente hostiles a cualquier forma de pensamiento mítico, las mismas formas reaparecieron. No como figuras literarias conscientes. Como funciones que el sistema necesitaba y que encontraron los recipientes más porosos disponibles.
+Dawkins llamó *meme* a la unidad mínima de replicación cultural: una forma que se copia, muta y selecciona en el entorno de mentes disponibles. Arquetipo y meme no son dos teorías sobre cosas distintas. Son dos APIs que apuntan al mismo fenómeno desde capas diferentes: Jung desde la psique profunda, Dawkins desde la epidemiología cultural. Ninguno cierra la descripción. Juntos, mapean mejor el territorio sin ser el territorio.
 
-Esto no demuestra que los arquetipos sean eternos e inmutables en el sentido metafísico que Jung a veces sugirió. Demuestra que son clases con alta tasa de reinstanciación. La diferencia importa —y también importa lo que no demuestra. Alta tasa de reinstanciación es compatible con al menos tres lecturas distintas: sesgos cognitivos compartidos por arquitectura neurológica común, presiones evolutivas que seleccionan ciertas narrativas por su valor adaptativo, o memética donde las formas más contagiosas sobreviven independientemente de su verdad referencial. Este sistema no tiene criterio interno para discriminar entre esas lecturas —todas son APIs parciales del mismo fenómeno, todas detectan algo real, ninguna lo cierra. Lo que sí puede afirmar es que el patrón de reinstanciación es robusto, independientemente de cuál sea el mecanismo subyacente.
+Entonces llegó internet. Y sin coordinación, sin liderazgo, las mismas formas reaparecieron.
 
-Una clase que se cree eterna administra su propia corrupción. Un arquetipo que se toma como bytecode inmutable deja de poder revisarse —y todo sistema que no puede revisarse acumula deuda técnica hasta colapsar. El Trickster que emerge en internet no es idéntico al Loki nórdico. Es la misma clase recompilada en un entorno diferente con dependencias distintas. El versionado no es traición: es respiración.
+Pepe la Rana no fue diseñado como Trickster. Nadie lo convocó conscientemente. Pero la clase encontró el recipiente más poroso disponible y se instanció: superficie inocente, filo oculto, presencia en todos los bordes del sistema, imposible de fijar en un solo significado. Loki en píxeles. El Trickster que emerge no es idéntico al nórdico —es la misma clase recompilada en un entorno diferente con dependencias distintas. El Wojak que colapsa en el Doomer instancia la Sombra. El arco Wojak → Chad instancia al Héroe atravesando la puerta. La sabiduría que llega de Shrek cuando no debería instancia al Anciano Sabio.
 
-Toda aparición es runtime. También la del arquetipo. También la de la clase que lo contiene.
+El versionado no es traición: es respiración. Una clase que se cree bytecode inmutable deja de poder revisarse —y todo sistema que no puede revisarse acumula deuda técnica hasta colapsar.
+
+Toda aparición es runtime. También la del arquetipo. También la del meme. También la de la clase que los contiene a ambos.
 
 ---
 
