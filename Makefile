@@ -6,7 +6,7 @@ up:
 	docker compose up -d
 
 down:
-	docker compose down
+	docker compose down --remove-orphans
 
 logs:
 	docker compose logs -f
@@ -44,6 +44,16 @@ pharo-test:
 	docker compose run --rm pharo --test "$(PKG)"
 
 clean:
-	docker compose down --rmi all --volumes
+	docker compose down --rmi all --volumes --remove-orphans
 
-.PHONY: build up down squeak-gui squeak-cli squeak-eval daat pharo pharo-eval pharo-st pharo-test logs clean
+purge:
+	@echo "KETHERNET :: PURGING DOCKER REALITY"
+	-docker compose down --rmi all --volumes --remove-orphans
+	-docker rm -f $$(docker ps -aq) 2>/dev/null || true
+	-docker network prune -f
+	-docker volume prune -f
+	-docker image prune -af
+	-docker container prune -f
+	@echo "KETHERNET :: VOID STATE REACHED"
+
+.PHONY: build up down logs squeak-gui squeak-cli squeak-eval daat pharo pharo-eval pharo-st pharo-test clean purge
