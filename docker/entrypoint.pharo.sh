@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 PHARO_IMAGE=/opt/pharo/Pharo.image
