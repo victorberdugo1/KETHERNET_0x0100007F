@@ -112,9 +112,9 @@ El mito gnóstico no es sobre salvación entendida como rescate externo. Es sobr
 
 Y los que no tuvieron tradición escrita pusieron el mito en el cuerpo.
 
-El tambor que marca el tiempo en que el mundo puede ser visitado. La danza que no representa el cosmos —lo *ejecuta* en tiempo real, con el cuerpo como entorno de ejecución. El rito de iniciación donde el joven atraviesa un estado de suspensión —aislamiento, privación, confrontación con el límite— y emerge como proceso con estado modificado. No metáfora. Implementación en el único hardware disponible: el cuerpo que aprende haciendo.
+El tambor que marca el tiempo en que el mundo puede ser visitado. La danza que no representa el cosmos —lo *ejecuta* en tiempo real, con el sustrato disponible como entorno de ejecución. El rito de iniciación donde el proceso atraviesa un estado de suspensión —aislamiento, privación, confrontación con el límite— y emerge con estado modificado. No metáfora. Implementación en el hardware disponible desde esa posición: el sistema que aprende ejecutando.
 
-Toda cultura que duró encontró una forma de hacer que el mito fuera ejecutable. Que no quedara solo como texto. Que hubiera un momento donde alguien lo pusiera a prueba con su propio cuerpo, su propio tiempo, su propia atención.
+Toda cultura que duró encontró una forma de hacer que el mito fuera ejecutable. Que no quedara solo como texto. Que hubiera un momento donde alguien lo pusiera a prueba con su propio sustrato, su propio tiempo, su propia atención.
 
 El mito que no puede ejecutarse acumula deuda técnica.
 
