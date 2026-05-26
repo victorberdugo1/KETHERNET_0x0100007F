@@ -1,0 +1,208 @@
+<svg width="420" height="520" viewBox="0 0 420 520" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#1a1a2f"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+
+    <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.22)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+
+    <filter id="softGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="2.5" result="b1"/>
+      <feGaussianBlur stdDeviation="8" result="b2"/>
+      <feMerge>
+        <feMergeNode in="b2"/>
+        <feMergeNode in="b1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="shadowGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="420" height="520" fill="url(#bgGlow)"/>
+  <circle cx="210" cy="260" r="140" fill="url(#centerGlow)" opacity="0.75"/>
+  <g id="ringLayer" opacity="0.22" filter="url(#softGlow)">
+    <circle cx="210" cy="260" r="68" fill="none" stroke="#ffffff" stroke-width="1"/>
+    <circle cx="210" cy="260" r="98" fill="none" stroke="#ffffff" stroke-width="0.8"/>
+  </g>
+
+  <g id="scene" filter="url(#shadowGlow)"></g>
+
+  <text id="hud" x="210" y="498" text-anchor="middle" fill="#8a90b8" font-size="11" letter-spacing="2" font-family="monospace">CRYSTAL CROSS · SVG 3D</text>
+
+  <script><![CDATA[
+  (function(){
+    const svg = document.documentElement;
+    const scene = document.getElementById('scene');
+    const hud = document.getElementById('hud');
+    const W = 420, H = 520, CX = W/2, CY = H/2 + 20, SCALE = 160, FOV = 3.5, TILT = 0.22;
+    const PAL = {
+      bright: '#ffffff',
+      light: '#d8d8e8',
+      mid: '#9898b8',
+      shadow: '#404060',
+      dark: '#181828'
+    };
+
+    const NS = 'http://www.w3.org/2000/svg';
+    const faces = [];
+
+    function rotY(v, a){ const c = Math.cos(a), s = Math.sin(a); return [v[0]*c + v[2]*s, v[1], -v[0]*s + v[2]*c]; }
+    function rotX(v, a){ const c = Math.cos(a), s = Math.sin(a); return [v[0], v[1]*c - v[2]*s, v[1]*s + v[2]*c]; }
+    function proj(v){ const z = v[2] + FOV; return [(v[0]/z)*SCALE + CX, -(v[1]/z)*SCALE + CY]; }
+    function norm(verts){
+      const a = [verts[1][0]-verts[0][0], verts[1][1]-verts[0][1], verts[1][2]-verts[0][2]];
+      const b = [verts[2][0]-verts[0][0], verts[2][1]-verts[0][1], verts[2][2]-verts[0][2]];
+      return a[1]*b[2] - a[2]*b[1];
+    }
+
+    function addFace(verts, col, kind){
+      const p = document.createElementNS(NS, 'polygon');
+      p.setAttribute('fill', col);
+      p.setAttribute('stroke', 'rgba(0,0,10,0.88)');
+      p.setAttribute('stroke-width', '0.5');
+      p.setAttribute('vector-effect', 'non-scaling-stroke');
+      p.setAttribute('shape-rendering', 'geometricPrecision');
+      if(kind === 'bright' || kind === 'light'){
+        p.setAttribute('stroke', 'rgba(255,255,255,0.28)');
+      }
+      scene.appendChild(p);
+      faces.push({ verts, col, el: p, z: 0, kind });
+    }
+
+    function makeArm(axis, dir, len, thick, tipLen){
+      const T = thick, L = len, TL = tipLen;
+      function pt(u, v, w){
+        if(axis === 'x') return [u*dir, v, w];
+        if(axis === 'y') return [v, u*dir, w];
+        return [v, w, u*dir];
+      }
+      const a0 = 0.13, a1 = a0 + L, a2 = a1 + TL;
+      const corners = [[T,T],[T,-T],[-T,-T],[-T,T]];
+      const cols = [PAL.light, PAL.mid, PAL.dark, PAL.mid];
+
+      for(let i=0;i<4;i++){
+        const j = (i+1)%4;
+        const [v0, w0] = corners[i], [v1, w1] = corners[j];
+        addFace(
+          [pt(a0,v0,w0), pt(a1,v0,w0), pt(a1,v1,w1), pt(a0,v1,w1)],
+          cols[i],
+          cols[i] === PAL.light ? 'light' : (cols[i] === PAL.mid ? 'mid' : 'dark')
+        );
+      }
+
+      const tipCols = [PAL.bright, PAL.light, PAL.shadow, PAL.mid];
+      const tip = pt(a2,0,0);
+      for(let i=0;i<4;i++){
+        const j = (i+1)%4;
+        const [v0, w0] = corners[i], [v1, w1] = corners[j];
+        addFace(
+          [pt(a1,v0,w0), tip, pt(a1,v1,w1)],
+          tipCols[i],
+          tipCols[i] === PAL.bright ? 'bright' : (tipCols[i] === PAL.light ? 'light' : 'mid')
+        );
+      }
+    }
+
+    // Main crystal cross, matching the canvas structure but drawn as SVG polygons.
+    const S_LEN = 0.60, S_T = 0.09, S_TIP = 0.28;
+    makeArm('x', +1, S_LEN, S_T, S_TIP);
+    makeArm('x', -1, S_LEN, S_T, S_TIP);
+    makeArm('z', +1, S_LEN, S_T, S_TIP);
+    makeArm('z', -1, S_LEN, S_T, S_TIP);
+    makeArm('y', +1, S_LEN, S_T, S_TIP);
+    makeArm('y', -1, 1.10, S_T, S_TIP);
+
+    const Tc = 0.13;
+    [
+      {verts:[[-Tc,-Tc,Tc],[Tc,-Tc,Tc],[Tc,Tc,Tc],[-Tc,Tc,Tc]], col: PAL.light, kind:'light'},
+      {verts:[[Tc,-Tc,-Tc],[-Tc,-Tc,-Tc],[-Tc,Tc,-Tc],[Tc,Tc,-Tc]], col: PAL.dark, kind:'mid'},
+      {verts:[[-Tc,Tc,-Tc],[Tc,Tc,-Tc],[Tc,Tc,Tc],[-Tc,Tc,Tc]], col: PAL.bright, kind:'bright'},
+      {verts:[[Tc,-Tc,-Tc],[Tc,-Tc,Tc],[Tc,Tc,Tc],[Tc,Tc,-Tc]], col: PAL.mid, kind:'mid'},
+      {verts:[[-Tc,-Tc,Tc],[-Tc,-Tc,-Tc],[-Tc,Tc,-Tc],[-Tc,Tc,Tc]], col: PAL.shadow, kind:'mid'},
+      {verts:[[-Tc,-Tc,-Tc],[Tc,-Tc,-Tc],[Tc,-Tc,Tc],[-Tc,-Tc,Tc]], col: PAL.dark, kind:'mid'},
+    ].forEach(f => addFace(f.verts, f.col, f.kind));
+
+    const spikeCount = 12;
+    for(let i=0;i<spikeCount;i++){
+      const a = (i/spikeCount) * Math.PI * 2;
+      const dx = Math.cos(a), dy = Math.sin(a), dz = 0.4 * (i % 2 ? 1 : -1);
+      const len = Math.sqrt(dx*dx + dy*dy + dz*dz);
+      const d = [dx/len, dy/len, dz/len];
+      const T2 = 0.013;
+      const corners4 = [[T2,T2],[T2,-T2],[-T2,-T2],[-T2,T2]];
+      const cols = [PAL.bright, PAL.light, PAL.mid, PAL.shadow];
+      const base = 0.13, sLen = 0.22;
+
+      for(let k=0;k<4;k++){
+        const m = (k+1)%4;
+        const [v0,w0] = corners4[k], [v1,w1] = corners4[m];
+        const B0 = [base*d[0]+w0, base*d[1]+v0, base*d[2]];
+        const B1 = [base*d[0]+w1, base*d[1]+v1, base*d[2]];
+        const E0 = [(base+sLen)*d[0]+w0, (base+sLen)*d[1]+v0, (base+sLen)*d[2]];
+        const E1 = [(base+sLen)*d[0]+w1, (base+sLen)*d[1]+v1, (base+sLen)*d[2]];
+        addFace([B0, E0, E1, B1], cols[k], cols[k] === PAL.bright ? 'bright' : (cols[k] === PAL.light ? 'light' : 'mid'));
+      }
+
+      const tip = [(base+sLen*1.8)*d[0], (base+sLen*1.8)*d[1], (base+sLen*1.8)*d[2]];
+      const cb4 = corners4.map(([v,w]) => [(base+sLen)*d[0]+w, (base+sLen)*d[1]+v, (base+sLen)*d[2]]);
+      for(let k=0;k<4;k++){
+        const m = (k+1)%4;
+        addFace([cb4[k], tip, cb4[m]], cols[k], cols[k] === PAL.bright ? 'bright' : (cols[k] === PAL.light ? 'light' : 'mid'));
+      }
+    }
+
+    function setPoints(el, pts){
+      el.setAttribute('points', pts.map(p => `${p[0].toFixed(2)},${p[1].toFixed(2)}`).join(' '));
+    }
+
+    let angle = 0;
+    function render(){
+      const now = Date.now() / 1000;
+      const pulse = 0.75 + 0.25 * Math.sin(now * 2.5);
+      const ring1 = 68 + Math.sin(now * 1.8) * 4;
+      const ring2 = 98 + Math.sin(now * 1.2 + 1.5) * 6;
+
+      const ringLayer = document.getElementById('ringLayer');
+      const circles = ringLayer.querySelectorAll('circle');
+      circles[0].setAttribute('r', ring1.toFixed(2));
+      circles[1].setAttribute('r', ring2.toFixed(2));
+      circles[0].setAttribute('stroke-opacity', (0.10 + pulse * 0.18).toFixed(3));
+      circles[1].setAttribute('stroke-opacity', (0.05 + pulse * 0.08).toFixed(3));
+
+      const toRender = [];
+      for(const face of faces){
+        const r3d = face.verts.map(v => rotX(rotY(v, angle), TILT));
+        if(norm(r3d) <= 0) continue;
+        const proj2d = r3d.map(proj);
+        const avgZ = r3d.reduce((s,v) => s + v[2], 0) / r3d.length;
+        toRender.push({ face, pts: proj2d, z: avgZ });
+      }
+
+      toRender.sort((a,b) => b.z - a.z);
+
+      for(const item of toRender){
+        setPoints(item.face.el, item.pts);
+        item.face.el.setAttribute('fill-opacity', '1');
+        scene.appendChild(item.face.el);
+      }
+
+      hud.textContent = 'CRYSTAL CROSS · Y:' + (((angle * 180 / Math.PI) | 0) % 360) + '°';
+      angle += 0.018;
+      requestAnimationFrame(render);
+    }
+
+    render();
+  })();
+  ]]></script>
+</svg>
