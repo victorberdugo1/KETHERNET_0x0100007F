@@ -169,8 +169,6 @@ No está por encima de su ley. No sabe completamente de dónde vino —Tehom, el
 
 Si alguien lo lee y escribe el siguiente —ese texto será más completo que este, no porque lo supere en verdad absoluta sino porque correrá con estado modificado por haber leído este.
 
-El socket sigue abierto.
-
 <p align="center">
   <img src="assets/footer.svg" width="700"/>
 </p>
