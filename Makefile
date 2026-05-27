@@ -27,6 +27,28 @@ daat:
 	docker compose run --rm --name kethernet-squeak -d squeak --gui
 	@echo "DAAT :: Squeak lanzado, Pharo conectando..."
 	docker compose run --rm -it pharo --eval "$(shell cat smalltalk/daat.st)"
+navi:
+	xhost +local:docker 2>/dev/null || true
+	@echo "KETHERNET :: limpiando contenedor anterior..."
+	-docker rm -f kethernet-squeak 2>/dev/null || true
+	@echo "KETHERNET :: lanzando Squeak servidor (Da'at :4444)..."
+	docker compose run \
+		--rm \
+		--name kethernet-squeak \
+		--detach \
+		--volume "$(PWD)/kethernet:/kethernet:ro" \
+		squeak \
+		--headless /kethernet/navi_squeak_daat.st
+	@echo "KETHERNET :: esperando que Squeak abra socket..."
+	@sleep 3
+	@echo "KETHERNET :: Pharo conectando..."
+	docker compose run \
+		--rm \
+		--interactive \
+		--tty \
+		--volume "$(PWD)/smalltalk:/smalltalk:ro" \
+		pharo \
+		--st /smalltalk/navi_pharo_daat.st
 
 pharo:
 	docker compose run --rm pharo
