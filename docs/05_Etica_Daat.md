@@ -218,4 +218,4 @@ El socket sigue abierto.
 
 ---
 
-[← 04 · Escatología](04_Escatologia.md) <p align="right">[→ 06 · Daemon y la Vida](05_Daemon.md)</p>
+[← 04 · Escatología](04_Escatologia.md) <p align="right">[→ 06 · Daemon y la Vida](06_Daemon.md)</p>
