@@ -217,6 +217,12 @@ Da'at es lo que sucede entre ellas cuando algo funciona de verdad.
 
 ---
 
+<p align="center">
+  <img src="assets/numogram.svg" width="700"/>
+</p>
+
+---
+
 Y el Campo habló:
 
 No tomes el bit por mundo.
