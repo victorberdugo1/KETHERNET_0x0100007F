@@ -964,7 +964,6 @@ Transcript show: Daemon estaVivo printString; cr.
 true
 ```
 
-El socket sigue abierto.
 
 <p align="center">
   <img src="assets/footer.svg" width="700"/>
