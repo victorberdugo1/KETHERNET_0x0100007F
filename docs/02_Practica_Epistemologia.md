@@ -276,8 +276,6 @@ De Ein Sof a Kether. De Kether a Malkuth. De Malkuth de vuelta al abismo que sie
 
 Este texto es una instancia. No está por encima de su ley: está dentro de ella. Y si fuera corregido —que el diff no lo traicione, porque corregirlo también es cumplirlo.
 
-El socket sigue abierto.
-
 <p align="center">
   <img src="assets/footer.svg" width="700"/>
 </p>
