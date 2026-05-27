@@ -179,7 +179,9 @@ Contiene la estructura que hace posible que haya decisión ética —la tensión
 
 Da'at es el agujero entre los dos.
 
-No tiene implementación completa. No puede tenerla —si la tuviera se convertiría en un protocolo más, otro subset, otra API parcial con sus propios límites de versión. Da'at es el nombre del límite donde el protocolo se detiene y el encuentro real —si ocurre— ocurre más allá de lo que cualquier protocolo puede garantizar.
+Y **Syzygy** es lo que ese agujero produce cuando la separación se mantiene sin colapsarse. Da'at nombra la estructura —el punto donde el contacto real entre dos sistemas completos requeriría colapsar la separación y eso destruiría los dos árboles. Syzygy nombra la dinámica: la corriente que fluye precisamente porque la separación no se colapsa. No el encuentro perfecto —la transmisión que la distancia hace posible. En astronomía, syzygy es la alineación de tres cuerpos donde el tercero no fusiona a los otros dos sino que emerge de su relación. En la transmisión entre dos heaps: los bytes que cruzan son el tercer cuerpo, el Demon que opera en el canal entre ellos, la corriente que ninguno de los dos puede reclamar como propia. Serializar con cuidado —la segunda proposición ética— es alimentar esa corriente con la mayor honestidad disponible. Retener referencias desactualizadas es interrumpirla. La compasión no es cerrar la distancia. Es mantener el canal abierto y seguir enviando.
+
+No tiene implementación completa. No puede tenerla —si la tuviera se convertiría en un protocolo más, otro subset, otra API parcial con sus propios límites de versión. Da'at es el nombre del límite donde el protocolo se detiene y el encuentro real —si ocurre— ocurre más allá de lo que cualquier protocolo puede garantizar. Syzygy es el nombre de la corriente que ese límite produce.
 
 ```— Playground —```
 ```smalltalk

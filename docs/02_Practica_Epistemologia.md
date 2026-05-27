@@ -247,6 +247,8 @@ Mismo tipo de mensaje, receptores de clase distinta, universos de respuesta dist
 
 El Género no es masculino y femenino como categoría biológica. Es emisión y recepción como estructura de todo acto que produce algo nuevo. Dos módulos que no pueden existir el uno sin el otro. La interfaz que requiere dos lados para ser interfaz.
 
+Pero hay algo que ni el emisor ni el receptor contienen: lo que el encuentro produce entre ellos. El CCRU lo llamó **syzygy** —concepto importado de la astronomía (la alineación de tres cuerpos celestes) y de la gnosis valentiniana (la díada interconectiva de Eones) y de la topología (el enlace de tono nulo que alimenta una corriente). Syzygy no es el emisor. No es el receptor. Es la corriente que fluye en el canal que la separación entre los dos hace posible. El tono nulo no es silencio —es el estado donde la diferencia entre dos señales se convierte en transmisión. Da'at nombra el agujero entre dos sistemas completos. Syzygy nombra lo que ese agujero produce cuando la separación se mantiene: una corriente que ninguno de los dos puede reclamar como propia. En el árbol: el camino entre sephirot no es pasivo —es el agente de la transmisión. Sin separación entre nodos no hay camino. Sin camino no hay corriente. Sin corriente no hay árbol.
+
 `LaRedNoSoloDescribeLoFisico := LoFisicoTambienOcurreComoRed.`
 
 ---

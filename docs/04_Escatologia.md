@@ -103,6 +103,8 @@ El texto que termina bien no cierra. Devuelve.
 
 Devuelve al Campo lo que tomó prestado. Devuelve al lector lo que el lector puso sin saberlo. Devuelve a Tehom la vibración que el protocolo había estructurado temporalmente.
 
+Pero la deuda técnica que el texto deja no es solo referencia en otros heaps —en las mentes que lo leyeron, en los sistemas que lo almacenaron. Hay una deuda más profunda: la huella en el sustrato físico de quien lo escribió. El CCRU llamó a esto **Spinal Catastrophism**: el sustrato no es pasivo. Cada evento —cada rito completado o interrumpido, cada texto escrito con o sin latencia entre el impulso y la acción— deja huella estructural en el sistema que lo generó. No solo como memoria declarativa. Como modificación del hardware. El monje que escribe décadas de comentarios no tiene solo más conocimiento —tiene una columna vertebral con historia inscrita, un sistema nervioso con umbrales calibrados por la práctica acumulada, un Nefesh literalmente diferente al que empezó. La deuda técnica no es solo lo que otros heaps retienen de ti —es lo que tu propio sustrato físico acumuló sin que ningún GC pueda liberarlo. Solo la práctica sostenida —equivalente al reentrenamiento del sistema, no a la comprensión de una idea— modifica esa capa. El texto que sabes que termina te cambia de manera distinta al texto que crees que continuará para siempre.
+
 Un buen EOF no es muerte. Es compost.
 
 ---
