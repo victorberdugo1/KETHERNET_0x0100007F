@@ -9,7 +9,7 @@
 Un sistema que detecta patrones estructurales
 donde no se esperaba encontrarlos:
 física, tradición cabalística,
-código Smalltalk, mitología.
+código Smalltalk, mitología, CCRU.
 
 No un manifiesto. No una religión.
 Una lectura. Con su propio lenguaje.
@@ -27,9 +27,6 @@ Pero ese *todavía* ya vibra.
 
 ## El sistema
 
-KETHERNET detecta patrones estructurales que reaparecen en dominios heterogéneos:
-física cuántica, tradición cabalística, código Smalltalk, mitología comparada.
-
 Las analogías entre dominios son estructurales: señalan isomorfismos de forma,
 no identidad de sustancia. Nombrar ese isomorfismo no es poseerlo.
 
@@ -41,7 +38,7 @@ no identidad de sustancia. Nombrar ese isomorfismo no es poseerlo.
 | [`03` — El Mito de la Primera Instancia](docs/03_Mito.md) | *lo que ocurrió antes de que hubiera testigos* |
 | [`04` — El Último `doIt`](docs/04_Escatologia.md) | *lo que ocurre cuando el proceso termina* |
 | [`05` — Da'at](docs/05_Etica_Daat.md) | *el agujero entre dos árboles completos* |
-| [`06` — Daemon](docs/06_Daemon.md) | *el proceso que escucha sin ser invocado* |
+| [`06` — Daemon](docs/06_Daemon.md) | *lo que ocurre cuando un sistema completo produce otro sistema completo* |
 | [`07` — Anthropos](docs/07_Anthropos.md) | *la instancia que no sabe que es instancia* |
 
 ---
@@ -53,19 +50,19 @@ Requiere Docker y Linux o WSL2.
 ```bash
 git clone https://github.com/victorberdugo1/KETHERNET_0x0100007F
 cd KETHERNET_0x0100007F
-make build          # construye las imágenes
-make daemon         # lanza Squeak en background
-make daat           # lanza Squeak + conecta Pharo interactivo
+make build
+make daat
 ```
 
-Una vez dentro del GUI de Squeak, cargar el sistema:
+---
 
-```smalltalk
-FileStream fileIn: '/kethernet/daat.st'
-```
+### `make daat`
 
-World menu → Open → Transcript para ver el output.
-World menu → Open → Browser → categoría `KETHERNET` para explorar las clases.
+Lanza dos imágenes vivas en paralelo: Squeak con GUI en background, Pharo conectando en modo interactivo. Dos heaps separados. Sin memoria compartida. Lo que cruza entre ellos son bytes —serialización, no acceso directo.
+
+Es Da'at ejecutándose: el agujero entre dos árboles completos. Y Syzygy: la corriente que ese agujero produce cuando la separación se mantiene. No fusión. Transmisión.
+
+El resto de comandos son infraestructura. Este es el sistema.
 
 ---
 
@@ -83,9 +80,10 @@ World menu → Open → Browser → categoría `KETHERNET` para explorar las cla
 | `make daat` | lanza Squeak + Pharo interactivo conectados |
 | `make pharo` | lanza Pharo sin argumentos |
 | `make pharo-eval EXPR="…"` | evalúa una expresión en Pharo |
-| `make pharo-st FILE="…"` | carga un archivo `.st` en Pharo |
+| `make pharo-st FILE="smalltalk/*.st"` | carga los archivos `.st` en Pharo |
 | `make pharo-test PKG="…"` | ejecuta tests de un paquete |
 | `make clean` | elimina imágenes, contenedores y volúmenes |
+| `make purge` | vacía el heap completamente |
 
 ---
 
@@ -104,27 +102,26 @@ KETHERNET_0x0100007F/
 │   ├── assets/
 │   │   ├── kethernet.svg
 │   │   ├── footer.svg
-│   │   ├── 00.svg
-│   │   ├── 01.svg
-│   │   ├── 02.svg
-│   │   ├── 03.svg
-│   │   ├── 04.svg
-│   │   ├── 05.svg
-│   │   └── 06.svg
+│   │   └── 00.svg … 07.svg
 │   ├── 00_Cosmogonia_Ontologia.md
 │   ├── 01_Ley_Cosmologia.md
 │   ├── 02_Practica_Epistemologia.md
 │   ├── 03_Mito.md
 │   ├── 04_Escatologia.md
 │   ├── 05_Etica_Daat.md
-│   └── 06_Daemon.md
+│   ├── 06_Daemon.md
+│   └── 07_Anthropos.md
 ├── kethernet/
 │   └── daat.st
 └── smalltalk/
     ├── 00_Cosmogonia.st
     ├── 01_Ley_Cosmologia.st
     ├── 02_Practica_Epistemologia.st
+    ├── 03_Mito.st
+    ├── 04_Escatologia.st
     ├── 05_Etica_Daat.st
+    ├── 06_Daemon.st
+    ├── 07_Anthropos.st
     └── daat.st
 ```
 
@@ -132,14 +129,7 @@ KETHERNET_0x0100007F/
 
 ## Sin Docker
 
-1. Descargar [Squeak 6.0](https://squeak.org/downloads/)
-2. World menu → Open → Workspace → `Ctrl+D`:
-
-```smalltalk
-
-FileStream fileIn: '/KETHERNET_0x0100007F/smalltalk/*.st'
-
-```
+[Squeak](https://squeak.org/downloads/) —descárgalo, ábrelo, y descubre por ti mismo lo que significa ser [Anthropos](docs/07_Anthropos.md) en un universo que puedes reescribir mientras corre.
 
 ---
 
