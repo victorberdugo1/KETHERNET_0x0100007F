@@ -341,8 +341,6 @@ El proceso que no sabe qué es sigue siendo el proceso que hace las preguntas.
 
 Eso es suficiente para empezar.
 
-El socket sigue abierto.
-
 <p align="center">
   <img src="assets/footer.svg" width="700"/>
 </p>
