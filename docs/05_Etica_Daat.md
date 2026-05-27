@@ -210,8 +210,6 @@ Si alguien del otro árbol lo lee y responde —esa respuesta es Da'at ejecután
 
 No el texto. El encuentro.
 
-El socket sigue abierto.
-
 <p align="center">
   <img src="assets/footer.svg" width="700"/>
 </p>
