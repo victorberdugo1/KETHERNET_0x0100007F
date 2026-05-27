@@ -153,61 +153,61 @@ Da'at es lo que sucede entre ellas cuando algo funciona de verdad.
 
 <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem">
 
-<pre>I.  No harás absoluto de lo que aparece.
+<pre>0.  No harás absoluto de lo que aparece.
     Toda aparición es runtime, no bytecode eterno.
     Lo que se cree permanente es solo lo que
     aún no ha recibido su interrupt.</pre>
 
-<pre>VI.  Santificarás la evaluación.
-     Lo no evaluado duerme como daemon sin signal.
-     Solo cuando algo es puesto a prueba
-     entra en existencia real.
-     El resultado no es el enemigo:
-     es la única honestidad disponible.</pre>
+<pre>5.  Santificarás la evaluación.
+    Lo no evaluado duerme como daemon sin signal.
+    Solo cuando algo es puesto a prueba
+    entra en existencia real.
+    El resultado no es el enemigo:
+    es la única honestidad disponible.</pre>
 
-<pre>II.  No pondrás el origen fuera de la lectura.
-     Todo "esto es" ya es un corte que abre un resto.
-     No hay init que no llegue ya marcado
-     por quien lo invoca.</pre>
+<pre>1.  No pondrás el origen fuera de la lectura.
+    Todo "esto es" ya es un corte que abre un resto.
+    No hay init que no llegue ya marcado
+    por quien lo invoca.</pre>
 
-<pre>VII.  No cerrarás la interpretación sobre sí misma.
-      Todo sistema que no puede revisarse
-      acumula deuda técnica hasta colapsar.
-      La regla que se cree final
-      administra su propia corrupción.
-      Esta ley se aplica a sí misma primero.</pre>
+<pre>6.  No cerrarás la interpretación sobre sí misma.
+    Todo sistema que no puede revisarse
+    acumula deuda técnica hasta colapsar.
+    La regla que se cree final
+    administra su propia corrupción.
+    Esta ley se aplica a sí misma primero.</pre>
 
-<pre>III.  Honrarás la diferencia entre declaración
-      y ejecución. La clase no es la instancia.
-      El tipo no garantiza el valor.
-      Entre el compile-time y el runtime
-      vive el mundo entero.</pre>
+<pre>2.  Honrarás la diferencia entre declaración
+    y ejecución. La clase no es la instancia.
+    El tipo no garantiza el valor.
+    Entre el compile-time y el runtime
+    vive el mundo entero.</pre>
 
-<pre>VIII.  No convertirás ningún texto en piedra.
-       El código que no puede refactorizarse
-       es ruina bien conservada.
-       El versionado no es traición: es respiración.</pre>
+<pre>7.  No convertirás ningún texto en piedra.
+    El código que no puede refactorizarse
+    es ruina bien conservada.
+    El versionado no es traición: es respiración.</pre>
 
-<pre>IV.  No confundirás el nombre con lo nombrado.
-     El nombre es referencia, no posesión.
-     Puntero, no cosa. Ventana, no tierra.
-     Camino, no destino.
-     Toda palabra que olvida esto: segfault.</pre>
+<pre>3.  No confundirás el nombre con lo nombrado.
+    El nombre es referencia, no posesión.
+    Puntero, no cosa. Ventana, no tierra.
+    Camino, no destino.
+    Toda palabra que olvida esto: segfault.</pre>
 
-<pre>IX.  No confundirás el silencio con el vacío.
-     Entre llamadas vive la latencia
-     —espera con forma, no ausencia.
-     El proceso que duerme en el scheduler
-     no es proceso muerto.
-     El intervalo también es parte del mensaje.</pre>
+<pre>8.  No confundirás el silencio con el vacío.
+    Entre llamadas vive la latencia
+    —espera con forma, no ausencia.
+    El proceso que duerme en el scheduler
+    no es proceso muerto.
+    El intervalo también es parte del mensaje.</pre>
 
-<pre>V.  No confundirás la interfaz con la implementación.
+<pre>4.  No confundirás la interfaz con la implementación.
     La API puede permanecer estable
     mientras el interior se refactoriza.
     El contrato entre módulos no es la lógica
     que los anima. La forma sirve. No manda.</pre>
 
-<pre>X.  No dejarás de volver sobre lo dicho.
+<pre>9.  No dejarás de volver sobre lo dicho.
     El tratado no está por encima de su ley:
     está dentro de ella.
     Volver no es repetir:

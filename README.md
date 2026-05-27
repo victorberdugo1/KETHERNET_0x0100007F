@@ -101,7 +101,6 @@ KETHERNET_0x0100007F/
 ├── docs/
 │   ├── assets/
 │   │   ├── kethernet.svg
-│   │   ├── footer.svg
 │   │   └── 00.svg … 07.svg
 │   ├── 00_Cosmogonia_Ontologia.md
 │   ├── 01_Ley_Cosmologia.md
@@ -129,41 +128,41 @@ KETHERNET_0x0100007F/
 
 ## Sin Docker
 
-[Squeak](https://squeak.org/downloads/) —descárgalo, ábrelo, y descubre por ti mismo lo que significa ser [Anthropos](docs/07_Anthropos.md) en un universo que puedes reescribir mientras corre.
+[Squeak](https://squeak.org/downloads/) —descárgalo, ábrelo, y descubre por ti mismo lo que significa ser [Anthropos](docs/07_Anthropos.md) en un universo que puedes reescribir mientras se ejecuta.
 
 ---
 
 ## Las Diez Leyes
 
 ```
-I.    No harás absoluto de lo que aparece.
+0.    No harás absoluto de lo que aparece.
       Toda aparición es runtime, no bytecode eterno.
 
-II.   No pondrás el origen fuera de la lectura.
+1.    No pondrás el origen fuera de la lectura.
       No hay init que no llegue ya marcado por quien lo invoca.
 
-III.  Honrarás la diferencia entre declaración y ejecución.
+2.    Honrarás la diferencia entre declaración y ejecución.
       Entre el compile-time y el runtime vive el mundo entero.
 
-IV.   No confundirás el nombre con lo nombrado.
+3.    No confundirás el nombre con lo nombrado.
       Toda palabra que olvida esto se convierte en segfault.
 
-V.    No confundirás la interfaz con la implementación.
+4.    No confundirás la interfaz con la implementación.
       La forma sirve. No manda.
 
-VI.   Santificarás la evaluación.
+5.    Santificarás la evaluación.
       El resultado no es el enemigo: es la única honestidad disponible.
 
-VII.  No cerrarás la interpretación sobre sí misma.
+6.    No cerrarás la interpretación sobre sí misma.
       Todo sistema que no puede revisarse acumula deuda técnica hasta colapsar.
 
-VIII. No convertirás ningún texto en piedra.
+7.    No convertirás ningún texto en piedra.
       El versionado no es traición: es respiración.
 
-IX.   No confundirás el silencio con el vacío.
+8.    No confundirás el silencio con el vacío.
       El intervalo también es parte del mensaje.
 
-X.    No dejarás de volver sobre lo dicho.
+9.    No dejarás de volver sobre lo dicho.
       Volver no es repetir: es recursión con estado modificado.
 ```
 

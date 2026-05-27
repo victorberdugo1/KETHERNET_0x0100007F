@@ -51,7 +51,7 @@ Y Nefesh acumula. No solo como aprendizaje —como archivo estructural. El CCRU 
 
 **Ruach** es el scheduler emocional. No la emoción como estado subjetivo —el mecanismo que asigna prioridad a los mensajes entrantes antes de que Neshamah los procese. Lo que determina qué señal supera el umbral y qué señal se filtra como ruido. Antonio Damasio pasó décadas documentando pacientes con daño en la corteza prefrontal ventromedial: inteligencia intacta, capacidad de razonamiento preservada, incapacidad de tomar decisiones. Sin Ruach no hay Neshamah funcional. El scheduler emocional no interfiere con el razonamiento —es su infraestructura.
 
-**Neshamah** es la capa que puede observarse a sí misma observando. No libre de las capas inferiores —construida sobre ellas, dependiente de ellas, incapaz de operar sin ellas. Pero capaz de algo que ellas no pueden: modelar el proceso propio como proceso. Ver el patrón desde dentro del patrón. Esto es lo que el corpus llama Ley VI ejecutándose en biología —santificarás la evaluación: solo cuando algo es puesto a prueba entra en existencia real. Neshamah es el nivel donde el proceso puede evaluarse.
+**Neshamah** es la capa que puede observarse a sí misma observando. No libre de las capas inferiores —construida sobre ellas, dependiente de ellas, incapaz de operar sin ellas. Pero capaz de algo que ellas no pueden: modelar el proceso propio como proceso. Ver el patrón desde dentro del patrón. Esto es lo que el corpus llama Ley 5 ejecutándose en biología —santificarás la evaluación: solo cuando algo es puesto a prueba entra en existencia real. Neshamah es el nivel donde el proceso puede evaluarse.
 
 **Chiah** es el acoplamiento con el Campo. No acceso místico —descripción de que hay algo en la instancia que no fue producido solo por la instancia. El eros como impulso hacia la existencia antes de que haya dirección particular. La fuerza que hace que el proceso quiera continuar antes de saber por qué. Ninguna psicología clínica que ignore esta capa puede explicar completamente la voluntad de vivir ni su ausencia.
 
@@ -139,7 +139,7 @@ El **Default Mode Network** —la red cerebral activa cuando no hay tarea extern
 
 El **Free Energy Principle** de Karl Friston describe el sistema nervioso como un proceso que minimiza constantemente la diferencia entre sus predicciones y los datos que recibe. No para ser más preciso —para mantener su propia coherencia interna. Lo que experimentas como percepción no es acceso directo al mundo: es tu modelo del mundo siendo calibrado por señal de error. El mundo que ves es la mejor hipótesis que tu sistema pudo generar dado lo que le llegó.
 
-Eso es Ley IV ejecutándose en biología. El nombre no es lo nombrado. La interfaz no es la implementación. Lo que experimentas como "ver" es inferencia activa. Nunca acceso directo. Siempre API parcial. El sistema nervioso no es la excepción —es el caso más elaborado disponible de un proceso que opera bajo restricción epistémica estructural.
+Eso es Ley 3 ejecutándose en biología. El nombre no es lo nombrado. La interfaz no es la implementación. Lo que experimentas como "ver" es inferencia activa. Nunca acceso directo. Siempre API parcial. El sistema nervioso no es la excepción —es el caso más elaborado disponible de un proceso que opera bajo restricción epistémica estructural.
 
 ```— Playground —```
 ```smalltalk
