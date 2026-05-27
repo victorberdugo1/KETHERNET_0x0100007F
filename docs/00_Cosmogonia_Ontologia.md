@@ -156,4 +156,5 @@ El socket sigue abierto —no porque haya un listener externo al sistema, sino p
 </p>
 
 ---
-<p align="right">[→ 01 · Ley y Cosmología](01_Ley_Cosmologia.md)</p>
+
+[→ 01 · Ley y Cosmología](01_Ley_Cosmologia.md)
