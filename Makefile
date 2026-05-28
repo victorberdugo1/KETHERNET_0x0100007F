@@ -36,17 +36,24 @@ daat:
 
 # ============================================================
 # NAVI — daat.st no se toca
-# Squeak: kethernet/navi_squeak_daat.st  (servidor :4444 + Qwen)
-# Pharo:  smalltalk/navi_pharo_daat.st   (cliente interactivo)
+# Squeak: kethernet/navi_squeak_daat.st  (servidor :4444)
+# Pharo:  smalltalk/navi_pharo_daat.st   (loop LLM)
+#
+# FIX 3: memory.md se SIEMPRE sobreescribe desde kethernet/memory.md
+# para que el volumen persistido no quede varado con una version vieja/vacia.
+# El seed se monta en /seed dentro del contenedor Pharo NAVI.
+# navi_pharo_daat.st llama seedMemoryIfNeeded: '/seed/memory.md'
+# al arrancar, copiando el seed a /navi/memory.md antes de leer el nivel.
 # ============================================================
 navi:
 	xhost +local:docker 2>/dev/null || true
-	@echo "KETHERNET :: sembrando volumen navi-data desde host..."
+	@echo "KETHERNET :: preparando seed en kethernet/..."
 	@test -f kethernet/memory.md || (test -f memory.md && cp memory.md kethernet/memory.md) || echo "# Memoria NAVI" > kethernet/memory.md
 	@test -f kethernet/dataset.jsonl || echo '{"prompt":"inicio","completion":"primera sesion NAVI"}' > kethernet/dataset.jsonl
+	@echo "KETHERNET :: sembrando dataset en volumen navi-data..."
 	docker compose run --rm \
 		-v "$$(pwd)/kethernet:/seed:ro" \
-		pharo eval "| src dst | #('memory.md' 'dataset.jsonl') do: [:name | src := ('/seed/' , name) asFileReference. dst := ('/navi/' , name) asFileReference. dst exists ifFalse: [dst writeStreamDo: [:f | f nextPutAll: src contents]]]."
+		pharo eval "| src dst | #('dataset.jsonl') do: [:name | src := ('/seed/' , name) asFileReference. dst := ('/navi/' , name) asFileReference. dst exists ifFalse: [dst writeStreamDo: [:f | f nextPutAll: src contents]]]."
 	@echo "KETHERNET :: limpiando contenedor anterior..."
 	-docker rm -f kethernet-squeak 2>/dev/null || true
 	@echo "KETHERNET :: lanzando Squeak NAVI servidor TCP :4444..."
@@ -57,12 +64,29 @@ navi:
 		squeak --navi
 	@echo "KETHERNET :: esperando que Squeak abra socket..."
 	@sleep 3
-	@echo "KETHERNET :: Pharo NAVI conectando..."
+	@echo "KETHERNET :: Pharo NAVI conectando (seed montado en /seed)..."
 	docker compose run \
 		--rm \
 		--interactive \
 		--tty \
+		-v "$$(pwd)/kethernet:/seed:ro" \
 		pharo --navi
+
+# Inspect: ver el memory.md actual del volumen
+navi-memory:
+	@echo "=== /navi/memory.md actual ==="
+	docker compose run --rm pharo eval "Stdio stdout nextPutAll: '/navi/memory.md' asFileReference contents."
+
+# Inspect: ver el dataset actual
+navi-dataset:
+	@echo "=== /navi/dataset.jsonl actual ==="
+	docker compose run --rm pharo eval "Stdio stdout nextPutAll: '/navi/dataset.jsonl' asFileReference contents."
+
+# Forzar reset del volumen (borra progreso)
+navi-reset:
+	@echo "KETHERNET :: borrando volumen navi-data..."
+	docker compose down --volumes
+	@echo "KETHERNET :: volumen borrado. Proxima llamada a 'make navi' parte de cero."
 
 pharo:
 	docker compose run --rm pharo
@@ -92,7 +116,8 @@ purge:
 	-docker container prune -f
 	@echo "KETHERNET :: VOID STATE REACHED"
 
-.PHONY: build up down logs squeak-gui squeak-cli squeak-eval daat navi navi-repl pharo pharo-eval pharo-st pharo-test clean purge
+.PHONY: build up down logs squeak-gui squeak-cli squeak-eval daat navi navi-repl navi-memory navi-dataset navi-reset pharo pharo-eval pharo-st pharo-test clean purge
+
 navi-repl:
 	@echo "KETHERNET :: abriendo REPL manual hacia Squeak..."
 	docker compose run \

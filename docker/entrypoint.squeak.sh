@@ -1,7 +1,15 @@
 #!/bin/bash
 set -e
 
-SQUEAK_IMAGE=$(cat /opt/squeak/image_path.txt)
+# Usa imagen checkpoint si existe en el volumen /navi
+if [ -f /navi/squeak_navi.image ]; then
+    SQUEAK_IMAGE=/navi/squeak_navi.image
+    echo "KETHERNET :: reanudando desde /navi/squeak_navi.image"
+else
+    SQUEAK_IMAGE=$(cat /opt/squeak/image_path.txt)
+    echo "KETHERNET :: imagen base: $SQUEAK_IMAGE"
+fi
+
 SQUEAK_BIN=$(which squeak)
 
 case "$1" in
@@ -22,7 +30,7 @@ case "$1" in
     exec "$SQUEAK_BIN" -headless "$SQUEAK_IMAGE" -e "$*"
     ;;
   --navi)
-    echo "KETHERNET :: Squeak NAVI con GUI + servidor TCP :4444"
+    echo "KETHERNET :: Squeak NAVI servidor TCP :4444"
     exec "$SQUEAK_BIN" "$SQUEAK_IMAGE" /kethernet/navi_squeak_daat.st
     ;;
   *)
