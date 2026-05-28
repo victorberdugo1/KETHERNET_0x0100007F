@@ -21,6 +21,10 @@ case "$1" in
     shift
     exec "$SQUEAK_BIN" -headless "$SQUEAK_IMAGE" -e "$*"
     ;;
+  --navi)
+    echo "KETHERNET :: Squeak NAVI con GUI + servidor TCP :4444"
+    exec "$SQUEAK_BIN" "$SQUEAK_IMAGE" /kethernet/navi_squeak_daat.st
+    ;;
   *)
     exec "$SQUEAK_BIN" "$SQUEAK_IMAGE"
     ;;

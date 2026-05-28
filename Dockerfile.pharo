@@ -1,0 +1,9 @@
+FROM ghcr.io/ba-st/pharo:latest
+
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends dos2unix && rm -rf /var/lib/apt/lists/*
+
+COPY docker/entrypoint.pharo.sh /entrypoint.pharo.sh
+RUN dos2unix /entrypoint.pharo.sh && chmod +x /entrypoint.pharo.sh
+
+ENTRYPOINT ["bash", "/entrypoint.pharo.sh"]

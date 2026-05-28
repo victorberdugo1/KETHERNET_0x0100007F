@@ -11,18 +11,16 @@ case "$1" in
     ;;
   --st)
     shift
-    FILE="$1"
-    exec "$PHARO_BIN" "$PHARO_IMAGE" eval "
-| code |
-code := '$FILE' asFileReference readStream contents.
-Smalltalk compiler evaluate: code.
-"
+    exec "$PHARO_BIN" "$PHARO_IMAGE" st "$1"
+    ;;
+  --navi)
+    exec "$PHARO_BIN" "$PHARO_IMAGE" st /smalltalk/navi_pharo_daat.st
     ;;
   --test)
     shift
     exec "$PHARO_BIN" "$PHARO_IMAGE" test "$*"
     ;;
   *)
-    exec "$PHARO_BIN" "$PHARO_IMAGE" eval "Stdio stdout nextPutAll: 'Pharo headless OK'; lf."
+    exec "$PHARO_BIN" "$PHARO_IMAGE" eval "Stdio stdout nextPutAll: 'Pharo OK'; lf."
     ;;
 esac

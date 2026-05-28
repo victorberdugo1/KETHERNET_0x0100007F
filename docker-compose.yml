@@ -1,31 +1,37 @@
 services:
 
   squeak:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.squeak
     container_name: kethernet-squeak
     environment:
       - DISPLAY=${DISPLAY:-:0}
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - ./kethernet:/kethernet:ro
+      - navi-data:/navi:rw
     stdin_open: true
     tty: true
-    entrypoint: ["/usr/local/bin/entrypoint.squeak.sh"]
     networks:
       - kethernet
 
   pharo:
-    image: ghcr.io/ba-st/pharo:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.pharo
     container_name: kethernet-pharo
     stdin_open: true
     tty: true
     volumes:
-      - ./docker/entrypoint.pharo.sh:/usr/local/bin/entrypoint.pharo.sh:ro
       - ./smalltalk:/smalltalk:ro
-    entrypoint: ["/usr/local/bin/entrypoint.pharo.sh"]
+      - navi-data:/navi:rw
     networks:
       - kethernet
 
 networks:
   kethernet:
     driver: bridge
+
+volumes:
+  navi-data:
