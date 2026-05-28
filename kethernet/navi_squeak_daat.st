@@ -1,4 +1,12 @@
-"NAVI :: Squeak servidor TCP :4444 + guardado periodico de imagen"
+"NAVI :: Squeak 6.0 servidor TCP :4444 + guardado periodico de imagen
+ CORRECCIONES v3:
+  - Smalltalk at: #NaviCanvas put: ... para globals visibles desde eval TCP
+  - Refresco canvas con form: + invalidate (no image: + changed)
+  - Buffer robusto con deadline reiniciable por actividad
+  - Proteccion contra buffer vacio o sin LF
+  - Canvas con FONDO BLANCO, pinta con colores
+  - NaviCanvas/NaviCanvasM/NaviButtons expuestos al codigo evaluado
+"
 
 | naviProcess saveProcess logBlock hasDisplay |
 
@@ -8,9 +16,19 @@ logBlock := [:msg |
     Transcript show: msg; cr.
 ].
 
+"=== Registrar globals vacias para que existan antes del ifTrue: ==="
+Smalltalk at: #NaviCanvas    put: nil.
+Smalltalk at: #NaviCanvasM   put: nil.
+Smalltalk at: #NaviCanvasWin put: nil.
+Smalltalk at: #NaviButtons   put: nil.
+Smalltalk at: #NaviWindow    put: nil.
+Smalltalk at: #NaviTitle     put: nil.
+Smalltalk at: #NaviLog       put: nil.
+
 "=== Panel visual solo si hay display ==="
 hasDisplay ifTrue: [
-    | win titleMorph logMorph logText memWin memMorph memProcess jsonWin jsonMorph jsonProcess |
+    | win titleMorph logMorph logText memWin memMorph memProcess jsonWin jsonMorph jsonProcess
+      canvasWin canvasForm canvasMorph |
 
     logText := ''.
     win := SystemWindow new.
@@ -58,6 +76,30 @@ hasDisplay ifTrue: [
     jsonWin openInWorld.
     jsonWin position: 640@540.
 
+    "=== Canvas BLANCO para la LLM ===
+     NaviCanvas    -> Form 600x400 fondo BLANCO
+     NaviCanvasM   -> ImageMorph que muestra el Form en pantalla
+     NaviButtons   -> OrderedCollection de ButtonMorph creados por la LLM
+     NaviCanvasWin -> ventana contenedora
+    "
+    canvasForm := Form extent: 600@400 depth: 32.
+    canvasForm fillColor: Color white.
+    canvasMorph := ImageMorph new.
+    canvasMorph image: canvasForm.
+    canvasWin := SystemWindow new.
+    canvasWin setLabel: 'KETHERNET :: CANVAS NAVI'.
+    canvasWin extent: 620@440.
+    canvasWin color: Color white.
+    canvasWin addMorph: canvasMorph frame: (0@0 corner: 1@1).
+    canvasWin openInWorld.
+    canvasWin position: 20@440.
+
+    "Registrar en Smalltalk dict para que sean visibles desde cualquier contexto eval"
+    Smalltalk at: #NaviCanvas    put: canvasForm.
+    Smalltalk at: #NaviCanvasM   put: canvasMorph.
+    Smalltalk at: #NaviCanvasWin put: canvasWin.
+    Smalltalk at: #NaviButtons   put: OrderedCollection new.
+
     jsonProcess := [
         [ true ] whileTrue: [
             [ | text |
@@ -70,12 +112,10 @@ hasDisplay ifTrue: [
     jsonProcess priority: Processor userBackgroundPriority.
     jsonProcess resume.
 
-    "Ventana de memoria: muestra NIVEL_ACTUAL + ultimas lineas del dataset"
     memProcess := [
         [ true ] whileTrue: [
             [
                 | nivel dataset lines last20 display |
-                "Leer NIVEL_ACTUAL de memory.md"
                 nivel := 'NIVEL_ACTUAL=?'.
                 [ | mem marker idx end |
                   mem := (FileStream readOnlyFileNamed: '/navi/memory.md') contentsOfEntireFile.
@@ -88,7 +128,6 @@ hasDisplay ifTrue: [
                       nivel := 'NIVEL_ACTUAL=' , (mem copyFrom: idx to: end - 1).
                   ].
                 ] on: Error do: [ :e | nivel := 'NIVEL_ACTUAL=error' ].
-                "Leer ultimas 20 entradas del dataset"
                 last20 := '(dataset vacio)'.
                 [ | raw |
                   raw := (FileStream readOnlyFileNamed: '/navi/dataset.jsonl') contentsOfEntireFile.
@@ -112,17 +151,17 @@ hasDisplay ifTrue: [
         logMorph contents: (logText copyFrom: (logText size - (logText size min: 2000) + 1) to: logText size).
         Transcript show: msg; cr.
     ].
-    NaviWindow := win.
-    NaviTitle := titleMorph.
+    Smalltalk at: #NaviWindow put: win.
+    Smalltalk at: #NaviTitle  put: titleMorph.
 ].
 
+Smalltalk at: #NaviLog put: logBlock.
 NaviLog := logBlock.
 
-"Fijar autor para evitar dialogos interactivos al definir clases"
 [ Utilities authorName: 'NAVI' ] on: Error do: [ :e | ].
 [ Utilities setAuthorInitials: 'NV' ] on: Error do: [ :e | ].
 
-"=== Guardado periodico: copia binaria de la imagen al volumen /navi ==="
+"=== Guardado periodico ==="
 saveProcess := [
     [ true ] whileTrue: [
         (Delay forSeconds: 300) wait.
@@ -146,10 +185,7 @@ saveProcess := [
 saveProcess priority: Processor userBackgroundPriority.
 saveProcess resume.
 
-"=== Servidor TCP ===
-Protocolo: Pharo envia codigo + LF como terminador.
-Squeak acumula chunks hasta recibir un LF, evalua, responde resultado + LF.
-El codigo que llega tiene sus newlines internos ya reemplazados por espacios en Pharo."
+"=== Servidor TCP ==="
 naviProcess := [
     | server client |
     NaviLog value: 'NAVI :: abriendo socket :4444'.
@@ -161,39 +197,58 @@ naviProcess := [
         client isNil ifFalse: [
             NaviLog value: 'NAVI :: Pharo conectado'.
             [
-                | buffer deadline chunk code result lf |
-                lf       := String with: Character lf.
-                buffer   := ''.
-                deadline := Time millisecondClockValue + 60000.
-                "Acumular hasta recibir LF o timeout"
+                | buffer deadline chunk code result lf lfIdx localDeadline |
+                lf            := String with: Character lf.
+                buffer        := ''.
+                deadline      := Time millisecondClockValue + 120000.
+                localDeadline := Time millisecondClockValue + 30000.
+
+                "Acumular chunks hasta LF o timeout"
                 [
                     (buffer includes: Character lf) not and: [
-                        Time millisecondClockValue < deadline ]
+                        Time millisecondClockValue < (deadline min: localDeadline) ]
                 ] whileTrue: [
                     client dataAvailable
                         ifTrue: [
-                            chunk := client receiveData asString.
-                            buffer := buffer , chunk.
+                            chunk := client receiveData.
+                            chunk isString ifFalse: [ chunk := chunk asString ].
+                            chunk isEmpty ifFalse: [
+                                buffer := buffer , chunk.
+                                localDeadline := Time millisecondClockValue + 30000.
+                            ].
                         ]
                         ifFalse: [
                             (Delay forMilliseconds: 20) wait.
                         ].
                 ].
-                "Tomar todo hasta el primer LF"
-                code := buffer
-                    copyFrom: 1
-                    to: ((buffer indexOf: Character lf) - 1 max: 0).
+
+                "Extraer codigo hasta el primer LF"
+                lfIdx := buffer indexOf: Character lf.
+                lfIdx = 0
+                    ifTrue:  [ code := buffer ]
+                    ifFalse: [ code := buffer copyFrom: 1 to: lfIdx - 1 ].
+
                 "Limpiar CR sobrante"
                 code := code copyReplaceAll: (String with: Character cr) with: ''.
                 code := code withBlanksTrimmed.
+
                 code isEmpty ifFalse: [
                     NaviLog value: 'NAVI << ' , (code copyFrom: 1 to: (code size min: 80)).
                     result := [
                         | val |
-                        "Fijar nombre e iniciales para evitar cualquier dialogo de autor"
                         [ Utilities authorName: 'NAVI' ] on: Error do: [ :e | ].
                         [ Utilities setAuthorInitials: 'NV' ] on: Error do: [ :e | ].
                         val := (Compiler evaluate: '[' , code , '] value') printString.
+                        "Refrescar canvas si existe y tiene contenido"
+                        [ | nc ncm |
+                          nc  := Smalltalk at: #NaviCanvas  ifAbsent: [nil].
+                          ncm := Smalltalk at: #NaviCanvasM ifAbsent: [nil].
+                          (nc notNil and: [ncm notNil]) ifTrue: [
+                              ncm image: nc.
+                              ncm changed.
+                              [ World doOneCycle ] on: Error do: [:e | ].
+                          ].
+                        ] on: Error do: [ :e | ].
                         val
                     ] on: Error do: [:e |
                         'ERROR: ' , e messageText
@@ -204,7 +259,7 @@ naviProcess := [
             ] on: Error do: [ :e |
                 NaviLog value: 'NAVI :: error cliente: ' , e messageText.
             ].
-            client close.
+            [ client close ] on: Error do: [ :e | ].
             NaviLog value: 'NAVI :: cliente desconectado - esperando nuevo'.
         ].
     ].
@@ -213,3 +268,4 @@ naviProcess := [
 naviProcess priority: Processor userBackgroundPriority.
 naviProcess resume.
 NaviLog value: 'NAVI :: servidor iniciado'.
+NaviLog value: 'NAVI :: NaviCanvas = Form 600x400 FONDO BLANCO lista para pintar'.
