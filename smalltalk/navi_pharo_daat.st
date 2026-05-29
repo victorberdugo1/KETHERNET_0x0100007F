@@ -1,21 +1,3 @@
-"============================================================
- NaviLoop v7 — RITUAL KETHERNET
-
- Cambios vs v6:
-  - FIX TCP: limite de 400 chars por linea enviada a Squeak
-    (evita truncado silencioso en el socket)
-  - FIX TCP: verificacion de longitud antes de enviar
-  - Anti-repeticion: deteccion activa en run, descarta igual
-  - buildLibrePrompt: inspira en vez de dictar, semilla temporal
-  - buildRetryPrompt libre: 5 fallbacks rotativos por tiempo
-  - Sistema de BELLEZA: score estetico post-EVAL en canvas
-    * varianza de color (diversidad cromatica)
-    * simetria bilateral horizontal
-    * densidad de pixeles activos (no blanco/negro puro)
-    * score 0.0-1.0, penaliza el loop si score < umbral
-    * feedback de score al LLM en el proximo prompt
-============================================================"
-
 "--- KarmaBuffer ---"
 Object subclass: #KarmaBuffer
     instanceVariableNames: 'pendientes procesados pesoMaximo'
@@ -590,7 +572,7 @@ COLORES:
   Color pink, Color brown, Color gray, Color r: 0.5 g: 0.2 b: 0.8
 
 REGLA: responde SOLO con:
-EVAL: <codigo Squeak valido en UNA LINEA, maximo 350 caracteres>
+EVAL: <codigo Squeak valido en UNA LINEA, sin limite estricto de longitud>
 Sin explicacion. Sin comentarios.' ].
 
     ^ 'Eres NAVI. Encarnacion ' , encarnacion , '. Nivel actual: ' , nivelActual , '.
@@ -665,7 +647,7 @@ buildLibrePrompt
     , String lf
     , 'REGLAS ESTRICTAS:' , String lf
     , '- Responde SOLO con: EVAL: <codigo>' , String lf
-    , '- UNA LINEA. Maximo 350 caracteres despues de EVAL:' , String lf
+    , '- UNA LINEA. Sin limite estricto de longitud despues de EVAL:' , String lf
     , '- DIFERENTE a todo lo listado arriba' , String lf
     , '- Si usa canvas: | gc | gc := NaviCanvas getCanvas. gc ...' , String lf
     , '- gc line: p1 to: p2 color: c  (SIN width:)'!
@@ -744,7 +726,7 @@ askLLM: userContent
 
 !NaviLoop methodsFor: 'squeak'!
 evalInSqueak: code
-    ^ self evalInSqueak: code maxChars: 400!
+    ^ self evalInSqueak: code maxChars: 20000!
 
 evalInSqueak: code maxChars: maxChars
     "FIX TCP: verifica longitud antes de enviar.
@@ -756,7 +738,7 @@ evalInSqueak: code maxChars: maxChars
     cleanCode := self sanitizeCodeForTCP: code.
 
     cleanCode size > maxChars ifTrue: [
-        Transcript show: 'NAVI :: codigo demasiado largo (' , cleanCode size printString , ' chars) — descartado'; cr.
+        Transcript show: 'NAVI :: codigo demasiado largo (' , cleanCode size printString , ' chars) — permitido por configuracion'; cr.
         ^ 'ERROR: codigo demasiado largo (' , cleanCode size printString , ' chars), maximo ' , maxChars printString ].
 
     stream := SocketStream openConnectionToHostNamed: squeakHost port: squeakPort.
