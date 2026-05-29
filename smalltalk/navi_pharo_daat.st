@@ -288,7 +288,7 @@ restoreLevelFromMemory
     Transcript show: 'NAVI :: reanudando desde nivel ' , currentLevel printString; cr.!
 
 restoreHistoryFromDataset
-    | ref raw lines libreLines prompt completion |
+    | ref raw lines libreLines |
     karmaBuffer := KarmaBuffer new.
     [ ref := datasetPath asFileReference.
       ref exists ifFalse: [ ^ self ].
@@ -296,9 +296,10 @@ restoreHistoryFromDataset
       raw isEmpty ifTrue: [ ^ self ].
       lines := raw substrings: (String with: Character lf).
       libreLines := lines select: [ :l | l includesSubstring: '"LIBRE"' ].
+      libreLines isEmpty ifTrue: [ ^ self ].
       libreLines := libreLines last: (libreLines size min: 8).
       libreLines do: [ :l |
-          | pIdx cIdx ps pe cs ce |
+          | pIdx cIdx ps pe cs ce prompt completion |
           pIdx := l indexOfSubCollection: '"prompt":' startingAt: 1.
           cIdx := l indexOfSubCollection: '"completion":' startingAt: 1.
           (pIdx > 0 and: [ cIdx > 0 ]) ifTrue: [
@@ -465,7 +466,7 @@ stripWrappingQuotes: aString
     s size < 2 ifTrue: [ ^ s ].
     ((s at: 1) = $' and: [ (s at: s size) = $' ]) ifTrue: [
         ^ s copyFrom: 2 to: s size - 1 ].
-    ((s at: 1) = $" and: [ (s at: s size) = $"]) ifTrue: [
+    ((s at: 1) = $" and: [ (s at: s size) = $" ]) ifTrue: [
         ^ s copyFrom: 2 to: s size - 1 ].
     ((s at: 1) = $( and: [ (s at: s size) = $) ]) ifTrue: [
         ^ s copyFrom: 2 to: s size - 1 ].
@@ -473,9 +474,7 @@ stripWrappingQuotes: aString
 
 !NaviLoop methodsFor: 'belleza'!
 scoreCanvas
-    "Pide a Squeak el score estetico del canvas actual.
-     Squeak ejecuta el analisis sobre NaviCanvas (Form 640x356)
-     y devuelve un float entre 0.0 y 1.0 como string."
+    "Pide a Squeak el score estetico del canvas actual."
     | scoreCodigo raw score |
     scoreCodigo :=
         '[ | form w h muestras rVals densCount i x y px r g b '
@@ -506,7 +505,7 @@ scoreCanvas
         , 'scoreTotal := (densidad * 0.4) + (varianza * 0.4) + (simetria * 0.2). '
         , 'scoreTotal printString] ] value'.
 
-    raw := [ self evalInSqueak: scoreCodigo maxChars: 1500 ]
+    raw := [ self evalInSqueak: scoreCodigo ]
         on: Error do: [ :e | '-1' ].
     score := [ raw asFloat ] on: Error do: [ -1.0 ].
     ^ score!
@@ -560,7 +559,7 @@ CANVAS (Form) — dibujar en NaviCanvas:
 METODOS CANVAS — SOLO ESTOS:
   gc fillRectangle: aRect color: aColor
   gc fillOval: aRect color: aColor
-  gc line: pt1 to: pt2 color: aColor    (SIN width:)
+  gc line: pt1 to: pt2 color: aColor
   gc drawString: str at: pt font: nil color: aColor
 
 MORPHS:
@@ -652,7 +651,7 @@ buildLibrePrompt
     , '- Si usa canvas: | gc | gc := NaviCanvas getCanvas. gc ...' , String lf
     , '- gc line: p1 to: p2 color: c  (SIN width:)'!
 
-buildRetryPrompt: error forCode: code
+buildRetryPrompt: errorString forCode: code
     | seed fallbacks idx |
     currentLevel >= curriculum size ifTrue: [
         seed := Time millisecondClockValue.
@@ -663,13 +662,13 @@ buildRetryPrompt: error forCode: code
         fallbacks add: '| d | d := Dictionary new. d at: #k put: 99. (d at: #k) printString'.
         fallbacks add: '(#(3 1 4 1 5 9 2 6) inject: 0 into: [:a :x | a + x]) printString'.
         idx := (seed \\ fallbacks size) + 1.
-        ^ 'Error en Squeak: ' , error , String lf
+        ^ 'Error en Squeak: ' , errorString , String lf
         , 'Codigo fallido: ' , code , String lf
         , String lf
         , 'Ese codigo no funciona. Prueba este codigo seguro:' , String lf
         , String lf
         , 'EVAL: ' , (fallbacks at: idx) ].
-    ^ 'Error al ejecutar en Squeak: ' , error , String lf
+    ^ 'Error al ejecutar en Squeak: ' , errorString , String lf
     , 'Codigo que produjo el error: ' , code , String lf
     , 'Nivel: ' , self levelName , String lf
     , 'El codigo correcto para este nivel es exactamente: ' , self levelCode , String lf
@@ -683,7 +682,7 @@ askLLM: userContent
         , '"messages":['
         , '{"role":"system","content":"' , sys , '"},'
         , '{"role":"user","content":"' , usr , '"}'
-        , '],"temperature":0.7,"max_tokens":200,"stream":false}'.
+        , '],"temperature":0.7,"max_tokens":2048,"stream":false}'.
     Transcript show: 'LLM >> llamando...'; cr.
     client := ZnClient new.
     (apiKey notNil and: [ apiKey notEmpty ]) ifTrue: [
@@ -726,20 +725,15 @@ askLLM: userContent
 
 !NaviLoop methodsFor: 'squeak'!
 evalInSqueak: code
-    ^ self evalInSqueak: code maxChars: 20000!
+    ^ self evalInSqueak: code maxChars: nil!
 
 evalInSqueak: code maxChars: maxChars
-    "FIX TCP: verifica longitud antes de enviar.
-     Squeak lee hasta LF — si el codigo tiene LF internos o es muy largo
-     lo trunca silenciosamente.
-     sanitizeCodeForTCP ya convierte LF/CR en espacios."
+    "Sin tope duro: solo limpia para TCP y manda el codigo."
     | stream result lf cleanCode |
     lf := String with: Character lf.
     cleanCode := self sanitizeCodeForTCP: code.
 
-    cleanCode size > maxChars ifTrue: [
-        Transcript show: 'NAVI :: codigo demasiado largo (' , cleanCode size printString , ' chars) — permitido por configuracion'; cr.
-        ^ 'ERROR: codigo demasiado largo (' , cleanCode size printString , ' chars), maximo ' , maxChars printString ].
+    Transcript show: 'NAVI :: enviando codigo (' , cleanCode size printString , ' chars)'; cr.
 
     stream := SocketStream openConnectionToHostNamed: squeakHost port: squeakPort.
     stream timeout: 90.
@@ -773,21 +767,21 @@ sanitizeCodeForTCP: code
                                 i := i + 1. ]
                             ifFalse: [
                                 inString := false.
-                                result nextPut: c. ]. ]
+                                result nextPut: c. ] ]
                     ifFalse: [
                         (c = Character cr or: [ c = Character lf ])
                             ifTrue: [ result nextPut: Character space ]
-                            ifFalse: [ result nextPut: c ]. ]. ]
+                            ifFalse: [ result nextPut: c ] ] ]
             ifFalse: [
                 c = $'
                     ifTrue: [
                         inString := true.
-                        result nextPut: c. ]
+                        result nextPut: c ]
                     ifFalse: [
                         (c = Character cr or: [ c = Character lf ])
                             ifTrue: [ result nextPut: Character space ]
-                            ifFalse: [ result nextPut: c ]. ]. ].
-        i := i + 1. ].
+                            ifFalse: [ result nextPut: c ] ] ].
+        i := i + 1 ].
     ^ result contents! !
 
 !NaviLoop methodsFor: 'loop'!
