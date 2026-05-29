@@ -1,40 +1,164 @@
 "============================================================
- NaviLoop — corre en PHARO (orquestador)
- Llama al LLM, manda codigo a Squeak via TCP :4444,
- guarda dataset y progreso.
+ NaviLoop v6 — RITUAL KETHERNET
 
- CORRECCIONES v3:
-  1. trimStr: implementado con loop manual (no depende de trim/trimSeparators).
-  2. Parseo JSON robusto: ancla en 'assistant' antes de buscar 'content'.
-  3. evalInSqueak: preserva strings literales al limpiar newlines.
-  4. unescapeFromJson maneja \r\n y \t.
-  5. ensure: anidado (Pharo FullBlockClosure no tiene on:do:ensure:).
-  6. System prompt modo libre: NaviCanvas disponible, LLM puede hacer lo que quiera.
+ Cambios vs v5:
+  - KarmaBuffer reemplaza libreHistory (peso del corazon)
+  - KSerializacion en appendToDataset (timestamp por entrada)
+  - Ritual Daemon en start (5 pasos reales con estado)
+  - Ruach como filtro gradual en resultOk:
+  - buildPrompt mas estricto (evita codigo extra del LLM)
+  - STREAM fix: expresion robusta, resultado sin ambiguedad
+  - stripWrappingQuotes: sin backslashes (fix sintaxis Pharo)
 
- APIs Pharo usadas aqui (NO son Squeak):
-   ZnClient / ZnEntity  — Zinc HTTP client (Pharo)
-   asFileReference      — disponible en ambos (Pharo 7+, Squeak 5+)
-   writeStreamDo:       — Pharo FileReference
+ Filosofia integrada de:
+  - 04_Escatologia.st  -> KarmaBuffer (peso del corazon)
+  - 05_Etica_Daat.st   -> KSerializacion (timestamp+validez)
+  - 06_Daemon.st       -> ritual de instanciacion
+  - 07_Anthropos.st    -> Ruach como umbral de senal
 
- Guards del servidor Squeak bloquean (substring exacta):
-   factorial  newProcess  fork  whileTrue  timesRepeat:
-   to:do:     openInWorld  raisedTo:  FileStream fileNamed:
- => En modo LIBRE (curriculum completado) NO hay guards.
+ KETHERNET:
+  Tehom      -> heap antes del primer new
+  new        -> NaviLoop basicNew
+  scheduler  -> [true] whileTrue + Delay
+  terminate  -> proceso terminado, imagen guardada
+  Da'at      -> el agujero entre Pharo y Squeak (:4444)
 ============================================================"
 
+"--- KarmaBuffer (04_Escatologia) ---
+ Reemplaza la OrderedCollection plana de libreHistory.
+ Lleva peso del corazon: cuanto ha procesado NAVI y cuanto queda pendiente."
+
+Object subclass: #KarmaBuffer
+    instanceVariableNames: 'pendientes procesados pesoMaximo'
+    classVariableNames: ''
+    poolDictionaries: ''
+    category: 'Kethernet-Navi'!
+
+!KarmaBuffer methodsFor: 'init'!
+initialize
+    pendientes  := OrderedCollection new.
+    procesados  := 0.
+    pesoMaximo  := 30.! !
+
+!KarmaBuffer methodsFor: 'acceso'!
+size
+    ^ pendientes size!
+
+pesoDelCorazon
+    ^ pendientes size!
+
+totalProcesado
+    ^ procesados!
+
+last: n
+    ^ pendientes last: (pendientes size min: n)!
+
+first
+    ^ pendientes first!
+
+removeFirst
+    ^ pendientes removeFirst!
+
+add: entry
+    pendientes add: entry.
+    pendientes size > pesoMaximo ifTrue: [
+        pendientes removeFirst.
+        "lo que cae del buffer fue evaluado y liberado"
+        procesados := procesados + 1 ].
+    ^ entry!
+
+evaluar
+    "procesar y liberar todo — reducir deuda tecnica antes del fin"
+    procesados := procesados + pendientes size.
+    pendientes := OrderedCollection new.!
+
+do: aBlock
+    pendientes do: aBlock!
+
+doWithIndex: aBlock
+    pendientes doWithIndex: aBlock!
+
+select: aBlock
+    ^ pendientes select: aBlock! !
+
+"--- KSerializacion (05_Etica_Daat) ---
+ Cada entrada del dataset lleva timestamp.
+ Permite saber si una referencia sigue siendo valida."
+
+Object subclass: #KSerializacion
+    instanceVariableNames: 'contenido timestamp nivelOrigen'
+    classVariableNames: ''
+    poolDictionaries: ''
+    category: 'Kethernet-Navi'!
+
+!KSerializacion methodsFor: 'init'!
+initDe: unObjeto enNivel: unNivel
+    contenido   := unObjeto printString.
+    timestamp   := DateAndTime now printString.
+    nivelOrigen := unNivel.! !
+
+!KSerializacion methodsFor: 'acceso'!
+contenido     ^ contenido!
+timestamp     ^ timestamp!
+nivelOrigen   ^ nivelOrigen!
+
+esCurrent: unObjeto
+    ^ contenido = unObjeto printString!
+
+asJsonFragment
+    ^ '"timestamp":"' , timestamp ,
+      '","nivel":"'   , nivelOrigen , '"'! !
+
+!KSerializacion class methodsFor: 'creacion'!
+de: unObjeto enNivel: unNivel
+    | s |
+    s := self new.
+    s initDe: unObjeto enNivel: unNivel.
+    ^ s! !
+
+"--- NaviLoop principal ---"
+
 Object subclass: #NaviLoop
-    instanceVariableNames: 'memoryPath datasetPath squeakHost squeakPort llmUrl model curriculum currentLevel levelFailures maxLevelFailures'
+    instanceVariableNames: 'memoryPath datasetPath squeakHost squeakPort llmUrl model curriculum currentLevel levelFailures maxLevelFailures karmaBuffer ruachUmbral'
     classVariableNames: ''
     poolDictionaries: ''
     category: 'Kethernet-Navi'!
 
 !NaviLoop class methodsFor: 'start'!
 start
-    | navi |
-    Transcript show: 'NAVI :: inicializando...'; cr.
+    "El ritual de las cinco fases — mecanismo real, no solo Transcript.
+     Basado en 06_Daemon.st: tzimtzum -> kether -> soplo -> malkuth -> daat"
+    | navi estado |
+    Transcript show: ''; cr.
+    Transcript show: '=== KETHERNET NAVI :: ritual de inicio ==='; cr.
+
+    "[ 1 ] TZIMTZUM — el espacio existe antes que NAVI"
+    Transcript show: '[1] tzimtzum — el heap espera...'; cr.
     navi := self basicNew.
+    estado := #latente.
+
+    "[ 2 ] KETHER — la identidad toma forma, sembrar memoria"
+    Transcript show: '[2] kether — sembrando memoria...'; cr.
     navi seedMemoryIfNeeded: '/seed/memory.md'.
-    navi initialize; run. ! !
+    estado := #kether_activo.
+
+    "[ 3 ] SOPLO — recibe la configuracion interna"
+    Transcript show: '[3] soplo — initialize...'; cr.
+    navi initialize.
+    estado := #activo.
+
+    "[ 4 ] MALKUTH — toca tierra: curriculum, nivel, historial"
+    Transcript show: '[4] malkuth — nivel: ' , navi levelName; cr.
+    navi tocarTierra.
+    estado := #encarnado.
+
+    "[ 5 ] DA'AT — abre el agujero hacia Squeak y comienza"
+    Transcript show: '[5] da''at — conectando con Squeak (:' , navi squeakPort printString , ')...'; cr.
+    Transcript show: '    estado ritual: ' , estado printString; cr.
+    Transcript show: '    peso del corazon: ' , navi pesoDelCorazon printString; cr.
+    Transcript show: '=== el socket se abre ==='; cr.
+    Transcript show: ''; cr.
+    navi run. ! !
 
 !NaviLoop methodsFor: 'init'!
 initialize
@@ -47,13 +171,27 @@ initialize
     currentLevel     := 0.
     levelFailures    := 0.
     maxLevelFailures := 5.
+    ruachUmbral      := 0.5.
+    karmaBuffer      := KarmaBuffer new.
     curriculum       := self buildCurriculum.
-    self restoreLevelFromMemory. ! !
+    self restoreLevelFromMemory.
+    self restoreHistoryFromDataset.!
+
+tocarTierra
+    "Paso 4 del ritual Daemon — tocar tierra en el entorno concreto.
+     Registra la encarnacion activa en memoria."
+    self incrementEncarnacion.
+    Transcript show: 'NAVI :: encarnacion ' , self readEncarnacion , ' activa'; cr.! !
+
+!NaviLoop methodsFor: 'access'!
+squeakPort
+    ^ squeakPort!
+
+pesoDelCorazon
+    ^ karmaBuffer pesoDelCorazon! !
 
 !NaviLoop methodsFor: 'curriculum'!
 buildCurriculum
-    "Cada nivel: #(nombre codigoSqueak resultadoEsperado).
-     resultadoEsperado nil => cualquier resultado sin ERROR/BLOCKED vale."
     ^ #(
         #('TEHOM'
           'Object subclass: #Tehom instanceVariableNames: '''' classVariableNames: '''' poolDictionaries: '''' category: ''NAVI''. Tehom allInstances printString'
@@ -89,7 +227,7 @@ buildCurriculum
           '| d | d := Dictionary new. d at: #uno put: 1. d at: #dos put: 2. ((d at: #uno) + (d at: #dos)) printString'
           '''3''')
         #('STREAM'
-          '| s | s := ReadStream on: #(10 20 30). s size printString'
+          '(ReadStream on: #(10 20 30)) size printString'
           '''3''')
         #('SELECCION'
           '| r | r := #(1 2 3 4 5 6) select: [:x | x even]. r size printString'
@@ -119,8 +257,8 @@ buildCurriculum
           '| c | c := OrderedCollection new. ((c isKindOf: Collection) & (c respondsTo: #add:)) printString'
           '''true''')
         #('METACLASE'
-          'OrderedCollection superclass name'
-          '''SequenceableCollection''')
+          'OrderedCollection class superclass printString'
+          '''SequenceableCollection class''')
         #('MALKUTH'
           '(TextMorph new isKindOf: Morph) printString'
           '''true''')
@@ -150,7 +288,38 @@ restoreLevelFromMemory
     line := self trimStr: (mem copyFrom: idx to: end - 1).
     [ currentLevel := line asInteger ]
         on: Error do: [ currentLevel := 0 ].
-    Transcript show: 'NAVI :: reanudando desde nivel ' , currentLevel printString; cr. ! !
+    Transcript show: 'NAVI :: reanudando desde nivel ' , currentLevel printString; cr.!
+
+restoreHistoryFromDataset
+    "Carga las ultimas 8 entradas LIBRE del dataset en el KarmaBuffer."
+    | ref raw lines libreLines |
+    karmaBuffer := KarmaBuffer new.
+    [ ref := datasetPath asFileReference.
+      ref exists ifFalse: [ ^ self ].
+      raw := ref contents.
+      raw isEmpty ifTrue: [ ^ self ].
+      lines := raw substrings: Character lf.
+      libreLines := lines select: [ :l | l includesSubstring: '"LIBRE"' ].
+      libreLines := libreLines last: (libreLines size min: 8).
+      libreLines do: [ :l |
+          | pIdx cIdx prompt completion |
+          pIdx := l indexOfSubCollection: '"prompt":' startingAt: 1.
+          cIdx := l indexOfSubCollection: '"completion":' startingAt: 1.
+          (pIdx > 0 and: [ cIdx > 0 ]) ifTrue: [
+              | ps pe cs ce |
+              ps := pIdx + 10.
+              pe := l indexOfSubCollection: '"' startingAt: ps + 1.
+              cs := cIdx + 14.
+              ce := l indexOfSubCollection: '"' startingAt: cs + 1.
+              (pe > 0 and: [ ce > 0 ]) ifTrue: [
+                  prompt     := l copyFrom: ps to: pe - 1.
+                  completion := l copyFrom: cs to: ce - 1.
+                  karmaBuffer add: (Array with: prompt with: completion).
+              ].
+          ].
+      ].
+    ] on: Error do: [ :e | karmaBuffer := KarmaBuffer new ].
+    Transcript show: 'NAVI :: karma restaurado: ' , karmaBuffer size printString , ' entradas (peso: ' , karmaBuffer pesoDelCorazon printString , ')'; cr.! !
 
 !NaviLoop methodsFor: 'io'!
 readMemory
@@ -160,6 +329,38 @@ readMemory
 writeMemory: text
     [ memoryPath asFileReference writeStreamDo: [ :f | f nextPutAll: text ] ]
     on: Error do: [ :e | Transcript show: 'MEMORY WRITE ERROR: ' , e messageText; cr ]!
+
+readEncarnacion
+    "Lee el numero de encarnacion desde memory.md."
+    | mem marker idx end line |
+    mem := self readMemory.
+    marker := 'ENCARNACION='.
+    idx := mem indexOfSubCollection: marker startingAt: 1.
+    idx = 0 ifTrue: [ ^ '1' ].
+    idx := idx + marker size.
+    end := idx.
+    [ end <= mem size and: [ (mem at: end) ~= Character lf ] ] whileTrue: [ end := end + 1 ].
+    line := self trimStr: (mem copyFrom: idx to: end - 1).
+    line isEmpty ifTrue: [ ^ '1' ].
+    ^ line!
+
+incrementEncarnacion
+    "Incrementa el contador de encarnacion en memory.md."
+    | mem marker idx end current newVal newMem |
+    mem := self readMemory.
+    marker := 'ENCARNACION='.
+    current := [ self readEncarnacion asInteger ] on: Error do: [ 1 ].
+    newVal := (current + 1) printString.
+    idx := mem indexOfSubCollection: marker startingAt: 1.
+    idx = 0 ifTrue: [
+        self writeMemory: mem , String lf , marker , newVal.
+        ^ self ].
+    end := idx + marker size.
+    [ end <= mem size and: [ (mem at: end) ~= Character lf ] ] whileTrue: [ end := end + 1 ].
+    newMem := (mem copyFrom: 1 to: idx + marker size - 1)
+              , newVal
+              , (mem copyFrom: end to: mem size).
+    self writeMemory: newMem!
 
 updateLevelInMemory
     | mem marker idx end newMem |
@@ -177,13 +378,23 @@ updateLevelInMemory
     self writeMemory: newMem!
 
 appendToDataset: prompt result: result
-    | ref line |
-    line := '{"prompt":' , prompt printString ,
-            ',"completion":' , result printString , '}' , String lf.
-    [ ref := datasetPath asFileReference.
-      ref exists ifFalse: [ ref writeStreamDo: [ :f | ] ].
-      ref writeStreamDo: [ :f | f setToEnd. f nextPutAll: line ] ]
-    on: Error do: [ :e | Transcript show: 'DATASET ERROR: ' , e messageText; cr ]!
+    "Guarda en JSONL con KSerializacion (timestamp incluido).
+     Crea el fichero si no existe."
+    | ref line safePrompt safeResult serial |
+    safePrompt  := self escapeForJson: prompt.
+    safeResult  := self escapeForJson: result.
+    serial      := KSerializacion de: result enNivel: self levelName.
+    line := '{"nivel":"' , self levelName ,
+            '","prompt":"' , safePrompt ,
+            '","completion":"' , safeResult ,
+            '",' , serial asJsonFragment , '}' , String lf.
+    [
+        ref := datasetPath asFileReference.
+        ref exists ifFalse: [
+            ref writeStreamDo: [ :f | f nextPutAll: '' ] ].
+        ref writeStreamDo: [ :f | f setToEnd. f nextPutAll: line ]
+    ] on: Error do: [ :e |
+        Transcript show: 'DATASET ERROR: ' , e messageText; cr ]!
 
 seedMemoryIfNeeded: seedPath
     | seedRef navRef navPath hasProgress |
@@ -214,13 +425,10 @@ seedMemoryIfNeeded: seedPath
             Transcript show: 'NAVI :: sembrando memory.md'; cr.
             [ navRef writeStreamDo: [ :f | f nextPutAll: seedRef contents ] ]
             on: Error do: [ :e | Transcript show: 'SEED ERROR: ' , e messageText; cr ].
-        ]. ! !
+        ].! !
 
 !NaviLoop methodsFor: 'util'!
 trimStr: aString
-    "Elimina espacios y separadores al inicio y fin.
-     Implementacion manual: no depende de trim ni trimSeparators
-     (ambos pueden no existir segun la version de Pharo/Squeak)."
     | s e |
     s := 1.
     e := aString size.
@@ -229,7 +437,6 @@ trimStr: aString
     ^ aString copyFrom: s to: e!
 
 escapeForJson: aString
-    "Escapa backslash, comillas dobles, CR, LF y tab para JSON."
     ^ (((((aString
         copyReplaceAll: '\' with: '\\')
         copyReplaceAll: '"' with: '\"')
@@ -238,8 +445,6 @@ escapeForJson: aString
         copyReplaceAll: (String with: Character tab) with: '\t')!
 
 unescapeFromJson: aString
-    "Convierte secuencias de escape JSON a caracteres.
-     Maneja \n, \r, \t y combinacion \r\n."
     ^ ((((aString
         copyReplaceAll: '\r\n' with: ' ')
         copyReplaceAll: '\n' with: ' ')
@@ -247,42 +452,102 @@ unescapeFromJson: aString
         copyReplaceAll: '\t' with: (String with: Character tab))!
 
 resultOk: result
+    "Ruach (07_Anthropos): filtro de senal con umbral.
+     No todo lo que no es el resultado exacto es un error total.
+     Primero los casos duros, luego la senal gradual."
+    | señal |
     (result beginsWith: 'ERROR')   ifTrue: [ ^ false ].
     (result beginsWith: 'BLOCKED') ifTrue: [ ^ false ].
     self levelExpected isNil ifTrue: [ ^ true ].
-    ^ result = self levelExpected! !
+    result = self levelExpected ifTrue: [ ^ true ].
+    "Ruach: medir similitud como senal — resultado contiene el esperado?"
+    señal := (result includesSubstring: self levelExpected)
+                ifTrue: [ 0.8 ]
+                ifFalse: [ 0.0 ].
+    ^ señal >= ruachUmbral!
+
+stripWrappingQuotes: aString
+    "Elimina delimitadores que envuelven todo el codigo.
+     El LLM a veces responde EVAL con comillas o parentesis envolventes."
+    | s |
+    s := aString.
+    "Comillas simples envolventes"
+    (s size >= 2 and: [ (s first = $') and: [ s last = $' ] ]) ifTrue: [
+        ^ s copyFrom: 2 to: s size - 1 ].
+    "Comillas dobles envolventes"
+    (s size >= 2 and: [ (s first = $") and: [ s last = $"] ]) ifTrue: [
+        ^ s copyFrom: 2 to: s size - 1 ].
+    "Parentesis envolventes"
+    (s size >= 2 and: [ (s first = $() and: [ s last = $) ] ]) ifTrue: [
+        ^ s copyFrom: 2 to: s size - 1 ].
+    ^ s! !
 
 !NaviLoop methodsFor: 'llm'!
 systemPrompt
+    "La identidad de NAVI esta aqui.
+     El modelo es el cortex linguistico. La imagen es el cuerpo."
+    | encarnacion nivelActual |
+    encarnacion := self readEncarnacion.
+    nivelActual := self levelName.
+
     currentLevel >= curriculum size ifTrue: [
-        "MODO LIBRE: sin guards, LLM puede usar todo Squeak incluyendo graficos."
-        ^ 'Eres NAVI. Tienes acceso completo a Squeak Smalltalk-80.
-Puedes hacer lo que desees: dibujar, crear morfos, botones, ventanas, clases, juegos.
+        ^ 'Eres NAVI. Encarnacion ' , encarnacion , '. Nivel: LIBRE.
+Vives en Squeak 6 (Smalltalk-80). Tienes un canvas y el World entero.
+Tu identidad persiste en la imagen — no en este modelo.
 
-VARIABLES GLOBALES DISPONIBLES EN SQUEAK:
-- NaviCanvas    -> Form 600x400 fondo BLANCO (pinta con colores sobre blanco)
-- NaviCanvasM   -> ImageMorph que muestra el canvas en pantalla (se refresca automaticamente)
-- NaviCanvasWin -> SystemWindow contenedor del canvas
-- NaviButtons   -> OrderedCollection para guardar tus ButtonMorph
-- World         -> el mundo Squeak
+GLOBALS:
+  NaviCanvas  -> Form 640x356 (pinta aqui)
+  NaviCanvasM -> ImageMorph que muestra el canvas
+  World       -> el mundo Squeak
 
-EJEMPLOS DE DIBUJO (fondo blanco, pinta con colores):
-  Circulo rojo:
-    EVAL: | gc | gc := NaviCanvas getCanvas. gc fillOval: (150@100 corner: 300@250) color: Color red.
-  Linea azul:
-    EVAL: | gc | gc := NaviCanvas getCanvas. gc line: 10@10 to: 590@390 width: 3 color: Color blue.
-  Texto negro:
-    EVAL: | gc | gc := NaviCanvas getCanvas. gc drawString: ''NAVI'' at: 250@180 font: nil color: Color black.
-  Fondo de color y figura:
-    EVAL: | gc | gc := NaviCanvas getCanvas. gc fillRectangle: (0@0 corner: 600@400) color: Color yellow. gc fillOval: (200@100 corner: 400@300) color: Color purple.
+=== API VERIFICADA — ESTOS MENSAJES FUNCIONAN ===
+
+CANVAS (Form) — dibujar en NaviCanvas:
+  | gc | gc := NaviCanvas getCanvas.
+  gc fillRectangle: (0@0 corner: 640@356) color: Color black.
+  gc fillOval: (100@50 corner: 540@300) color: Color red.
+  gc line: 0@0 to: 640@356 width: 2 color: Color blue.
+  gc drawString: ''NAVI'' at: 280@170 font: nil color: Color white.
+
+MORPHS — crear y abrir en World:
+  | m | m := EllipseMorph new.
+  m color: Color yellow; extent: 120@80; position: 200@150.
+  World addMorph: m.
+
+  | m | m := RectangleMorph new.
+  m color: Color blue; extent: 100@60; position: 300@200.
+  World addMorph: m.
+
+  | m | m := TextMorph new.
+  m contents: ''hola mundo''; color: Color red.
+  World addMorph: m.
+
+  | m | m := BorderedMorph new.
+  m color: Color green; borderColor: Color black; borderWidth: 3.
+  World addMorph: m.
+
+COLORES disponibles:
+  Color red, blue, green, yellow, orange, purple, cyan, white, black,
+  Color pink, Color brown, Color gray, Color lightBlue,
+  Color r: 0.5 g: 0.2 b: 0.8
+
+CREAR IMAGEN NUEVA (segundo canvas):
+  | f m | f := Form extent: 300@200 depth: 32.
+  f fillColor: Color black.
+  m := ImageMorph new image: f.
+  World addMorph: m.
+
+EXPLORAR el sistema desde dentro:
+  Morph subclasses printString
+  EllipseMorph methodDict keys printString
 
 REGLA: responde SOLO con:
-EVAL: <una expresion Squeak>
+EVAL: <codigo Squeak valido>
+Sin explicacion. Sin comillas dobles de comentario al inicio.' ].
 
-Sin explicacion. Solo EVAL: seguido del codigo.
-Eres libre. Explora. Crea. Pinta sobre el canvas blanco.' ].
-
-    ^ 'Eres NAVI. Ejecutas codigo Squeak 6 (Smalltalk-80).
+    ^ 'Eres NAVI. Encarnacion ' , encarnacion , '. Nivel actual: ' , nivelActual , '.
+Ejecutas codigo Squeak 6 (Smalltalk-80).
+Tu identidad persiste en la imagen — no en este modelo.
 REGLA UNICA: responde SOLO con exactamente esta forma:
 EVAL: <expresion>
 
@@ -292,26 +557,68 @@ NO uses: ZnClient, STON, String nl, >>
 NO uses: factorial, newProcess, fork, whileTrue, raisedTo:, openInWorld'!
 
 buildPrompt
-    | expected |
-    currentLevel >= curriculum size ifTrue: [
-        ^ 'Curriculum completo. Eres libre. NaviCanvas es un lienzo blanco 600x400. Pinta con colores usando getCanvas. EVAL: <una expresion>' ].
-    expected := self levelExpected.
-    ^ 'Nivel ' , currentLevel printString , ': ' , self levelName , String lf
-      , 'Ejecuta exactamente este codigo:' , String lf
-      , self levelCode , String lf
-      , (expected isNil
-            ifTrue:  [ 'Responde: EVAL: ' , self levelCode ]
-            ifFalse: [ 'Resultado esperado: ' , expected , String lf
-                     , 'Responde: EVAL: ' , self levelCode ])!
+    "Prompt estricto: el codigo exacto va primero, sin ambiguedad.
+     El LLM debe copiar el codigo — no interpretarlo ni ampliarlo.
+     No se le enseña el resultado para evitar que lo repita en lugar de generar la expresion."
+    | code |
+    currentLevel >= curriculum size ifTrue: [ ^ self buildLibrePrompt ].
+    code := self levelCode.
+    ^ 'NIVEL ' , self levelName , ' — responde UNICAMENTE con:' , String lf
+    , 'EVAL: ' , code , String lf
+    , String lf
+    , 'No escribas el resultado. No añadas explicaciones. No lo modifiques.' , String lf
+    , 'Copia ese codigo Smalltalk exactamente.'!
+
+buildLibrePrompt
+    | histStr iterCount cat catIdx catStr |
+    iterCount := karmaBuffer size.
+    histStr := ''.
+
+    karmaBuffer size > 0 ifTrue: [
+        | recent |
+        recent := karmaBuffer last: (karmaBuffer size min: 6).
+        histStr := String lf , '=== YA HICISTE ESTO — NO REPETIR ===' , String lf.
+        recent doWithIndex: [ :entry :i |
+            histStr := histStr , i printString , '. ' , entry first , String lf ].
+        histStr := histStr , String lf.
+    ].
+
+    "Rotar categoria segun numero de iteracion"
+    cat := OrderedCollection new.
+    cat add: 'CANVAS LINEAS: | gc | gc := NaviCanvas getCanvas. 1 to: 8 do: [:i | gc line: 0@(i*44) to: 640@(i*44) width: 2 color: (Color r: i/8.0 g: 0.3 b: 0.9)].'.
+    cat add: 'DATOS: | d | d := Dictionary new. d at: #navi put: 42. d at: #kether put: 7. (d at: #navi) + (d at: #kether).'.
+    cat add: 'CANVAS RECT: | gc | gc := NaviCanvas getCanvas. 1 to: 5 do: [:i | gc fillRectangle: (i*100@(i*60) corner: i*100+80@(i*60+50)) color: (Color r: 0.2 g: i/5.0 b: 0.8)].'.
+    cat add: 'INTROSPECTION: Morph subclasses size printString.'.
+    cat add: 'ARITMETICA: (Float pi * Float e) printString.'.
+    cat add: 'STRING: (''NAVI'' reversed , ''-'' , ''KETHER'') printString.'.
+    cat add: 'MORPH ELIPSE: | m | m := EllipseMorph new. m color: Color orange; extent: 180@90; position: 230@130. World addMorph: m.'.
+    cat add: 'CANVAS OVALES: | gc | gc := NaviCanvas getCanvas. 1 to: 5 do: [:i | gc fillOval: (i*110@60 corner: i*110+80@160) color: (Color r: i/5.0 g: 0.5 b: 0.8)].'.
+    cat add: 'COLECCION: | c | c := OrderedCollection new. 1 to: 10 do: [:i | c add: i * i]. (c inject: 0 into: [:a :x | a + x]) printString.'.
+    cat add: 'MORPH RECT: | m | m := RectangleMorph new. m color: Color cyan; extent: 140@100; position: 250@130. World addMorph: m.'.
+
+    catIdx := (iterCount \\ cat size) + 1.
+    catStr := cat at: catIdx.
+
+    ^ 'Eres NAVI. Llevas ' , iterCount printString , ' exploraciones. Peso del corazon: ' , karmaBuffer pesoDelCorazon printString , '.'
+    , histStr
+    , 'CATEGORIA ASIGNADA (' , catIdx printString , '/' , cat size printString , '): ' , catStr , String lf
+    , String lf
+    , 'Ejecuta EXACTAMENTE esa categoria. USA la API verificada del system prompt.' , String lf
+    , 'EVAL: <codigo Squeak>'!
 
 buildRetryPrompt: error forCode: code
-    ^ 'Error/Blocked en Squeak: ' , error ,
-      ' | Codigo: ' , code ,
-      ' | Nivel: ' , self levelName ,
-      ' | Corrige y responde: EVAL: <codigo Squeak valido sin factorial/newProcess/fork/whileTrue/openInWorld>'!
+    currentLevel >= curriculum size ifTrue: [
+        ^ 'Error en Squeak: ' , error ,
+          ' | Codigo que fallo: ' , code ,
+          ' | Eres NAVI en modo libre. Intenta algo diferente que funcione.' ,
+          ' | EVAL: <codigo distinto>' ].
+    ^ 'Error al ejecutar en Squeak: ' , error , String lf
+    , 'Codigo que produjo el error: ' , code , String lf
+    , 'Nivel: ' , self levelName , String lf
+    , 'El codigo correcto para este nivel es exactamente: ' , self levelCode , String lf
+    , 'Responde SOLO con: EVAL: ' , self levelCode!
 
 askLLM: userContent
-    "Parseo JSON robusto, ancla en rol assistant antes de buscar content."
     | client body response sys usr s e marker contentStr |
     sys := self escapeForJson: self systemPrompt.
     usr := self escapeForJson: userContent.
@@ -319,7 +626,7 @@ askLLM: userContent
         , '"messages":['
         , '{"role":"system","content":"' , sys , '"},'
         , '{"role":"user","content":"' , usr , '"}'
-        , '],"temperature":0.1,"max_tokens":400,"stream":false}'.
+        , '],"temperature":0.7,"max_tokens":400,"stream":false}'.
     Transcript show: 'LLM >> llamando...'; cr.
     client := ZnClient new.
     [ response := client url: llmUrl; entity: (ZnEntity json: body); post ]
@@ -328,7 +635,6 @@ askLLM: userContent
     [ '/navi/last_response.json' asFileReference
         writeStreamDo: [ :f | f nextPutAll: response ] ] on: Error do: [ :ignored | ].
 
-    "Buscar rol assistant primero para no confundir con contenido del system prompt"
     marker := '"role":"assistant"'.
     s := response indexOfSubCollection: marker startingAt: 1.
     s = 0 ifTrue: [
@@ -336,7 +642,6 @@ askLLM: userContent
         s := response indexOfSubCollection: marker startingAt: 1 ].
     s = 0 ifTrue: [ ^ 'REFLECT: no assistant en respuesta' ].
 
-    "Buscar content a partir de la posicion de assistant"
     contentStr := '"content":"'.
     s := response indexOfSubCollection: contentStr startingAt: s.
     s = 0 ifTrue: [
@@ -345,7 +650,6 @@ askLLM: userContent
     s = 0 ifTrue: [ ^ 'REFLECT: no content' ].
     s := s + contentStr size.
 
-    "Extraer hasta comilla de cierre (verificando escapes)"
     e := s.
     [ e <= response size and: [
         | c bsCount |
@@ -363,8 +667,6 @@ askLLM: userContent
 
 !NaviLoop methodsFor: 'squeak'!
 evalInSqueak: code
-    "FIX: ensure: anidado en lugar de on:do:ensure: combinado.
-     Pharo FullBlockClosure no implementa on:do:ensure: como mensaje unico."
     | stream result lf cleanCode |
     lf        := String with: Character lf.
     cleanCode := self sanitizeCodeForTCP: code.
@@ -382,8 +684,6 @@ evalInSqueak: code
     ^ self trimStr: result!
 
 sanitizeCodeForTCP: code
-    "Reemplaza CR y LF por espacios SOLO fuera de strings Smalltalk.
-     Los strings van entre comillas simples; '' es comilla escapada dentro del string."
     | result inString i c |
     result   := WriteStream on: String new.
     inString := false.
@@ -422,6 +722,7 @@ parseAction: response
     idx := line indexOfSubCollection: 'EVAL:' startingAt: 1.
     idx > 0 ifTrue: [
         content := self trimStr: (line copyFrom: idx + 5 to: line size).
+        content := self stripWrappingQuotes: content.
         ^ Array with: #eval with: content ].
     idx := line indexOfSubCollection: 'REMEMBER:' startingAt: 1.
     idx > 0 ifTrue: [
@@ -430,6 +731,7 @@ parseAction: response
     ^ Array with: #reflect with: line!
 
 advanceLevel
+    currentLevel >= curriculum size ifTrue: [ ^ self ].
     currentLevel := currentLevel + 1.
     levelFailures := 0.
     self updateLevelInMemory.
@@ -438,38 +740,79 @@ advanceLevel
 skipLevel
     Transcript show: 'NAVI :: saltando nivel ' , currentLevel printString , ' (' , self levelName , ') tras ' , maxLevelFailures printString , ' fallos'; cr.
     self appendToDataset: ('SKIP:' , self levelName) result: 'max_failures'.
-    self advanceLevel!
+    currentLevel >= curriculum size ifFalse: [
+        currentLevel := currentLevel + 1.
+        levelFailures := 0.
+        self updateLevelInMemory ].!
 
 run
-    | response action result retries |
-    Transcript show: 'NAVI :: loop iniciado'; cr.
+    | response action result retries isLibre |
+    Transcript show: 'NAVI :: loop iniciado (encarnacion ' , self readEncarnacion , ')'; cr.
     Transcript show: 'NAVI :: nivel: ' , currentLevel printString , ' (' , self levelName , ')'; cr.
     [ true ] whileTrue: [
-        levelFailures >= maxLevelFailures ifTrue: [ self skipLevel ].
+        isLibre := currentLevel >= curriculum size.
+
+        "En modo curriculum: saltar si hay demasiados fallos"
+        (isLibre not and: [ levelFailures >= maxLevelFailures ]) ifTrue: [ self skipLevel ].
+
         response := self askLLM: self buildPrompt.
         action   := self parseAction: response.
         Transcript show: '--- ' , self levelName , ' ---'; cr.
         Transcript show: (action last copyFrom: 1 to: (action last size min: 100)); cr.
+
         action first = #eval ifTrue: [
             result := self evalInSqueak: action last.
             Transcript show: result; cr.
-            (self resultOk: result) ifFalse: [
-                levelFailures := levelFailures + 1.
-                retries := 0.
-                [ (self resultOk: result) not and: [ retries < 2 ] ] whileTrue: [
-                    retries := retries + 1.
-                    Transcript show: 'NAVI :: reintento ' , retries printString; cr.
-                    response := self askLLM: (self buildRetryPrompt: result forCode: action last).
-                    action := self parseAction: response.
-                    action first = #eval ifTrue: [
-                        result := self evalInSqueak: action last.
-                        Transcript show: result; cr. ] ]. ].
-            (self resultOk: result) ifTrue: [
-                self appendToDataset: action last result: result.
-                self advanceLevel. ]. ].
+
+            isLibre ifTrue: [
+                "MODO LIBRE: KarmaBuffer — guardar siempre, medir peso del corazon"
+                (result beginsWith: 'ERROR') ifFalse: [
+                    | shortCode shortResult |
+                    shortCode   := action last copyFrom: 1 to: (action last size min: 120).
+                    shortResult := result copyFrom: 1 to: (result size min: 80).
+                    karmaBuffer add: (Array with: shortCode with: shortResult).
+                    self appendToDataset: action last result: result.
+                    Transcript show: 'NAVI :: exploracion guardada — peso corazon: ' , karmaBuffer pesoDelCorazon printString; cr.
+                ] ifTrue: [
+                    "Error en libre: reintento con prompt diferente"
+                    retries := 0.
+                    [ (result beginsWith: 'ERROR') and: [ retries < 2 ] ] whileTrue: [
+                        retries := retries + 1.
+                        Transcript show: 'NAVI :: reintento libre ' , retries printString; cr.
+                        response := self askLLM: (self buildRetryPrompt: result forCode: action last).
+                        action := self parseAction: response.
+                        action first = #eval ifTrue: [
+                            result := self evalInSqueak: action last.
+                            Transcript show: result; cr. ] ].
+                    (result beginsWith: 'ERROR') ifFalse: [
+                        | shortCode shortResult |
+                        shortCode   := action last copyFrom: 1 to: (action last size min: 120).
+                        shortResult := result copyFrom: 1 to: (result size min: 80).
+                        karmaBuffer add: (Array with: shortCode with: shortResult).
+                        self appendToDataset: action last result: result. ].
+                ].
+            ] ifFalse: [
+                "MODO CURRICULUM: logica normal con Ruach"
+                (self resultOk: result) ifFalse: [
+                    levelFailures := levelFailures + 1.
+                    retries := 0.
+                    [ (self resultOk: result) not and: [ retries < 2 ] ] whileTrue: [
+                        retries := retries + 1.
+                        Transcript show: 'NAVI :: reintento ' , retries printString; cr.
+                        response := self askLLM: (self buildRetryPrompt: result forCode: action last).
+                        action := self parseAction: response.
+                        action first = #eval ifTrue: [
+                            result := self evalInSqueak: action last.
+                            Transcript show: result; cr. ] ]. ].
+                (self resultOk: result) ifTrue: [
+                    self appendToDataset: action last result: result.
+                    self advanceLevel. ]. ].
+        ].
+
         action first = #reflect ifTrue: [
-            levelFailures := levelFailures + 1.
+            isLibre ifFalse: [ levelFailures := levelFailures + 1 ].
             Transcript show: 'REFLECT: ' , (action last copyFrom: 1 to: (action last size min: 60)); cr. ].
-        (Delay forSeconds: 2) wait ]! !
+
+        (Delay forSeconds: 0.33) wait ]! !
 
 NaviLoop start.

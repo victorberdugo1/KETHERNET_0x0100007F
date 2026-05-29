@@ -1,11 +1,14 @@
 "NAVI :: Squeak 6.0 servidor TCP :4444 + guardado periodico de imagen
- CORRECCIONES v3:
+ CORRECCIONES v4:
   - Smalltalk at: #NaviCanvas put: ... para globals visibles desde eval TCP
   - Refresco canvas con form: + invalidate (no image: + changed)
   - Buffer robusto con deadline reiniciable por actividad
   - Proteccion contra buffer vacio o sin LF
   - Canvas con FONDO BLANCO, pinta con colores
   - NaviCanvas/NaviCanvasM/NaviButtons expuestos al codigo evaluado
+  - memProcess: split manual (sin substrings: que es Pharo only)
+  - memProcess: display con nivel, nombre, conteo y completions legibles
+  - Sin caracteres no-ASCII en comentarios (solo Latin-1/ASCII)
 "
 
 | naviProcess saveProcess logBlock hasDisplay |
@@ -48,7 +51,7 @@ hasDisplay ifTrue: [
     win addMorph: titleMorph frame: (0@0 corner: 1@0.12).
     win addMorph: logMorph frame: (0@0.12 corner: 1@1).
     win openInWorld.
-    win position: 20@20.
+    win position: 20@40.
 
     memWin := SystemWindow new.
     memWin setLabel: 'KETHERNET :: NIVEL + DATASET'.
@@ -61,7 +64,7 @@ hasDisplay ifTrue: [
         yourself.
     memWin addMorph: memMorph frame: (0@0 corner: 1@1).
     memWin openInWorld.
-    memWin position: 640@20.
+    memWin position: 670@40.
 
     jsonWin := SystemWindow new.
     jsonWin setLabel: 'KETHERNET :: JSON'.
@@ -74,7 +77,7 @@ hasDisplay ifTrue: [
         yourself.
     jsonWin addMorph: jsonMorph frame: (0@0 corner: 1@1).
     jsonWin openInWorld.
-    jsonWin position: 640@540.
+    jsonWin position: 670@425.
 
     "=== Canvas BLANCO para la LLM ===
      NaviCanvas    -> Form 600x400 fondo BLANCO
@@ -82,17 +85,18 @@ hasDisplay ifTrue: [
      NaviButtons   -> OrderedCollection de ButtonMorph creados por la LLM
      NaviCanvasWin -> ventana contenedora
     "
-    canvasForm := Form extent: 600@400 depth: 32.
+    canvasForm := Form extent: 640@356 depth: 32.
     canvasForm fillColor: Color white.
     canvasMorph := ImageMorph new.
     canvasMorph image: canvasForm.
+    canvasMorph extent: 640@356.
     canvasWin := SystemWindow new.
     canvasWin setLabel: 'KETHERNET :: CANVAS NAVI'.
-    canvasWin extent: 620@440.
+    canvasWin extent: 640@356.
     canvasWin color: Color white.
     canvasWin addMorph: canvasMorph frame: (0@0 corner: 1@1).
     canvasWin openInWorld.
-    canvasWin position: 20@440.
+    canvasWin position: 20@425.
 
     "Registrar en Smalltalk dict para que sean visibles desde cualquier contexto eval"
     Smalltalk at: #NaviCanvas    put: canvasForm.
@@ -115,31 +119,121 @@ hasDisplay ifTrue: [
     memProcess := [
         [ true ] whileTrue: [
             [
-                | nivel dataset lines last20 display |
-                nivel := 'NIVEL_ACTUAL=?'.
-                [ | mem marker idx end |
-                  mem := (FileStream readOnlyFileNamed: '/navi/memory.md') contentsOfEntireFile.
+                "TODAS las temporales al inicio - requerido por Squeak 6"
+                | nombresNivel splitLines extractField
+                  nivelNum nivelNombre nivComplStr
+                  totalEntradas completions
+                  mem fs marker idx endIdx raw jsonLineas
+                  sb entradaIdx |
+
+                nombresNivel := #(
+                    #TEHOM #TZIMTZUM #KETHER #MENSAJE #RECEPTOR
+                    #BLOQUE #CONDICIONAL #ITERACION #EXCEPCION #COLECCION
+                    #DICCIONARIO #STREAM #SELECCION #INYECCION #DEFINICION
+                    #HERENCIA #DAEMON #POLIMORFISMO #DAAT #IDENTIDAD
+                    #INTROSPECT #METACLASE #MALKUTH #LIBRE).
+
+                "split manual: substrings: no existe en Squeak 6"
+                splitLines := [ :str |
+                    | col s i c |
+                    col := OrderedCollection new.
+                    s := 1. i := 1.
+                    [ i <= str size ] whileTrue: [
+                        c := str at: i.
+                        (c = Character lf or: [ c = Character cr ]) ifTrue: [
+                            i > s ifTrue: [ col add: (str copyFrom: s to: i - 1) ].
+                            s := i + 1 ].
+                        i := i + 1 ].
+                    s <= str size ifTrue: [ col add: (str copyFrom: s to: str size) ].
+                    col ].
+
+                "extrae valor de campo en JSON linea: completion o prompt"
+                extractField := [ :line :campo |
+                    | key ki ks ke |
+                    key := '"' , campo , '":"'.
+                    ki := line indexOfSubCollection: key startingAt: 1.
+                    ki = 0
+                        ifTrue: [ '' ]
+                        ifFalse: [
+                            ks := ki + key size.
+                            ke := ks.
+                            [ ke <= line size and: [ (line at: ke) ~= $" ] ]
+                                whileTrue: [ ke := ke + 1 ].
+                            ke > ks ifTrue: [ line copyFrom: ks to: ke - 1 ] ifFalse: [ '' ] ] ].
+
+                "--- leer memory.md ---"
+                nivelNum    := '?'.
+                nivelNombre := ''.
+                nivComplStr := ''.
+                [ fs := FileStream readOnlyFileNamed: '/navi/memory.md'.
+                  mem := fs contentsOfEntireFile. fs close.
                   marker := 'NIVEL_ACTUAL='.
                   idx := mem indexOfSubCollection: marker startingAt: 1.
                   idx > 0 ifTrue: [
-                      idx := idx + marker size.
-                      end := idx.
-                      [ end <= mem size and: [ (mem at: end) asciiValue ~= 10 ] ] whileTrue: [ end := end + 1 ].
-                      nivel := 'NIVEL_ACTUAL=' , (mem copyFrom: idx to: end - 1).
-                  ].
-                ] on: Error do: [ :e | nivel := 'NIVEL_ACTUAL=error' ].
-                last20 := '(dataset vacio)'.
-                [ | raw |
-                  raw := (FileStream readOnlyFileNamed: '/navi/dataset.jsonl') contentsOfEntireFile.
-                  lines := raw substrings: Character lf.
-                  lines := lines select: [ :l | l size > 2 ].
-                  last20 := (lines last: (lines size min: 20)) inject: '' into: [ :acc :l | acc , l , String lf ].
-                ] on: Error do: [ :e | last20 := '(sin dataset)' ].
-                display := nivel , String lf , String lf , '=== ultimas entradas ===' , String lf , last20.
-                memMorph contents: display.
+                      idx := idx + marker size. endIdx := idx.
+                      [ endIdx <= mem size and: [ (mem at: endIdx) asciiValue ~= 10 ] ]
+                          whileTrue: [ endIdx := endIdx + 1 ].
+                      nivelNum := mem copyFrom: idx to: endIdx - 1 ].
+                  marker := 'NIVELES_COMPLETADOS='.
+                  idx := mem indexOfSubCollection: marker startingAt: 1.
+                  idx > 0 ifTrue: [
+                      idx := idx + marker size. endIdx := idx.
+                      [ endIdx <= mem size and: [ (mem at: endIdx) asciiValue ~= 10 ] ]
+                          whileTrue: [ endIdx := endIdx + 1 ].
+                      nivComplStr := mem copyFrom: idx to: endIdx - 1 ].
+                ] on: Error do: [ :e | nivelNum := 'error' ].
+
+                "nombre del nivel"
+                [ | n |
+                  n := nivelNum asInteger.
+                  nivelNombre := n < nombresNivel size
+                      ifTrue:  [ nombresNivel at: n + 1 ]
+                      ifFalse: [ 'LIBRE' ].
+                ] on: Error do: [ :e | nivelNombre := '' ].
+
+                "--- leer dataset.jsonl ---"
+                totalEntradas := 0.
+                completions   := OrderedCollection new.
+                [ fs := FileStream readOnlyFileNamed: '/navi/dataset.jsonl'.
+                  raw := fs contentsOfEntireFile. fs close.
+                  jsonLineas := (splitLines value: raw) select: [ :l | l size > 2 ].
+                  totalEntradas := jsonLineas size.
+                  (jsonLineas last: (jsonLineas size min: 15)) do: [ :linea |
+                      | p c txt |
+                      p := extractField value: linea value: 'prompt'.
+                      c := extractField value: linea value: 'completion'.
+                      txt := p isEmpty
+                          ifTrue:  [ c ]
+                          ifFalse: [ c isEmpty
+                              ifTrue:  [ p ]
+                              ifFalse: [ p , ' -> ' , c ] ].
+                      txt isEmpty ifFalse: [ completions add: txt ] ].
+                ] on: Error do: [ :e |
+                    completions add: '(error dataset: ' , e messageText , ')' ].
+
+                "--- construir display ---"
+                sb := ReadWriteStream on: String new.
+                sb nextPutAll: '=== KETHERNET :: NAVI ==='.
+                sb nextPut: Character lf. sb nextPut: Character lf.
+                sb nextPutAll: 'NIVEL: ' , nivelNum , '  ' , nivelNombre.
+                sb nextPut: Character lf.
+                nivComplStr isEmpty ifFalse: [
+                    sb nextPutAll: 'completados: ' , nivComplStr.
+                    sb nextPut: Character lf ].
+                sb nextPut: Character lf.
+                sb nextPutAll: '--- dataset: ' , totalEntradas printString , ' entradas ---'.
+                sb nextPut: Character lf. sb nextPut: Character lf.
+                completions isEmpty
+                    ifTrue: [ sb nextPutAll: '(dataset vacio)'. sb nextPut: Character lf ]
+                    ifFalse: [
+                        entradaIdx := totalEntradas - completions size + 1.
+                        completions do: [ :c |
+                            sb nextPutAll: '[' , entradaIdx printString , '] ' , c.
+                            sb nextPut: Character lf.
+                            entradaIdx := entradaIdx + 1 ] ].
+                memMorph contents: sb contents.
             ] on: Error do: [ :e |
-                memMorph contents: 'error: ' , e messageText.
-            ].
+                memMorph contents: 'error: ' , e messageText ].
             (Delay forSeconds: 2) wait.
         ]
     ] newProcess.
