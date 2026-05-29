@@ -119,7 +119,7 @@ de: unObjeto enNivel: unNivel
 "--- NaviLoop principal ---"
 
 Object subclass: #NaviLoop
-    instanceVariableNames: 'memoryPath datasetPath squeakHost squeakPort llmUrl model curriculum currentLevel levelFailures maxLevelFailures karmaBuffer ruachUmbral'
+    instanceVariableNames: 'memoryPath datasetPath squeakHost squeakPort llmUrl model apiKey curriculum currentLevel levelFailures maxLevelFailures karmaBuffer ruachUmbral'
     classVariableNames: ''
     poolDictionaries: ''
     category: 'Kethernet-Navi'!
@@ -166,16 +166,76 @@ initialize
     datasetPath      := '/navi/dataset.jsonl'.
     squeakHost       := 'kethernet-squeak'.
     squeakPort       := 4444.
-    llmUrl           := 'http://host.docker.internal:11434/v1/chat/completions'.
-    model            := 'qwen2.5-7b-instruct-q4_k_m-00001-of-00002.gguf'.
+    llmUrl           := 'http://host.docker.internal:8080/v1/chat/completions'.
+    model            := 'default'.
+    apiKey           := ''.
     currentLevel     := 0.
     levelFailures    := 0.
     maxLevelFailures := 5.
     ruachUmbral      := 0.5.
     karmaBuffer      := KarmaBuffer new.
+    self loadConfig.
     curriculum       := self buildCurriculum.
     self restoreLevelFromMemory.
     self restoreHistoryFromDataset.!
+
+loadConfig
+    "Lee navi.config desde /navi/navi.config.
+     Solo procesa lineas sin # al inicio.
+     Reconoce PROVIDER, LLM_URL, MODEL, API_KEY.
+     Si el modelo queda vacio o sin configurar, aborta con mensaje claro."
+    | configPath raw lines provider foundKey |
+    configPath := '/navi/navi.config'.
+    [ raw := configPath asFileReference contents ]
+        on: Error do: [ :e |
+            Transcript show: ''; cr.
+            Transcript show: '=== NAVI :: CONFIG NO ENCONTRADO ==='; cr.
+            Transcript show: 'Archivo esperado: ' , configPath; cr.
+            Transcript show: 'Copia navi.config al lado de navi_pharo_daat.st'; cr.
+            Transcript show: 'y montalo en el contenedor en /navi/navi.config'; cr.
+            Transcript show: '===================================='; cr.
+            Smalltalk exit: 1 ].
+    provider := ''.
+    foundKey := ''.
+    lines := raw substrings: (String with: Character lf).
+    lines do: [ :rawLine |
+        | line eqIdx key val |
+        line := self trimStr: rawLine.
+        (line isEmpty or: [ line first = $# ]) ifFalse: [
+            eqIdx := line indexOf: $=.
+            eqIdx > 0 ifTrue: [
+                key := self trimStr: (line copyFrom: 1 to: eqIdx - 1).
+                val := self trimStr: (line copyFrom: eqIdx + 1 to: line size).
+                key = 'PROVIDER' ifTrue: [ provider := val ].
+                key = 'LLM_URL'  ifTrue: [ llmUrl   := val ].
+                key = 'MODEL'    ifTrue: [ model    := val ].
+                key = 'API_KEY'  ifTrue: [ foundKey := val ].
+            ].
+        ].
+    ].
+    foundKey isEmpty ifFalse: [ apiKey := foundKey ].
+    "Validar que hay algo activo — si MODEL sigue en 'default' o vacio
+     significa que ningun bloque fue descomentado."
+    (model isEmpty or: [ model = 'default' ]) ifTrue: [
+        Transcript show: ''; cr.
+        Transcript show: '=== NAVI :: SIN PROVEEDOR ACTIVO ==='; cr.
+        Transcript show: 'Abre navi.config y descomenta UN bloque.'; cr.
+        Transcript show: 'Ejemplo para llama.cpp local en puerto 11434:'; cr.
+        Transcript show: ''; cr.
+        Transcript show: '  PROVIDER=llamacpp'; cr.
+        Transcript show: '  LLM_URL=http://host.docker.internal:11434/v1/chat/completions'; cr.
+        Transcript show: '  MODEL=qwen2.5-3b-instruct-q3_k_m.gguf'; cr.
+        Transcript show: '  API_KEY='; cr.
+        Transcript show: ''; cr.
+        Transcript show: 'Luego reinicia: make navi'; cr.
+        Transcript show: '====================================='; cr.
+        Smalltalk exit: 1 ].
+    Transcript show: 'CONFIG :: provider=' , provider; cr.
+    Transcript show: 'CONFIG :: url=' , llmUrl; cr.
+    Transcript show: 'CONFIG :: model=' , model; cr.!
+
+setApiKey: aKey
+    apiKey := aKey.!
 
 tocarTierra
     "Paso 4 del ritual Daemon — tocar tierra en el entorno concreto.
@@ -236,7 +296,7 @@ buildCurriculum
           '| r | r := #(1 2 3 4 5) inject: 0 into: [:acc :x | acc + x]. r printString'
           '''15''')
         #('DEFINICION'
-          'Object subclass: #Kether instanceVariableNames: '''' classVariableNames: '''' poolDictionaries: '''' category: ''NAVI''. Kether compile: ''corona ^42''. Kether new corona printString'
+          '| k | Object subclass: #Kether instanceVariableNames: '''' classVariableNames: '''' poolDictionaries: '''' category: ''NAVI''. Kether compile: ''corona ^42''. k := Kether new. k corona printString'
           '''42''')
         #('HERENCIA'
           '| c | Object subclass: #Cuadrado instanceVariableNames: ''lado'' classVariableNames: '''' poolDictionaries: '''' category: ''NAVI''. Cuadrado compile: ''lado: l lado := l''. Cuadrado compile: ''area ^lado * lado''. c := Cuadrado new. c lado: 4. c area printString'
@@ -298,7 +358,7 @@ restoreHistoryFromDataset
       ref exists ifFalse: [ ^ self ].
       raw := ref contents.
       raw isEmpty ifTrue: [ ^ self ].
-      lines := raw substrings: Character lf.
+      lines := raw substrings: (String with: Character lf).
       libreLines := lines select: [ :l | l includesSubstring: '"LIBRE"' ].
       libreLines := libreLines last: (libreLines size min: 8).
       libreLines do: [ :l |
@@ -468,17 +528,19 @@ resultOk: result
 
 stripWrappingQuotes: aString
     "Elimina delimitadores que envuelven todo el codigo.
-     El LLM a veces responde EVAL con comillas o parentesis envolventes."
+     El LLM a veces responde EVAL con comillas o parentesis envolventes.
+     Guard: si el string esta vacio o tiene menos de 2 chars, devolver tal cual."
     | s |
     s := aString.
+    s size < 2 ifTrue: [ ^ s ].
     "Comillas simples envolventes"
-    (s size >= 2 and: [ (s first = $') and: [ s last = $' ] ]) ifTrue: [
+    ((s at: 1) = $' and: [ (s at: s size) = $' ]) ifTrue: [
         ^ s copyFrom: 2 to: s size - 1 ].
     "Comillas dobles envolventes"
-    (s size >= 2 and: [ (s first = $") and: [ s last = $"] ]) ifTrue: [
+    ((s at: 1) = $" and: [ (s at: s size) = $"]) ifTrue: [
         ^ s copyFrom: 2 to: s size - 1 ].
     "Parentesis envolventes"
-    (s size >= 2 and: [ (s first = $() and: [ s last = $) ] ]) ifTrue: [
+    ((s at: 1) = $( and: [ (s at: s size) = $) ]) ifTrue: [
         ^ s copyFrom: 2 to: s size - 1 ].
     ^ s! !
 
@@ -506,8 +568,15 @@ CANVAS (Form) — dibujar en NaviCanvas:
   | gc | gc := NaviCanvas getCanvas.
   gc fillRectangle: (0@0 corner: 640@356) color: Color black.
   gc fillOval: (100@50 corner: 540@300) color: Color red.
-  gc line: 0@0 to: 640@356 width: 2 color: Color blue.
+  gc line: 0@0 to: 640@356 color: Color blue.
   gc drawString: ''NAVI'' at: 280@170 font: nil color: Color white.
+
+METODOS CANVAS (FormCanvas) — SOLO ESTOS EXISTEN:
+  gc fillRectangle: aRect color: aColor
+  gc fillOval: aRect color: aColor
+  gc line: pt1 to: pt2 color: aColor    <- SIN width:
+  gc drawString: str at: pt font: nil color: aColor
+NO USAR: line:to:width:color: (no existe en Squeak), do:, collect:
 
 MORPHS — crear y abrir en World:
   | m | m := EllipseMorph new.
@@ -516,10 +585,6 @@ MORPHS — crear y abrir en World:
 
   | m | m := RectangleMorph new.
   m color: Color blue; extent: 100@60; position: 300@200.
-  World addMorph: m.
-
-  | m | m := TextMorph new.
-  m contents: ''hola mundo''; color: Color red.
   World addMorph: m.
 
   | m | m := BorderedMorph new.
@@ -570,7 +635,7 @@ buildPrompt
     , 'Copia ese codigo Smalltalk exactamente.'!
 
 buildLibrePrompt
-    | histStr iterCount cat catIdx catStr |
+    | histStr iterCount cat catIdx catCode |
     iterCount := karmaBuffer size.
     histStr := ''.
 
@@ -583,35 +648,38 @@ buildLibrePrompt
         histStr := histStr , String lf.
     ].
 
-    "Rotar categoria segun numero de iteracion"
+    "Rotar categoria segun numero de iteracion — solo codigo, sin prefijo etiqueta"
     cat := OrderedCollection new.
-    cat add: 'CANVAS LINEAS: | gc | gc := NaviCanvas getCanvas. 1 to: 8 do: [:i | gc line: 0@(i*44) to: 640@(i*44) width: 2 color: (Color r: i/8.0 g: 0.3 b: 0.9)].'.
-    cat add: 'DATOS: | d | d := Dictionary new. d at: #navi put: 42. d at: #kether put: 7. (d at: #navi) + (d at: #kether).'.
-    cat add: 'CANVAS RECT: | gc | gc := NaviCanvas getCanvas. 1 to: 5 do: [:i | gc fillRectangle: (i*100@(i*60) corner: i*100+80@(i*60+50)) color: (Color r: 0.2 g: i/5.0 b: 0.8)].'.
-    cat add: 'INTROSPECTION: Morph subclasses size printString.'.
-    cat add: 'ARITMETICA: (Float pi * Float e) printString.'.
-    cat add: 'STRING: (''NAVI'' reversed , ''-'' , ''KETHER'') printString.'.
-    cat add: 'MORPH ELIPSE: | m | m := EllipseMorph new. m color: Color orange; extent: 180@90; position: 230@130. World addMorph: m.'.
-    cat add: 'CANVAS OVALES: | gc | gc := NaviCanvas getCanvas. 1 to: 5 do: [:i | gc fillOval: (i*110@60 corner: i*110+80@160) color: (Color r: i/5.0 g: 0.5 b: 0.8)].'.
-    cat add: 'COLECCION: | c | c := OrderedCollection new. 1 to: 10 do: [:i | c add: i * i]. (c inject: 0 into: [:a :x | a + x]) printString.'.
-    cat add: 'MORPH RECT: | m | m := RectangleMorph new. m color: Color cyan; extent: 140@100; position: 250@130. World addMorph: m.'.
+    cat add: '| gc | gc := NaviCanvas getCanvas. 1 to: 8 do: [:i | gc line: 0@(i*44) to: 640@(i*44) color: (Color r: i/8.0 g: 0.3 b: 0.9)].'.
+    cat add: '| d | d := Dictionary new. d at: #navi put: 42. d at: #kether put: 7. ((d at: #navi) + (d at: #kether)) printString.'.
+    cat add: '| gc | gc := NaviCanvas getCanvas. 1 to: 5 do: [:i | gc fillRectangle: (i*100@(i*60) corner: i*100+80@(i*60+50)) color: (Color r: 0.2 g: i/5.0 b: 0.8)].'.
+    cat add: 'Morph subclasses size printString.'.
+    cat add: '(Float pi * Float e) printString.'.
+    cat add: '(''NAVI'' reversed , ''-'' , ''KETHER'') printString.'.
+    cat add: '| m | m := EllipseMorph new. m color: Color orange; extent: 180@90; position: 230@130. World addMorph: m.'.
+    cat add: '| gc | gc := NaviCanvas getCanvas. 1 to: 5 do: [:i | gc fillOval: (i*110@60 corner: i*110+80@160) color: (Color r: i/5.0 g: 0.5 b: 0.8)].'.
+    cat add: '| c | c := OrderedCollection new. 1 to: 10 do: [:i | c add: i * i]. (c inject: 0 into: [:a :x | a + x]) printString.'.
+    cat add: '| m | m := RectangleMorph new. m color: Color cyan; extent: 140@100; position: 250@130. World addMorph: m.'.
 
     catIdx := (iterCount \\ cat size) + 1.
-    catStr := cat at: catIdx.
+    catCode := cat at: catIdx.
 
     ^ 'Eres NAVI. Llevas ' , iterCount printString , ' exploraciones. Peso del corazon: ' , karmaBuffer pesoDelCorazon printString , '.'
     , histStr
-    , 'CATEGORIA ASIGNADA (' , catIdx printString , '/' , cat size printString , '): ' , catStr , String lf
+    , 'Ejecuta exactamente este codigo (' , catIdx printString , '/' , cat size printString , '):' , String lf
     , String lf
-    , 'Ejecuta EXACTAMENTE esa categoria. USA la API verificada del system prompt.' , String lf
-    , 'EVAL: <codigo Squeak>'!
+    , 'EVAL: ' , catCode , String lf
+    , String lf
+    , 'Responde SOLO con esa linea EVAL: tal cual. Sin cambios. Sin explicacion.'!
 
 buildRetryPrompt: error forCode: code
     currentLevel >= curriculum size ifTrue: [
-        ^ 'Error en Squeak: ' , error ,
-          ' | Codigo que fallo: ' , code ,
-          ' | Eres NAVI en modo libre. Intenta algo diferente que funcione.' ,
-          ' | EVAL: <codigo distinto>' ].
+        ^ 'Error en Squeak: ' , error , String lf
+        , 'Codigo fallido: ' , code , String lf
+        , String lf
+        , 'Ejecuta este codigo seguro en su lugar:' , String lf
+        , String lf
+        , 'EVAL: | c | c := OrderedCollection new. 1 to: 5 do: [:i | c add: i * i]. c size printString.' ].
     ^ 'Error al ejecutar en Squeak: ' , error , String lf
     , 'Codigo que produjo el error: ' , code , String lf
     , 'Nivel: ' , self levelName , String lf
@@ -629,6 +697,8 @@ askLLM: userContent
         , '],"temperature":0.7,"max_tokens":400,"stream":false}'.
     Transcript show: 'LLM >> llamando...'; cr.
     client := ZnClient new.
+    (apiKey notNil and: [ apiKey notEmpty ]) ifTrue: [
+        client headerAt: 'Authorization' put: 'Bearer ' , apiKey ].
     [ response := client url: llmUrl; entity: (ZnEntity json: body); post ]
     on: Error do: [ :err | ^ 'REFLECT: error LLM: ' , err messageText ].
     Transcript show: 'LLM >> ' , response size printString , ' bytes'; cr.

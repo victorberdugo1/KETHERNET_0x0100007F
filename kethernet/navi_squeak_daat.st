@@ -1,14 +1,9 @@
 "NAVI :: Squeak 6.0 servidor TCP :4444 + guardado periodico de imagen
- CORRECCIONES v4:
-  - Smalltalk at: #NaviCanvas put: ... para globals visibles desde eval TCP
-  - Refresco canvas con form: + invalidate (no image: + changed)
-  - Buffer robusto con deadline reiniciable por actividad
-  - Proteccion contra buffer vacio o sin LF
-  - Canvas con FONDO BLANCO, pinta con colores
-  - NaviCanvas/NaviCanvasM/NaviButtons expuestos al codigo evaluado
-  - memProcess: split manual (sin substrings: que es Pharo only)
-  - memProcess: display con nivel, nombre, conteo y completions legibles
-  - Sin caracteres no-ASCII en comentarios (solo Latin-1/ASCII)
+ CORRECCIONES v6:
+  - FIX: doesNotUnderstand #first — MessageNotUnderstood capturado explicitamente en eval TCP
+  - FIX: Compiler evaluate: puede retornar nil sin lanzar Error — guard isNil antes de printString
+  - FIX: last: n con n=0 — guard n = 0 ifFalse: antes de llamar last:
+  - (heredados de v5) split manual, canvas blanco, buffer robusto, NaviCanvas expuesto
 "
 
 | naviProcess saveProcess logBlock hasDisplay |
@@ -198,16 +193,21 @@ hasDisplay ifTrue: [
                   raw := fs contentsOfEntireFile. fs close.
                   jsonLineas := (splitLines value: raw) select: [ :l | l size > 2 ].
                   totalEntradas := jsonLineas size.
-                  (jsonLineas last: (jsonLineas size min: 15)) do: [ :linea |
-                      | p c txt |
-                      p := extractField value: linea value: 'prompt'.
-                      c := extractField value: linea value: 'completion'.
-                      txt := p isEmpty
-                          ifTrue:  [ c ]
-                          ifFalse: [ c isEmpty
-                              ifTrue:  [ p ]
-                              ifFalse: [ p , ' -> ' , c ] ].
-                      txt isEmpty ifFalse: [ completions add: txt ] ].
+                  jsonLineas isEmpty ifFalse: [
+                      | n ultimas |
+                      n := jsonLineas size min: 15.
+                      n = 0 ifFalse: [
+                          ultimas := jsonLineas last: n.
+                          ultimas do: [ :linea |
+                              | p c txt |
+                              p := extractField value: linea value: 'prompt'.
+                              c := extractField value: linea value: 'completion'.
+                              txt := p isEmpty
+                                  ifTrue:  [ c ]
+                                  ifFalse: [ c isEmpty
+                                      ifTrue:  [ p ]
+                                      ifFalse: [ p , ' -> ' , c ] ].
+                              txt isEmpty ifFalse: [ completions add: txt ] ] ] ].
                 ] on: Error do: [ :e |
                     completions add: '(error dataset: ' , e messageText , ')' ].
 
@@ -232,7 +232,7 @@ hasDisplay ifTrue: [
                             sb nextPut: Character lf.
                             entradaIdx := entradaIdx + 1 ] ].
                 memMorph contents: sb contents.
-            ] on: Error do: [ :e |
+            ] on: Error, MessageNotUnderstood do: [ :e |
                 memMorph contents: 'error: ' , e messageText ].
             (Delay forSeconds: 2) wait.
         ]
@@ -287,7 +287,7 @@ naviProcess := [
     server listenOn: 4444 backlogSize: 5.
     NaviLog value: 'NAVI :: escuchando :4444'.
     [ true ] whileTrue: [
-        client := server waitForAcceptFor: 3600.
+        [ client := server waitForAcceptFor: 3600.
         client isNil ifFalse: [
             NaviLog value: 'NAVI :: Pharo conectado'.
             [
@@ -332,7 +332,8 @@ naviProcess := [
                         | val |
                         [ Utilities authorName: 'NAVI' ] on: Error do: [ :e | ].
                         [ Utilities setAuthorInitials: 'NV' ] on: Error do: [ :e | ].
-                        val := (Compiler evaluate: '[' , code , '] value') printString.
+                        val := (Compiler evaluate: '[' , code , '] value').
+                        val := val isNil ifTrue: [ 'nil' ] ifFalse: [ val printString ].
                         "Refrescar canvas si existe y tiene contenido"
                         [ | nc ncm |
                           nc  := Smalltalk at: #NaviCanvas  ifAbsent: [nil].
@@ -344,17 +345,20 @@ naviProcess := [
                           ].
                         ] on: Error do: [ :e | ].
                         val
-                    ] on: Error do: [:e |
+                    ] on: Error, MessageNotUnderstood do: [:e |
                         'ERROR: ' , e messageText
                     ].
                     NaviLog value: 'NAVI >> ' , (result copyFrom: 1 to: (result size min: 80)).
                     client sendData: result , lf.
                 ].
-            ] on: Error do: [ :e |
+            ] on: Error, MessageNotUnderstood do: [ :e |
                 NaviLog value: 'NAVI :: error cliente: ' , e messageText.
             ].
             [ client close ] on: Error do: [ :e | ].
             NaviLog value: 'NAVI :: cliente desconectado - esperando nuevo'.
+        ].
+        ] on: Error, MessageNotUnderstood do: [ :e |
+            NaviLog value: 'NAVI :: error loop: ' , e messageText.
         ].
     ].
 ] newProcess.
@@ -362,4 +366,3 @@ naviProcess := [
 naviProcess priority: Processor userBackgroundPriority.
 naviProcess resume.
 NaviLog value: 'NAVI :: servidor iniciado'.
-NaviLog value: 'NAVI :: NaviCanvas = Form 600x400 FONDO BLANCO lista para pintar'.

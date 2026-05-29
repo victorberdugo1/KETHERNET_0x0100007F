@@ -1,8 +1,13 @@
 #!/bin/bash
 set -e
-
 PHARO_IMAGE=/opt/pharo/Pharo.image
 PHARO_BIN=/opt/pharo/vm/bin/pharo
+
+# Copiar navi.config al volumen si no existe todavia
+if [ ! -f /navi/navi.config ]; then
+  cp /navi.config.default /navi/navi.config
+  echo "NAVI :: navi.config copiado al volumen"
+fi
 
 case "$1" in
   --eval)
