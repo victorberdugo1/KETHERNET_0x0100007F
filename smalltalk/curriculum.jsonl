@@ -1,0 +1,46 @@
+{"name":"TEHOM","code":"Object subclass: #Tehom instanceVariableNames: '' classVariableNames: '' poolDictionaries: '' category: 'NAVI'. Tehom allInstances printString","expected":null}
+{"name":"TZIMTZUM","code":"(1 = 0) printString","expected":"'false'"}
+{"name":"KETHER","code":"Object new identityHash printString","expected":null}
+{"name":"MENSAJE","code":"'hello' reversed printString","expected":null}
+{"name":"RECEPTOR","code":"(3 + 4) printString","expected":"'7'"}
+{"name":"BLOQUE","code":"([:x | x * 2] value: 5) printString","expected":null}
+{"name":"CONDICIONAL","code":"| x | x := 10. (x > 5) ifTrue: ['mayor'] ifFalse: ['menor']","expected":null}
+{"name":"ITERACION","code":"| sum | sum := 0. 1 to: 5 do: [:i | sum := sum + i]. sum printString","expected":"'15'"}
+{"name":"EXCEPCION","code":"[ 1/0 ] on: ZeroDivide do: [ :e | 'atrapado']","expected":"'atrapado'"}
+{"name":"COLECCION","code":"| c | c := OrderedCollection new. c add: 1. c add: 2. c add: 3. c size printString","expected":"'3'"}
+{"name":"DICCIONARIO","code":"| d | d := Dictionary new. d at: #uno put: 1. d at: #dos put: 2. ((d at: #uno) + (d at: #dos)) printString","expected":"'3'"}
+{"name":"STREAM","code":"(ReadStream on: #(10 20 30)) size printString","expected":"'3'"}
+{"name":"SELECCION","code":"| r | r := #(1 2 3 4 5 6) select: [:x | x even]. r size printString","expected":"'3'"}
+{"name":"INYECCION","code":"| r | r := #(1 2 3 4 5) inject: 0 into: [:acc :x | acc + x]. r printString","expected":"'15'"}
+{"name":"DEFINICION","code":"| k | Object subclass: #Kether instanceVariableNames: '' classVariableNames: '' poolDictionaries: '' category: 'NAVI'. Kether compile: 'corona ^42'. k := Kether new. k corona printString","expected":"'42'"}
+{"name":"HERENCIA","code":"| c | Object subclass: #Cuadrado instanceVariableNames: 'lado' classVariableNames: '' poolDictionaries: '' category: 'NAVI'. Cuadrado compile: 'lado: l lado := l'. Cuadrado compile: 'area ^lado * lado'. c := Cuadrado new. c lado: 4. c area printString","expected":"'16'"}
+{"name":"DAEMON","code":"| d | Object subclass: #Daemon instanceVariableNames: 'estado' classVariableNames: '' poolDictionaries: '' category: 'NAVI'. Daemon compile: 'initialize estado := #latente'. Daemon compile: 'acoplar estado := #activo'. Daemon compile: 'estaVivo ^estado = #activo'. d := Daemon new. d acoplar. d estaVivo printString","expected":"'true'"}
+{"name":"POLIMORFISMO","code":"| arr | Object subclass: #Forma instanceVariableNames: '' classVariableNames: '' poolDictionaries: '' category: 'NAVI'. Forma compile: 'nombre ^#forma'. Forma subclass: #Circulo instanceVariableNames: '' classVariableNames: '' poolDictionaries: '' category: 'NAVI'. Circulo compile: 'nombre ^#circulo'. Forma subclass: #Triangulo instanceVariableNames: '' classVariableNames: '' poolDictionaries: '' category: 'NAVI'. Triangulo compile: 'nombre ^#triangulo'. arr := Array with: Circulo new with: Triangulo new. (arr collect: [:f | f nombre]) printString","expected":null}
+{"name":"DAAT","code":"| a b | a := Object new. b := Object new. (a == b) printString","expected":"'false'"}
+{"name":"IDENTIDAD","code":"| a b | a := 'hola'. b := a. (a == b) printString","expected":"'true'"}
+{"name":"INTROSPECT","code":"| c | c := OrderedCollection new. ((c isKindOf: Collection) & (c respondsTo: #add:)) printString","expected":"'true'"}
+{"name":"METACLASE","code":"OrderedCollection class superclass printString","expected":"'SequenceableCollection class'"}
+{"name":"MALKUTH","code":"(TextMorph new isKindOf: Morph) printString","expected":"'true'"}
+{"name":"AYIN","code":"| methods | methods := Object methodDict keys asSortedCollection. (methods size > 10) printString","expected":"'true'"}
+{"name":"GEVURAH","code":"| src | src := (Object >> #printString) sourceCode. (src includesSubstring: 'printOn:') printString","expected":"'true'"}
+{"name":"CHESED","code":"| log | log := OrderedCollection new. 1 to: 10 do: [:i | (i \\ 2 = 0) ifTrue: [log add: i]]. log printString","expected":null}
+{"name":"TIFERET","code":"| fib | fib := [:n | | a b t | a := 0. b := 1. n timesRepeat: [t := b. b := a + b. a := t]. a]. (fib value: 10) printString","expected":"'55'"}
+{"name":"NETZACH","code":"| d | d := Dictionary new. #(alfa beta gamma) doWithIndex: [:v :i | d at: v put: i]. (d at: #beta) printString","expected":"'2'"}
+{"name":"HOD","code":"| s | s := ReadWriteStream on: String new. s nextPutAll: 'kether'. s nextPutAll: 'navi'. s reset. s contents","expected":"'kethernavi'"}
+{"name":"YESOD","code":"| stack | stack := OrderedCollection new. #(1 2 3 4 5) do: [:x | stack addLast: x]. (stack removeLast + stack removeLast) printString","expected":"'9'"}
+{"name":"BINAH","code":"| cls | cls := Behavior new. cls superclass: Object. cls setFormat: 0. (cls inheritsFrom: Object) printString","expected":"'true'"}
+{"name":"COLOR","code":"| c | c := Color r: 1.0 g: 0.5 b: 0.0 alpha: 1.0. c printString","expected":null}
+{"name":"PUNTO","code":"| p | p := 320@178. (p x + p y) printString","expected":"'498'"}
+{"name":"RECTANGULO","code":"| r | r := Rectangle origin: 10@10 corner: 110@60. r area printString","expected":"'5000'"}
+{"name":"FORM","code":"| f | f := Form extent: 64@64 depth: 32. f fillColor: Color blue. (f colorAt: 32@32) printString","expected":null}
+{"name":"CANVAS-LINEA","code":"| form gc | form := Form extent: 64@64 depth: 32. form fillColor: Color black. gc := FormCanvas on: form. gc line: 0@32 to: 63@32 color: Color white. (form colorAt: 32@32) printString","expected":null}
+{"name":"CANVAS-OVAL","code":"| form gc | form := Form extent: 64@64 depth: 32. form fillColor: Color black. gc := FormCanvas on: form. gc fillOval: (10@10 corner: 54@54) color: Color cyan. (form colorAt: 32@32) printString","expected":null}
+{"name":"CANVAS-TEXTO","code":"| form gc | form := Form extent: 200@40 depth: 32. form fillColor: Color black. gc := FormCanvas on: form. gc drawString: 'NAVI' at: 10@10 font: nil color: Color yellow. form printString","expected":null}
+{"name":"CANVAS-NAVI","code":"| form gc ncm | form := Smalltalk at: #NaviCanvas ifAbsent: [nil]. form isNil ifTrue: ['sin canvas'] ifFalse: [gc := FormCanvas on: form. gc fillRectangle: (0@0 corner: 640@356) color: Color black. gc fillOval: (240@128 corner: 400@228) color: Color cyan. gc drawString: 'NAVI en el mundo' at: 220@300 font: nil color: Color white. ncm := Smalltalk at: #NaviCanvasM ifAbsent: [nil]. ncm isNil ifFalse: [ncm image: form. ncm changed]. form printString]","expected":null}
+{"name":"MORPH-SUBCLASES","code":"Morph subclasses size printString","expected":null}
+{"name":"RANDOM","code":"| r vals | r := Random new. vals := (1 to: 5) collect: [:i | (r next * 100) truncated]. (vals inject: 0 into: [:a :x | a + x]) > 0","expected":null}
+{"name":"FRACCION","code":"(3/4 + 1/4) printString","expected":"'1'"}
+{"name":"SORTED","code":"(#(5 3 8 1 9 2) asSortedCollection) first printString","expected":"'1'"}
+{"name":"SET","code":"| s | s := Set new. s add: 1. s add: 1. s add: 2. s size printString","expected":"'2'"}
+{"name":"CHAR","code":"($A asciiValue + 1) asCharacter printString","expected":"'$B'"}
+{"name":"STRING-STREAM","code":"| s | s := ReadWriteStream on: String new. s nextPutAll: 'kether'. s nextPutAll: 'navi'. s reset. s contents","expected":"'kethernavi'"}

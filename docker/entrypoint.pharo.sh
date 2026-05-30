@@ -3,10 +3,15 @@ set -e
 PHARO_IMAGE=/opt/pharo/Pharo.image
 PHARO_BIN=/opt/pharo/vm/bin/pharo
 
-# Copiar navi.config al volumen si no existe todavia
+# Copiar archivos de configuracion al volumen si no existen todavia
 if [ ! -f /navi/navi.config ]; then
   cp /navi.config.default /navi/navi.config
   echo "NAVI :: navi.config copiado al volumen"
+fi
+
+if [ ! -f /navi/curriculum.jsonl ]; then
+  cp /curriculum.jsonl.default /navi/curriculum.jsonl
+  echo "NAVI :: curriculum.jsonl copiado al volumen"
 fi
 
 case "$1" in

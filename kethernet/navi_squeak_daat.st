@@ -116,7 +116,7 @@ hasDisplay ifTrue: [
             [
                 "TODAS las temporales al inicio - requerido por Squeak 6"
                 | nombresNivel splitLines extractField
-                  nivelNum nivelNombre nivComplStr
+                  nivelNum nivelNombre
                   totalEntradas completions
                   mem fs marker idx endIdx raw jsonLineas
                   sb entradaIdx |
@@ -126,7 +126,11 @@ hasDisplay ifTrue: [
                     #BLOQUE #CONDICIONAL #ITERACION #EXCEPCION #COLECCION
                     #DICCIONARIO #STREAM #SELECCION #INYECCION #DEFINICION
                     #HERENCIA #DAEMON #POLIMORFISMO #DAAT #IDENTIDAD
-                    #INTROSPECT #METACLASE #MALKUTH #LIBRE).
+                    #INTROSPECT #METACLASE #MALKUTH
+                    #COLOR #PUNTO #RECTANGULO #FORM
+                    #CANVAS-LINEA #CANVAS-OVAL #CANVAS-TEXTO #CANVAS-NAVI
+                    #MORPH-SUBCLASES #RANDOM #FRACCION #SORTED #SET #CHAR #STRING-STREAM
+                    #LIBRE).
 
                 "split manual: substrings: no existe en Squeak 6"
                 splitLines := [ :str |
@@ -159,7 +163,6 @@ hasDisplay ifTrue: [
                 "--- leer memory.md ---"
                 nivelNum    := '?'.
                 nivelNombre := ''.
-                nivComplStr := ''.
                 [ fs := FileStream readOnlyFileNamed: '/navi/memory.md'.
                   mem := fs contentsOfEntireFile. fs close.
                   marker := 'NIVEL_ACTUAL='.
@@ -169,13 +172,6 @@ hasDisplay ifTrue: [
                       [ endIdx <= mem size and: [ (mem at: endIdx) asciiValue ~= 10 ] ]
                           whileTrue: [ endIdx := endIdx + 1 ].
                       nivelNum := mem copyFrom: idx to: endIdx - 1 ].
-                  marker := 'NIVELES_COMPLETADOS='.
-                  idx := mem indexOfSubCollection: marker startingAt: 1.
-                  idx > 0 ifTrue: [
-                      idx := idx + marker size. endIdx := idx.
-                      [ endIdx <= mem size and: [ (mem at: endIdx) asciiValue ~= 10 ] ]
-                          whileTrue: [ endIdx := endIdx + 1 ].
-                      nivComplStr := mem copyFrom: idx to: endIdx - 1 ].
                 ] on: Error do: [ :e | nivelNum := 'error' ].
 
                 "nombre del nivel"
@@ -217,9 +213,6 @@ hasDisplay ifTrue: [
                 sb nextPut: Character lf. sb nextPut: Character lf.
                 sb nextPutAll: 'NIVEL: ' , nivelNum , '  ' , nivelNombre.
                 sb nextPut: Character lf.
-                nivComplStr isEmpty ifFalse: [
-                    sb nextPutAll: 'completados: ' , nivComplStr.
-                    sb nextPut: Character lf ].
                 sb nextPut: Character lf.
                 sb nextPutAll: '--- dataset: ' , totalEntradas printString , ' entradas ---'.
                 sb nextPut: Character lf. sb nextPut: Character lf.
