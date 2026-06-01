@@ -6,5 +6,5 @@ RUN apt-get update && apt-get install -y --no-install-recommends dos2unix && rm 
 COPY docker/entrypoint.pharo.sh /entrypoint.pharo.sh
 RUN dos2unix /entrypoint.pharo.sh && chmod +x /entrypoint.pharo.sh
 COPY smalltalk/navi.config /navi.config.default
-COPY smalltalk/curriculum.jsonl /curriculum.jsonl.default
+COPY smalltalk/reshimu.json /reshimu.json.default
 ENTRYPOINT ["bash", "/entrypoint.pharo.sh"]

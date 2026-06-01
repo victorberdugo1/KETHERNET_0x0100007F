@@ -9,9 +9,9 @@ if [ ! -f /navi/navi.config ]; then
   echo "NAVI :: navi.config copiado al volumen"
 fi
 
-if [ ! -f /navi/curriculum.jsonl ]; then
-  cp /curriculum.jsonl.default /navi/curriculum.jsonl
-  echo "NAVI :: curriculum.jsonl copiado al volumen"
+if [ ! -f /navi/reshimu.json ]; then
+  cp /reshimu.json.default /navi/reshimu.json
+  echo "NAVI :: reshimu.jsonl copiado al volumen"
 fi
 
 case "$1" in

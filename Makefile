@@ -49,11 +49,11 @@ navi:
 	xhost +local:docker 2>/dev/null || true
 	@echo "KETHERNET :: preparando seed en kethernet/..."
 	@test -f kethernet/memory.md || (test -f memory.md && cp memory.md kethernet/memory.md) || echo "# Memoria NAVI" > kethernet/memory.md
-	@test -f kethernet/dataset.jsonl || echo '{"prompt":"inicio","completion":"primera sesion NAVI"}' > kethernet/dataset.jsonl
+	@test -f kethernet/dataset.json || echo '{"prompt":"inicio","completion":"primera sesion NAVI"}' > kethernet/dataset.json
 	@echo "KETHERNET :: sembrando dataset en volumen navi-data..."
 	docker compose run --rm \
 		-v "$$(pwd)/kethernet:/seed:ro" \
-		pharo eval "| src dst | #('dataset.jsonl') do: [:name | src := ('/seed/' , name) asFileReference. dst := ('/navi/' , name) asFileReference. dst exists ifFalse: [dst writeStreamDo: [:f | f nextPutAll: src contents]]]."
+		pharo eval "| src dst | #('dataset.json') do: [:name | src := ('/seed/' , name) asFileReference. dst := ('/navi/' , name) asFileReference. dst exists ifFalse: [dst writeStreamDo: [:f | f nextPutAll: src contents]]]."
 	@echo "KETHERNET :: limpiando contenedor anterior..."
 	-docker rm -f kethernet-squeak 2>/dev/null || true
 	@echo "KETHERNET :: lanzando Squeak NAVI servidor TCP :4444..."
@@ -79,8 +79,8 @@ navi-memory:
 
 # Inspect: ver el dataset actual
 navi-dataset:
-	@echo "=== /navi/dataset.jsonl actual ==="
-	docker compose run --rm pharo eval "Stdio stdout nextPutAll: '/navi/dataset.jsonl' asFileReference contents."
+	@echo "=== /navi/dataset.json actual ==="
+	docker compose run --rm pharo eval "Stdio stdout nextPutAll: '/navi/dataset.json' asFileReference contents."
 
 # Forzar reset del volumen (borra progreso)
 navi-reset:

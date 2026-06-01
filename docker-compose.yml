@@ -3,7 +3,7 @@ services:
   squeak:
     build:
       context: .
-      dockerfile: Dockerfile.squeak
+      dockerfile: docker/Dockerfile.squeak
     container_name: kethernet-squeak
     environment:
       - DISPLAY=${DISPLAY:-:0}
@@ -19,7 +19,7 @@ services:
   pharo:
     build:
       context: .
-      dockerfile: Dockerfile.pharo
+      dockerfile: docker/Dockerfile.pharo
     container_name: kethernet-pharo
     stdin_open: true
     tty: true
