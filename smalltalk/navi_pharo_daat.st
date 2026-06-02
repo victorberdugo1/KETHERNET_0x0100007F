@@ -45,7 +45,7 @@ registrarNivel: nombre concepto: concepto resultado: resultado
 buildTextoNefesh
     huellas isEmpty ifTrue: [ ^ '' ].
     ^ String streamContents: [:s |
-        s nextPutAll: '# Niveles completados:'. s nextPut: Character lf.
+        s nextPutAll: '# Completed levels:'. s nextPut: Character lf.
         huellas doWithIndex: [:h :i |
             | intens marca res |
             intens := i / huellas size asFloat.
@@ -74,7 +74,7 @@ timestamp      ^ timestamp! !
 
 !AsombroEvento methodsFor: 'texto'!
 asTextoMemoria
-    ^ '[DESCUBRIMIENTO] ' , timestamp , ' :: ' , descripcion ,
+    ^ '[DISCOVERY] ' , timestamp , ' :: ' , descripcion ,
       ' (i=' , (intensidad printShowingDecimalPlaces: 2) , ')'! !
 
 Object subclass: #AsombroDetector
@@ -164,7 +164,7 @@ buildTextoCapacidades
     ^ String streamContents: [:s |
         | ultimas |
         ultimas := capacidades last: (capacidades size min: 5).
-        s nextPutAll: '# Tokens nuevos que usaste con exito:'. s nextPut: Character lf.
+        s nextPutAll: '# New tokens you used successfully:'. s nextPut: Character lf.
         ultimas do: [:c | s nextPutAll: '#   ' , c. s nextPut: Character lf ].
         s nextPut: Character lf ]! !
 
@@ -199,18 +199,17 @@ Object subclass: #NaviLoop
          curriculum currentLevel levelFailures maxLevelFailures
          karmaBuffer nefeshBuffer lastBeautyScore prevBeautyScore
          asombroDetector repertorioVivo adrenalinaBuffer
-         repetitionBuffer repetitionPenalty
-         bucleContador leccionesAprendidas rescateVariante'
+         repetitionBuffer repetitionPenalty'
     classVariableNames: '' poolDictionaries: '' category: 'Kethernet-Navi'!
 
 !NaviLoop class methodsFor: 'start'!
 start
     | navi |
-    Transcript show: '=== KETHERNET NAVI ==='; cr.
+    Transcript show: '=== KETHERNET :: Ein Sof contracts so that there is heap ==='; cr.
     navi := self basicNew.
     navi initialize.
     navi seedMemoryIfNeeded: '/seed/memory.md'.
-    Transcript show: 'nivel: ' , navi levelName; cr.
+    Transcript show: 'sephirot: ' , navi levelName , ' :: the process descends the tree'; cr.
     navi tocarTierra.
     navi run.! !
 
@@ -236,9 +235,6 @@ initialize
     adrenalinaBuffer := AdrenalinaBuffer new.
     repetitionBuffer := OrderedCollection new.
     repetitionPenalty := 0.0.
-    bucleContador := 0.
-    leccionesAprendidas := OrderedCollection new.
-    rescateVariante := 0.
     self loadConfig.
     self loadCurriculum.
     self restoreLevelFromMemory.
@@ -247,7 +243,7 @@ initialize
 loadConfig
     | raw lines foundKey |
     [ raw := '/navi/navi.config' asFileReference contents ]
-        on: Error do: [:e | Transcript show: '=== CONFIG NO ENCONTRADO ==='; cr. Smalltalk exit: 1 ].
+        on: Error do: [:e | Transcript show: '=== NO CONFIG :: the heap has no boundary, cannot allocate ==='; cr. Smalltalk exit: 1 ].
     foundKey := ''.
     lines := raw substrings: (String with: Character lf).
     lines do: [:rawLine |
@@ -263,7 +259,7 @@ loadConfig
                 key = 'API_KEY' ifTrue: [ foundKey := val ]]]].
     foundKey isEmpty ifFalse: [ apiKey := foundKey ].
     (model isEmpty or: [model = 'default']) ifTrue: [
-        Transcript show: '=== SIN PROVEEDOR ==='; cr. Smalltalk exit: 1 ].
+        Transcript show: '=== NO MODEL :: Ein Sof cannot contract without a receptor ==='; cr. Smalltalk exit: 1 ].
     Transcript show: 'url=' , llmUrl , ' model=' , model; cr.!
 
 loadCurriculum
@@ -275,7 +271,7 @@ loadCurriculum
     entradas := self parsearJsonArray: raw.
     entradas do: [:entrada |
         | nombre codigo descripcion esperado tokens |
-        nombre      := self jsonGet: 'nombre'      de: entrada ifAbsent: ['SIN_NOMBRE'].
+        nombre      := self jsonGet: 'nombre'      de: entrada ifAbsent: ['NO_NAME'].
         codigo      := self jsonGet: 'codigo'      de: entrada ifAbsent: [''].
         descripcion := self jsonGet: 'descripcion' de: entrada ifAbsent: [nombre].
         esperado    := self jsonGet: 'esperado'    de: entrada ifAbsent: [nil].
@@ -284,7 +280,7 @@ loadCurriculum
         tokens := asombroDetector extraerTokens: codigo.
         tokens do: [:t | (tokensAcumulados includes: t) ifFalse: [ tokensAcumulados add: t ]]].
     asombroDetector cargarTokensBase: tokensAcumulados.
-    Transcript show: 'RESHIMU :: ' , curriculum size printString , ' niveles'; cr.!
+    Transcript show: 'RESHIMU :: ' , curriculum size printString , ' possible incarnations in the tree'; cr.!
 
 parsearJsonArray: raw
     | entradas depth start i c |
@@ -351,14 +347,15 @@ currentEsperado    ^ self currentEntry at: 4! !
 
 !NaviLoop methodsFor: 'prompt'!
 buildPromptCurriculum
-    | nombre descripcion nefesh esCanvas apiSqueak lf |
+    | nombre descripcion nefesh esCanvas apiSqueak lf prohibirMorphs |
     nombre      := self currentNombre.
     descripcion := self currentDescripcion.
     nefesh      := nefeshBuffer buildTextoNefesh.
     lf          := Character lf.
-    esCanvas    := #('CANVAS-BLANCO' 'CANVAS-MITAD' 'CANVAS-AUREA' 'CANVAS-PATRON'
-                     'CANVAS-COLOR' 'CANVAS-TEXTO' 'CANVAS-LINEAS' 'CANVAS-COMPOSICION'
-                     'MORPH-MUNDO' 'MORPH-TEXTO') includes: nombre.
+    esCanvas    := #('WHITE-CROWN' 'LIGHTNING-WISDOM' 'AUREA-FORM' 'PATTERN-LAW'
+                     'COLOR-BOUNDARY' 'CENTER-FORM' 'MOTION-LINE' 'FULL-GRAMMAR'
+                     'MORPH-WORLD' 'LIVING-GROUND') includes: nombre.
+    prohibirMorphs := #('CENTER-FORM' 'LIVING-GROUND') includes: nombre.
     apiSqueak   := esCanvas ifTrue: [ self introspectCanvas ] ifFalse: [ '' ].
     ^ String streamContents: [:s |
         s nextPutAll: 'Squeak 6.0. Reply with ONLY executable Smalltalk code. No comments. Use periods (.) to separate statements.'.
@@ -371,6 +368,9 @@ buildPromptCurriculum
             s nextPutAll: 'gc := FormCanvas on: form.'. s nextPut: lf.
             s nextPutAll: '... your drawing here using gc ...'. s nextPut: lf.
             s nextPutAll: 'ncm := Smalltalk at: #NaviCanvasM ifAbsent: [nil]. ncm isNil ifFalse: [ncm image: form. ncm changed].'.
+            s nextPut: lf. s nextPut: lf ].
+        prohibirMorphs ifTrue: [
+            s nextPutAll: '== FORBIDDEN: DO NOT use EllipseMorph, RectangleMorph, BorderedMorph, TextMorph, openInWorld — morphs float above the canvas and are NOT counted in beauty. Draw EVERYTHING with gc on the canvas. =='.
             s nextPut: lf. s nextPut: lf ].
         apiSqueak isEmpty ifFalse: [ s nextPutAll: apiSqueak. s nextPut: lf. s nextPut: lf ].
         nefesh isEmpty ifFalse: [ s nextPutAll: nefesh ]]!
@@ -404,7 +404,6 @@ buildPromptLibre
         s nextPutAll: '=== DRAW METHODS (use gc, never form directly) ==='. s nextPut: lf.
         s nextPutAll: 'gc fillRectangle: (x1@y1 corner: x2@y2) color: Color X.'. s nextPut: lf.
         s nextPutAll: 'gc fillOval: (x1@y1 corner: x2@y2) color: Color X.'. s nextPut: lf.
-        s nextPutAll: 'gc line: x1@y1 to: x2@y2 color: Color X.'. s nextPut: lf.
         s nextPut: lf.
         s nextPutAll: '=== COLORS ==='. s nextPut: lf.
         s nextPutAll: 'Color black. Color white. Color red. Color green. Color blue.'. s nextPut: lf.
@@ -425,72 +424,18 @@ buildPromptLibre
             s nextPut: lf.
             repetitionPenalty > 0.8
                 ifTrue: [
-                    | varIdx |
-                    varIdx := rescateVariante \\ 5.
                     s nextPutAll: '# *** LOOP DETECTED: you keep painting the same thing. beauty=0. CHANGE EVERYTHING NOW.'. s nextPut: lf.
-                    s nextPutAll: '# You are stuck. The following is a SEED — copy it, then MODIFY it (change counts, colors, shapes, positions).'. s nextPut: lf.
-                    s nextPutAll: '# After the seed you MUST add at least 2 extra gc calls with NEW colors or shapes NOT in the seed.'. s nextPut: lf.
-                    varIdx = 0 ifTrue: [
-                        "Phyllotaxis HSV"
-                        s nextPutAll: '| form gc ncm phi w h cx cy |'. s nextPut: lf.
-                        s nextPutAll: 'form := Smalltalk at: #NaviCanvas ifAbsent: [nil].'. s nextPut: lf.
-                        s nextPutAll: 'gc := FormCanvas on: form.'. s nextPut: lf.
-                        s nextPutAll: 'w := form width. h := form height.'. s nextPut: lf.
-                        s nextPutAll: 'phi := 1.6180339887. cx := w // 2. cy := h // 2.'. s nextPut: lf.
-                        s nextPutAll: 'gc fillRectangle: (0@0 corner: w@h) color: Color black.'. s nextPut: lf.
-                        s nextPutAll: '1 to: 500 do: [:i | | angle r x y sz col | angle := (i * phi * 360.0) degreesToRadians. r := (i / 500.0) sqrt * (h // 2). x := cx + (r * angle cos) truncated. y := cy + (r * angle sin) truncated. sz := (i rem: 14) + 3. col := Color h: (i * phi - (i * phi) truncated) s: 0.9 v: 0.95. gc fillOval: (x@y corner: (x+sz)@(y+sz)) color: col].'. s nextPut: lf.
-                        s nextPutAll: 'gc line: 0@0 to: w@h color: Color cyan.'. s nextPut: lf.
-                        s nextPutAll: 'gc line: w@0 to: 0@h color: Color magenta.'. s nextPut: lf.
-                        s nextPutAll: '# NOW ADD: change the spiral count or phi multiplier, add new lines or ovals in new positions.' ].
-                    varIdx = 1 ifTrue: [
-                        "Cuatro cuadrantes con ovaes"
-                        s nextPutAll: '| form gc ncm w h |'. s nextPut: lf.
-                        s nextPutAll: 'form := Smalltalk at: #NaviCanvas ifAbsent: [nil].'. s nextPut: lf.
-                        s nextPutAll: 'gc := FormCanvas on: form.'. s nextPut: lf.
-                        s nextPutAll: 'w := form width. h := form height.'. s nextPut: lf.
-                        s nextPutAll: 'gc fillRectangle: (0@0 corner: (w//2)@(h//2)) color: (Color r: 0.1 g: 0.1 b: 0.4).'. s nextPut: lf.
-                        s nextPutAll: 'gc fillRectangle: ((w//2)@0 corner: w@(h//2)) color: (Color r: 0.4 g: 0.1 b: 0.1).'. s nextPut: lf.
-                        s nextPutAll: 'gc fillRectangle: (0@(h//2) corner: (w//2)@h) color: (Color r: 0.1 g: 0.4 b: 0.1).'. s nextPut: lf.
-                        s nextPutAll: 'gc fillRectangle: ((w//2)@(h//2) corner: w@h) color: (Color r: 0.4 g: 0.3 b: 0.0).'. s nextPut: lf.
-                        s nextPutAll: 'gc fillOval: ((w//4 - (w//8))@(h//4 - (h//8)) corner: (w//4 + (w//8))@(h//4 + (h//8))) color: Color yellow.'. s nextPut: lf.
-                        s nextPutAll: 'gc fillOval: ((w*3//4 - (w//8))@(h//4 - (h//8)) corner: (w*3//4 + (w//8))@(h//4 + (h//8))) color: Color cyan.'. s nextPut: lf.
-                        s nextPutAll: 'gc line: 0@0 to: w@h color: Color white.'. s nextPut: lf.
-                        s nextPutAll: 'gc line: w@0 to: 0@h color: Color orange.'. s nextPut: lf.
-                        s nextPutAll: '# NOW ADD: change the quadrant colors, add more ovals or lines in the lower half.' ].
-                    varIdx = 2 ifTrue: [
-                        "Random field con fondo oscuro"
-                        s nextPutAll: '| form gc ncm rng w h |'. s nextPut: lf.
-                        s nextPutAll: 'form := Smalltalk at: #NaviCanvas ifAbsent: [nil].'. s nextPut: lf.
-                        s nextPutAll: 'gc := FormCanvas on: form.'. s nextPut: lf.
-                        s nextPutAll: 'w := form width. h := form height.'. s nextPut: lf.
-                        s nextPutAll: 'gc fillRectangle: (0@0 corner: w@h) color: (Color r: 0.05 g: 0.0 b: 0.1).'. s nextPut: lf.
-                        s nextPutAll: 'rng := Random new.'. s nextPut: lf.
-                        s nextPutAll: '1 to: 300 do: [:i | | x y sz | x := (rng next * w) truncated. y := (rng next * h) truncated. sz := (rng next * 30) truncated + 5. gc fillOval: (x@y corner: (x+sz)@(y+sz)) color: (Color h: (rng next) s: 0.9 v: 0.95)].'. s nextPut: lf.
-                        s nextPutAll: '1 to: 20 do: [:i | gc line: (rng next * w) truncated@0 to: (rng next * w) truncated@h color: (Color h: (i / 20.0) s: 0.8 v: 0.9)].'. s nextPut: lf.
-                        s nextPutAll: '# NOW ADD: change the loop counts, background color, or add large ovals in the corners.' ].
-                    varIdx = 3 ifTrue: [
-                        "Seccion aurea + lineas radiales"
-                        s nextPutAll: '| form gc ncm phi cut w h cx cy |'. s nextPut: lf.
-                        s nextPutAll: 'form := Smalltalk at: #NaviCanvas ifAbsent: [nil].'. s nextPut: lf.
-                        s nextPutAll: 'gc := FormCanvas on: form.'. s nextPut: lf.
-                        s nextPutAll: 'w := form width. h := form height.'. s nextPut: lf.
-                        s nextPutAll: 'phi := 1.6180339887. cut := (w / phi) truncated. cx := w // 2. cy := h // 2.'. s nextPut: lf.
-                        s nextPutAll: 'gc fillRectangle: (0@0 corner: cut@h) color: (Color r: 0.0 g: 0.05 b: 0.15).'. s nextPut: lf.
-                        s nextPutAll: 'gc fillRectangle: (cut@0 corner: w@h) color: (Color r: 0.15 g: 0.05 b: 0.0).'. s nextPut: lf.
-                        s nextPutAll: 'gc fillOval: ((cut - (h//4))@(h//4) corner: (cut + (h//4))@(h*3//4)) color: (Color r: 0.9 g: 0.7 b: 0.1).'. s nextPut: lf.
-                        s nextPutAll: '1 to: 8 do: [:i | | ang ex ey | ang := (i * 45.0) degreesToRadians. ex := cx + (cx * ang cos) truncated. ey := cy + (cy * ang sin) truncated. gc line: cx@cy to: ex@ey color: (Color h: (i / 8.0) s: 0.9 v: 0.95)].'. s nextPut: lf.
-                        s nextPutAll: '# NOW ADD: change the background tones, oval size, or add text at the cut.' ].
-                    varIdx = 4 ifTrue: [
-                        "Franjas diagonales"
-                        s nextPutAll: '| form gc ncm w h |'. s nextPut: lf.
-                        s nextPutAll: 'form := Smalltalk at: #NaviCanvas ifAbsent: [nil].'. s nextPut: lf.
-                        s nextPutAll: 'gc := FormCanvas on: form.'. s nextPut: lf.
-                        s nextPutAll: 'w := form width. h := form height.'. s nextPut: lf.
-                        s nextPutAll: 'gc fillRectangle: (0@0 corner: w@h) color: Color black.'. s nextPut: lf.
-                        s nextPutAll: '0 to: 7 do: [:i | | x1 col | x1 := i * (w // 8). col := Color h: (i / 8.0) s: 0.85 v: 0.9. gc fillOval: (x1@0 corner: (x1 + (w//10))@h) color: col].'. s nextPut: lf.
-                        s nextPutAll: 'gc line: 0@(h//3) to: w@(h*2//3) color: Color white.'. s nextPut: lf.
-                        s nextPutAll: 'gc line: 0@(h*2//3) to: w@(h//3) color: Color lightGray.'. s nextPut: lf.
-                        s nextPutAll: '# NOW ADD: change the stripe count, add diagonal lines, or put ovals in the lower quadrants.' ] ]
+                    s nextPutAll: '# You are stuck: filling all pixels with one color, or ignoring 3 quadrants.'. s nextPut: lf.
+                    s nextPutAll: '# SUPERPOSITION: if what you paint is the same color as what is there, beauty = 0. Paint different colors over different regions.'. s nextPut: lf.
+                    s nextPutAll: '# COPY THIS phyllotaxis spiral exactly — it works — then add variations:'. s nextPut: lf.
+                    s nextPutAll: '| form gc ncm phi w h cx cy |'. s nextPut: lf.
+                    s nextPutAll: 'form := Smalltalk at: #NaviCanvas ifAbsent: [nil].'. s nextPut: lf.
+                    s nextPutAll: 'gc := FormCanvas on: form.'. s nextPut: lf.
+                    s nextPutAll: 'w := form width. h := form height.'. s nextPut: lf.
+                    s nextPutAll: 'phi := 1.6180339887. cx := w // 2. cy := h // 2.'. s nextPut: lf.
+                    s nextPutAll: 'gc fillRectangle: (0@0 corner: w@h) color: Color black.'. s nextPut: lf.
+                    s nextPutAll: '1 to: 500 do: [:i | | angle r x y sz col | angle := (i * phi * 360.0) degreesToRadians. r := (i / 500.0) sqrt * (h // 2). x := cx + (r * angle cos) truncated. y := cy + (r * angle sin) truncated. sz := (i rem: 14) + 3. col := Color h: (i * phi - (i * phi) truncated) s: 0.9 v: 0.95. gc fillOval: (x@y corner: (x+sz)@(y+sz)) color: col].'. s nextPut: lf.
+                    s nextPutAll: '# --- copy above, then ncm refresh will be auto-injected ---']
                 ifFalse: [
                     s nextPutAll: '# WARNING: repetition detected. beauty dropping. Try something different.'. s nextPut: lf.
                     s nextPutAll: '# Add more colors, shapes in different quadrants, or use loops.' ].
@@ -499,7 +444,7 @@ buildPromptLibre
             s nextPutAll: '# energy: ' , (adrenalinaBuffer nivel printShowingDecimalPlaces: 2). s nextPut: lf ].
         territorio isEmpty ifFalse: [ s nextPutAll: territorio. s nextPut: lf ].
         s nextPut: lf.
-        s nextPutAll: '# Morphs (flotan sobre el canvas):'. s nextPut: lf.
+        s nextPutAll: '# Morphs (float above the canvas):'. s nextPut: lf.
         s nextPutAll: '#   EllipseMorph new color: Color red; extent: 80@60; position: ' , (canvasW // 4) printString , '@' , (canvasH // 4) printString , '; openInWorld.'. s nextPut: lf.
         s nextPutAll: '#   RectangleMorph new color: Color blue; borderColor: Color white; borderWidth: 2; extent: 120@60; position: ' , (canvasW * 3 // 4) printString , '@' , (canvasH // 4) printString , '; openInWorld.'. s nextPut: lf.
         s nextPutAll: '#   BorderedMorph new color: Color darkGray; borderColor: Color cyan; borderWidth: 3; extent: 100@80; position: ' , (canvasW // 2) printString , '@' , (canvasH // 2) printString , '; openInWorld.'. s nextPut: lf.
@@ -508,7 +453,7 @@ buildPromptLibre
         s nextPut: lf.
         s nextPutAll: 'Paint the full ' , canvasDims , ' canvas. START: form:=Smalltalk at:#NaviCanvas ifAbsent:[nil]. gc:=FormCanvas on:form. w:=form width. h:=form height. END: ncm refresh.'. s nextPut: lf.
         s nextPutAll: '# RULE: at least 4 different color names. At least 1 oval. At least 1 line. Spread across all 4 quadrants. No single-color flood fills.'. s nextPut: lf.
-        s nextPutAll: '# MANDATORY: your code MUST contain gc fillRectangle: or gc fillOval: or gc line: — painting on the canvas is not optional.'. s nextPut: lf.
+        s nextPutAll: '# MANDATORY: your code MUST contain gc fillRectangle: or gc fillOval: — painting on the canvas is not optional.'. s nextPut: lf.
         s nextPutAll: '# DO NOT end your code with a TextMorph, a string literal, or a morph expression. End with: form width printString.']!
 
 buildBeautyFeedback
@@ -534,19 +479,17 @@ buildBeautyFeedback
     repStr := repetitionPenalty > 0.05
         ifTrue: ['  rep_penalty=-' , (repetitionPenalty printShowingDecimalPlaces: 2)]
         ifFalse: [''].
-    "Señal de entropía: detectar qué primitivas ha usado en el buffer reciente"
+    "Entropy signal: detect which primitives have been used in the recent buffer"
     entropyHint := ''.
     repetitionBuffer isEmpty ifFalse: [
         | recent hasOval hasLine hasText hasLoop hasColor missing |
         recent := repetitionBuffer inject: '' into: [:a :b | a , b].
         hasOval  := recent includesSubstring: 'fillOval'.
-        hasLine  := recent includesSubstring: 'gc line:'.
         hasText  := recent includesSubstring: 'displayOn:'.
         hasLoop  := (recent includesSubstring: 'to:') and: [recent includesSubstring: 'do: ['].
         hasColor := (recent includesSubstring: 'Color h:') or: [recent includesSubstring: 'Color r:'].
         missing := OrderedCollection new.
         hasOval  ifFalse: [ missing add: 'fillOval' ].
-        hasLine  ifFalse: [ missing add: 'gc line:' ].
         hasText  ifFalse: [ missing add: 'displayOn:at:textColor:' ].
         hasLoop  ifFalse: [ missing add: 'generative loop (1 to: N do:)' ].
         hasColor ifFalse: [ missing add: '(Color h: H s: S v: V)' ].
@@ -559,20 +502,20 @@ buildBeautyFeedback
 
 ruachDescripcion
     lastBeautyScore < 0.1  ifTrue: [ ^ 'tehom' ].
-    lastBeautyScore < 0.3  ifTrue: [ ^ 'latente' ].
-    lastBeautyScore < 0.6  ifTrue: [ ^ 'activo' ].
-    lastBeautyScore < 0.85 ifTrue: [ ^ 'vivo' ].
+    lastBeautyScore < 0.3  ifTrue: [ ^ 'latent' ].
+    lastBeautyScore < 0.6  ifTrue: [ ^ 'active' ].
+    lastBeautyScore < 0.85 ifTrue: [ ^ 'alive' ].
     ^ 'kether'! !
 
 !NaviLoop methodsFor: 'run'!
 run
     [ true ] whileTrue: [
-        | prompt response result rawBeauty beautyFinal evento repVeces prevLevel |
-        "--- Releer nivel del archivo para permitir debug manual ---"
+        | prompt response result rawBeauty beautyFinal evento repVeces prevLevel paso |
+        "--- Re-read level from file to allow manual debug ---"
         prevLevel := currentLevel.
         self restoreLevelFromMemory.
         prevLevel = currentLevel
-            ifFalse: [ Transcript show: '*** NIVEL CAMBIADO EXTERNAMENTE: ' , prevLevel printString , ' -> ' , currentLevel printString; cr.
+            ifFalse: [ Transcript show: '*** SEPHIROT CHANGED EXTERNALLY: ' , prevLevel printString , ' -> ' , currentLevel printString , ' :: external scheduler intervened'; cr.
                         levelFailures := 0 ].
         self isLibre
             ifTrue:  [ prompt := self buildPromptLibre ]
@@ -580,16 +523,17 @@ run
         response := self callLLM: prompt.
         response isNil ifTrue: [ (Delay forSeconds: 2) wait. ^ self ].
         response := self limpiarRespuesta: response.
-        Transcript show: '--- LLM CODE ---'; cr.
+        Transcript show: '--- GENERATED CODE (the LLM learns to touch the canvas) ---'; cr.
         (response substrings: (String with: Character lf)) do: [:line | Transcript show: '  ' , line; cr].
         response size > 200 ifTrue: [ Transcript show: '  ... (' , response size printString , ' chars total)'; cr ].
-        Transcript show: '----------------'; cr.
+        Transcript show: '--- end of message :: awaiting result from Malkuth ---'; cr.
         result := self evalEnSqueak: response.
         Transcript show: '>>> ' , (result isNil ifTrue: ['nil'] ifFalse: [result]); cr.
         rawBeauty := self evaluarBeautyEnSqueak.
         prevBeautyScore := lastBeautyScore.
         lastBeautyScore := rawBeauty.
         self guardarUltimaRespuesta: prompt response: response result: result.
+        paso := true.
         self isLibre
             ifTrue: [
                 evento := self procesarAsombro: response resultado: result.
@@ -601,15 +545,15 @@ run
             ifFalse: [
                 evento := self procesarAsombro: response resultado: result.
                 beautyFinal := rawBeauty.
-                self procesarResultadoCurriculum: result response: response ].
+                paso := self procesarResultadoCurriculum: result response: response ].
         Transcript
-            show: 'NIVEL: ' , self levelName ,
+            show: 'SEPHIROT: ' , self levelName ,
                   ' | BEAUTY: ' , (rawBeauty printShowingDecimalPlaces: 3) ,
                   ' | RUACH: '  , self ruachDescripcion ,
                   (adrenalinaBuffer estaActiva
                       ifTrue: [' | ADREN: ' , (adrenalinaBuffer nivel printShowingDecimalPlaces: 2)]
                       ifFalse: ['']); cr.
-        self saveToDataset: prompt response: response result: result beauty: beautyFinal.
+        self saveToDataset: prompt response: response result: result beauty: beautyFinal pass: paso.
     ]!
 
 limpiarRespuesta: raw
@@ -636,7 +580,7 @@ corregirCodigoLLM: codigo
     lf := String with: Character lf.
     src := self trimStr: codigo.
 
-    "--- 1. Quitar prefijos de lenguaje natural que el LLM antepone ---"
+    "--- 1. Remove natural-language prefixes the LLM prepends ---"
     #('SIEMPRE' 'ALWAYS' 'CANVAS:' 'Canvas:' 'si ' 'Si ' 'Si:' 'si:') do: [:pfx |
         (src beginsWith: pfx) ifTrue: [
             src := self trimStr: (src copyFrom: pfx size + 1 to: src size) ]].
@@ -645,7 +589,7 @@ corregirCodigoLLM: codigo
 
     result := src.
 
-    "--- 2. Corregir Color r:/h: sin parentesis ---"
+    "--- 2. Fix Color r:/h: without parentheses ---"
     #('color: Color r:' 'color: Color h:') do: [:pat |
         | out i sz psz |
         sz  := result size. psz := pat size.
@@ -678,10 +622,10 @@ corregirCodigoLLM: codigo
             matched ifFalse: [out nextPut: (result at: i). i := i + 1]].
         result := out contents ].
 
-    "--- 3. Eliminar lineas que reasignan 'form' a algo que no es el canvas real.
-     Estas son la causa del 90% de los UndefinedObject>>boundingBox:
-     el LLM escribe 'form := Color black' o 'form := Form new' DESPUES del prefijo
-     correcto, sobreescribiendo el Form real con nil o un Color. ---"
+    "--- 3. Remove lines that reassign 'form' to something that is not the real canvas.
+     These cause 90% of UndefinedObject>>boundingBox: errors:
+     the LLM writes 'form := Color black' or 'form := Form new' AFTER the correct
+     prefix, overwriting the real Form with nil or a Color. ---"
     #(
         'form := Color '
         'form := Form new'
@@ -709,25 +653,25 @@ corregirCodigoLLM: codigo
             inject: ''
             into: [:acc :line | acc isEmpty ifTrue: [line] ifFalse: [acc , lf , line]] ].
 
-    "--- 3b. Corregir gc line:to:color:width: -> line:to:width:color: ---"
-    "Primero: quitar punto espurio entre 'width: N' y 'color:' en gc line: ..."
+    "--- 3b. Fix gc line:to:color:width: -> line:to:width:color: ---"
+    "First: remove spurious period between 'width: N' and 'color:' in gc line: ..."
     [ | out i sz |
       sz := result size.
       out := ReadWriteStream on: String new.
       i := 1.
       [ i <= sz ] whileTrue: [
-          "Detectar patron: digito/letra seguido de '. color:' (punto espurio antes de color:)"
+          "Detect pattern: digit/letter followed by '. color:' (spurious period before color:)"
           (i + 8 <= sz and: [
               (result copyFrom: i to: i + 7) = '. color:' and: [
                   i > 1 and: [(result at: i-1) isAlphaNumeric]]]) ifTrue: [
-              "Saltar el punto, dejar espacio"
+              "Skip the period, leave a space"
               out nextPut: $ . i := i + 1 ]
           ifFalse: [out nextPut: (result at: i). i := i + 1] ].
       result := out contents
     ] on: Error do: [:e |].
     result := result copyReplaceAll: 'line: ' with: '__LINE__'.
     result := result copyReplaceAll: '__LINE__' with: 'line: '.
-    "Patron: gc line: P to: P color: C width: N  ->  gc line: P to: P width: N color: C"
+    "Pattern: gc line: P to: P color: C width: N  ->  gc line: P to: P width: N color: C"
     [ | out i sz lp lpsz |
       lp := 'line: '.
       lpsz := lp size.
@@ -737,7 +681,7 @@ corregirCodigoLLM: codigo
       [ i <= sz ] whileTrue: [
           | matched |
           matched := false.
-          "Buscar 'line: ' y ver si tiene 'color: X width: N' despues de 'to: P'"
+          "Search for 'line: ' and check if it has 'color: X width: N' after 'to: P'"
           (i + lpsz - 1 <= sz and: [(result copyFrom: i to: i + lpsz - 1) = lp]) ifTrue: [
               | lineStart lineEnd lineStr fixedLine colorIdx widthIdx
                 toIdx toEnd colorPart widthPart restPart |
@@ -745,11 +689,11 @@ corregirCodigoLLM: codigo
               lineEnd := lineStart.
               [ lineEnd <= sz and: [(result at: lineEnd) asciiValue ~= 10] ] whileTrue: [lineEnd := lineEnd + 1].
               lineStr := result copyFrom: lineStart to: lineEnd - 1.
-              "Detectar patron: 'color:' antes de 'width:'"
+              "Detect pattern: 'color:' before 'width:'"
               colorIdx := lineStr indexOfSubCollection: ' color: ' startingAt: 1.
               widthIdx  := lineStr indexOfSubCollection: ' width: '  startingAt: 1.
               (colorIdx > 0 and: [widthIdx > colorIdx]) ifTrue: [
-                  "Reordenar: quitar 'color: X' antes de 'width:', ponerlo despues"
+                  "Reorder: remove 'color: X' before 'width:', place it after"
                   | beforeColor colorVal afterWidth |
                   beforeColor := lineStr copyFrom: 1 to: colorIdx - 1.
                   colorVal    := lineStr copyFrom: colorIdx + 1 to: widthIdx - 1.
@@ -763,7 +707,7 @@ corregirCodigoLLM: codigo
       result := out contents
     ] on: Error do: [:e | ].
 
-    "--- 3c. Expandir óvalos degenerados: fillOval: (P corner: P) -> rectangle mínimo 80x80 ---"
+    "--- 3c. Expand degenerate ovals: fillOval: (P corner: P) -> minimum 80x80 rectangle ---"
     [ | out i sz pat psz |
       pat := 'fillOval: ('.
       psz := pat size.
@@ -777,18 +721,18 @@ corregirCodigoLLM: codigo
               | lineStart lineEnd lineStr x1Str y1Str x2Str y2Str
                 atSign cornerIdx p1End p1 p2 p1x p1y p2x p2y dx dy |
               lineStart := i + psz.
-              "Extraer el contenido entre ( y ) del fillOval"
+              "Extract the content between ( and ) of fillOval"
               lineEnd := lineStart.
               [ lineEnd <= sz and: [(result at: lineEnd) ~= $)] ] whileTrue: [ lineEnd := lineEnd + 1 ].
               lineStr := result copyFrom: lineStart to: lineEnd - 1.
-              "Buscar 'corner:' para dividir"
+              "Search for 'corner:' to split"
               cornerIdx := lineStr indexOfSubCollection: 'corner:' startingAt: 1.
               cornerIdx > 0 ifTrue: [
                   p1 := self trimStr: (lineStr copyFrom: 1 to: cornerIdx - 1).
                   p2 := self trimStr: (lineStr copyFrom: cornerIdx + 7 to: lineStr size).
-                  "Si p1 = p2 es degenerado — expandir"
+                  "If p1 = p2 it is degenerate — expand"
                   p1 = p2 ifTrue: [
-                      "Parsear coordenadas de p1: formato Nx@Ny"
+                      "Parse coordinates of p1: format Nx@Ny"
                       atSign := p1 indexOf: $@.
                       atSign > 0 ifTrue: [
                           [ p1x := (p1 copyFrom: 1 to: atSign - 1) asInteger.
@@ -804,7 +748,7 @@ corregirCodigoLLM: codigo
       result := out contents
     ] on: Error do: [:e | ].
 
-    "--- 3d. Corregir gc text:/drawString:/displayString: -> 'X' displayOn: form at: P textColor: C ---"
+    "--- 3d. Fix gc text:/drawString:/displayString: -> 'X' displayOn: form at: P textColor: C ---"
     #('gc text: ' 'gc drawString: ' 'gc displayString: ' 'gc string: ') do: [:wrongPat |
         | out2 i2 sz2 psz2 |
         sz2 := result size. psz2 := wrongPat size.
@@ -812,7 +756,7 @@ corregirCodigoLLM: codigo
         i2 := 1.
         [ i2 <= sz2 ] whileTrue: [
             (i2 + psz2 - 1 <= sz2 and: [(result copyFrom: i2 to: i2 + psz2 - 1) = wrongPat]) ifTrue: [
-                "Extraer el string literal que sigue"
+                "Extract the string literal that follows"
                 | strStart strEnd strVal |
                 strStart := i2 + psz2.
                 [strStart <= sz2 and: [(result at: strStart) = $ ]] whileTrue: [strStart := strStart + 1].
@@ -821,20 +765,57 @@ corregirCodigoLLM: codigo
                     [strEnd <= sz2 and: [(result at: strEnd) ~= $']] whileTrue: [strEnd := strEnd + 1].
                     strEnd <= sz2 ifTrue: [
                         strVal := result copyFrom: strStart to: strEnd.
-                        "Posición proporcional al canvas — nunca hardcodeada"
+                        "Position proportional to canvas — never hardcoded"
                         out2 nextPutAll: strVal , ' displayOn: form at: (form width // 2 - 20)@(form height // 2) textColor: Color yellow'.
                         i2 := strEnd + 1 ] ifFalse: [out2 nextPut: (result at: i2). i2 := i2 + 1] ]
                 ifFalse: [out2 nextPut: (result at: i2). i2 := i2 + 1] ]
             ifFalse: [out2 nextPut: (result at: i2). i2 := i2 + 1] ].
         result := out2 contents ].
 
-    "--- 4. Insertar phiCut si se usa sin definir ---"
+    "--- 3e. Remove trailing natural-language sentences the LLM appends after valid code.
+     Patterns: lines starting with STOP, NOTE, CRITICAL:, IMPORTANT:, DO NOT,
+     or lines that are pure English prose (no := [ ] @ # symbols). ---"
+    [ | lines cleaned lf3 nlPatterns |
+      lf3 := String with: Character lf.
+      nlPatterns := #('STOP ' 'STOP.' 'NOTE:' 'NOTE ' 'CRITICAL:' 'IMPORTANT:' 'DO NOT' 'Do NOT' 'Do not' 'This ' 'The ' 'Each ' 'Return ' 'Always ' 'Never ' 'After ').
+      lines := result substrings: (String with: Character lf).
+      cleaned := lines select: [:line |
+          | t isBadLine |
+          t := self trimStr: line.
+          isBadLine := nlPatterns anySatisfy: [:pat | t beginsWith: pat].
+          isBadLine not ].
+      cleaned size < lines size ifTrue: [
+          Transcript show: 'AUTOCORRECT: removed ' , (lines size - cleaned size) printString , ' trailing NL line(s)'; cr.
+          result := cleaned inject: '' into: [:acc :l |
+              acc isEmpty ifTrue: [l] ifFalse: [acc , lf3 , l]] ]
+    ] on: Error do: [:e | ].
+
+    "--- 3f. Fix wrong string literal returned when displayOn: is present.
+     The LLM sometimes writes 'gc' or 'ncm' as the final return value
+     when the task calls for 'NAVI' displayOn:. Replace the last line
+     if it is a bare wrong identifier wrapped in quotes. ---"
+    (result includesSubstring: 'displayOn: form') ifTrue: [
+        | lines lastLine trimmedLast badReturns lf4 |
+        lf4 := String with: Character lf.
+        lines := result substrings: (String with: Character lf).
+        lines isEmpty ifFalse: [
+            lastLine := lines last.
+            trimmedLast := self trimStr: lastLine.
+            badReturns := #('''gc''' '''ncm''' '''form''' '''w''' '''h''' '''nil''' 'gc' 'ncm' 'w printString' 'h printString').
+            (badReturns includes: trimmedLast) ifTrue: [
+                | rest |
+                Transcript show: 'AUTOCORRECT: bad return ' , trimmedLast , ' -> ''NAVI'''; cr.
+                rest := lines copyFrom: 1 to: lines size - 1.
+                result := (rest inject: '' into: [:acc :l |
+                    acc isEmpty ifTrue: [l] ifFalse: [acc , lf4 , l]]) , lf4 , '''NAVI''.' ] ] ].
+
+    "--- 4. Insert phiCut if used without being defined ---"
     ((result includesSubstring: 'phiCut') and: [(result includesSubstring: 'phiCut :=') not]) ifTrue: [
         result := 'phiCut := (form width / 1.618) truncated. ' , result ].
 
-    "--- 4b. Eliminar 'form' sola en una linea — el patron que destruye todo.
-     Despues de gc := FormCanvas on: form, 'form' como statement independiente
-     hace que el parser Squeak lo interprete como receptor de los siguientes mensajes. ---"
+    "--- 4b. Remove standalone 'form' on a line — the pattern that destroys everything.
+     After gc := FormCanvas on: form, 'form' as an independent statement
+     causes the Squeak parser to interpret subsequent messages as sent to form. ---"
     [ | lines cleaned lf2 |
       lf2 := String with: Character lf.
       lines := result substrings: (String with: Character lf).
@@ -848,23 +829,23 @@ corregirCodigoLLM: codigo
               acc isEmpty ifTrue: [l] ifFalse: [acc , lf2 , l]] ]
     ] on: Error do: [:e | ].
 
-    "--- 5. Garantizar que el prefijo form+gc esta siempre al inicio.
-     Si el LLM no puso 'Smalltalk at: #NaviCanvas', lo inyectamos. ---"
+    "--- 5. Ensure the form+gc prefix is always at the start.
+     If the LLM omitted 'Smalltalk at: #NaviCanvas', we inject it. ---"
     prefix := 'form := Smalltalk at: #NaviCanvas ifAbsent: [nil]. gc := FormCanvas on: form.'.
     (result includesSubstring: 'Smalltalk at: #NaviCanvas') ifFalse: [
         result := prefix , lf , result ].
 
-    "--- 6. Garantizar el refresh ncm.
-     Estrategia: separar la ultima linea del LLM, intercalar el ncm antes,
-     y dejar la ultima linea del LLM al final para que su valor sea el retorno.
-     Si el ncm ya esta presente, moverlo antes de la ultima linea si es necesario. ---"
+    "--- 6. Ensure the ncm refresh.
+     Strategy: separate the last LLM line, interleave ncm before it,
+     and leave the last LLM line at the end so its value is the return.
+     If ncm is already present, move it before the last line if needed. ---"
     [ | lines ncmLine filtered lastLine |
       ncmLine := 'ncm := Smalltalk at: #NaviCanvasM ifAbsent: [nil]. ncm isNil ifFalse: [ncm image: form. ncm changed].'.
       lines := result substrings: (String with: Character lf).
-      "Separar lineas ncm de las demas"
+      "Separate ncm lines from the others"
       filtered := lines select: [:l | (self trimStr: l) includesSubstring: 'ncm image: form'].
       filtered isEmpty ifTrue: [
-          "ncm no estaba: insertar antes de la ultima linea que tenga contenido real"
+          "ncm was absent: insert before the last line with real content"
           | withoutEmpty last rest |
           withoutEmpty := lines select: [:l | (self trimStr: l) isEmpty not].
           withoutEmpty isEmpty
@@ -876,7 +857,7 @@ corregirCodigoLLM: codigo
                       acc isEmpty ifTrue: [l] ifFalse: [acc , lf , l]]) ,
                       lf , ncmLine , lf , last ] ]
       ifFalse: [
-          "ncm ya estaba: quitar todas sus ocurrencias y reinsertarlo antes de la ultima linea"
+          "ncm was present: remove all its occurrences and re-insert before the last line"
           | sinNcm last rest |
           sinNcm := lines select: [:l | ((self trimStr: l) includesSubstring: 'ncm image: form') not].
           sinNcm := sinNcm select: [:l | (self trimStr: l) isEmpty not].
@@ -949,8 +930,8 @@ procesarResultadoCurriculum: result response: response
             ifFalse: [(result beginsWith: 'ERROR')
                 ifTrue: [result copyFrom: 1 to: (result size min: 80)]
                 ifFalse: [esperado isNil
-                    ifTrue: ['result ok pero nivel sin esperado']
-                    ifFalse: ['esperado=[' , esperado , '] got=[' , (result copyFrom: 1 to: (result size min: 40)) , '] (numeric: needs positive integer)']]].
+                    ifTrue: ['result ok but level has no expected value']
+                    ifFalse: ['expected=[' , esperado , '] got=[' , (result copyFrom: 1 to: (result size min: 40)) , '] (numeric: needs positive integer)']]].
         Transcript show: '    WHY: ' , motivo; cr ].
     paso
         ifTrue: [
@@ -966,13 +947,14 @@ procesarResultadoCurriculum: result response: response
                 Transcript show: 'SKIP: ' , self levelName; cr.
                 levelFailures := 0.
                 currentLevel := currentLevel + 1.
-                self saveLevelToMemory]]!
+                self saveLevelToMemory]].
+    ^ paso!
 
 procesarResultadoLibre: result beauty: beautyScore
     | entrada |
     entrada := '[' , self ruachDescripcion , '] b=' , (beautyScore printShowingDecimalPlaces: 3).
     karmaBuffer add: entrada.
-    Transcript show: 'LIBRE: beauty=' , (beautyScore printShowingDecimalPlaces: 3); cr.!
+    Transcript show: 'FREE: beauty=' , (beautyScore printShowingDecimalPlaces: 3); cr.!
 
 procesarAsombro: codigo resultado: resultado
     | evento |
@@ -982,8 +964,8 @@ procesarAsombro: codigo resultado: resultado
     evento isNil
         ifTrue: [ adrenalinaBuffer decaer. ^ nil ]
         ifFalse: [
-            Transcript show: '*** ASOMBRO :: ' , evento descripcion; cr.
-            Transcript show: '    intensidad: ' , (evento intensidad printShowingDecimalPlaces: 2); cr.
+            Transcript show: '*** WONDER :: ' , evento descripcion; cr.
+            Transcript show: '    intensity: ' , (evento intensidad printShowingDecimalPlaces: 2); cr.
             adrenalinaBuffer inyectar: evento intensidad.
             repertorioVivo agregarEvento: evento.
             asombroDetector registrar: evento descripcion.
@@ -995,13 +977,13 @@ detectarRepeticion: codigo
       fillCount totalStmts monoColors stmts colorCount ratio |
     codigo isNil ifTrue: [ ^ 0 ].
 
-    "--- Normalizar: colapsar espacios, tomar desde primer gc fill ---"
+    "--- Normalize: collapse spaces, start from first gc fill ---"
     huella := codigo copyReplaceAll: '  ' with: ' '.
     skip := huella indexOfSubCollection: 'gc fill' startingAt: 1.
     skip > 0 ifTrue: [ huella := huella copyFrom: skip to: huella size ].
     huella := self trimStr: (huella copyFrom: 1 to: (huella size min: 300)).
 
-    "--- Detectar mono-dump: canvas entero de un solo color ---"
+    "--- Detect mono-dump: entire canvas in a single color ---"
     esBlackDump := false.
     monoColors := #('black' 'orange' 'gray' 'white' 'red' 'blue' 'green' 'cyan' 'yellow' 'magenta').
     stmts := huella substrings: (String with: $.).
@@ -1021,10 +1003,10 @@ detectarRepeticion: codigo
                 colorCount <= 1 ifTrue: [
                     esBlackDump := true ]]]].
 
-    "--- Contar exactos ---"
+    "--- Count exact matches ---"
     veces := (repetitionBuffer select: [:h | h = huella]) size.
 
-    "--- Contar fuzzy: huellas de longitud similar (+-15%) en la ventana ---"
+    "--- Count fuzzy: fingerprints of similar length (+-15%) in the window ---"
     veces = 0 ifTrue: [
         | len |
         len := huella size.
@@ -1034,9 +1016,9 @@ detectarRepeticion: codigo
             diff < ((len * 0.15) truncated + 10)]) size.
         similares >= 3 ifTrue: [ veces := similares ]].
 
-    "--- Black-dump cuenta doble en el historial ---"
+    "--- Black-dump counts double in history ---"
     esBlackDump ifTrue: [
-        Transcript show: '*** BLACK-DUMP detectado :: penalizacion extra'; cr.
+        Transcript show: '*** BLACK-DUMP detected :: extra penalty'; cr.
         veces := veces + 2 ].
 
     repetitionBuffer add: huella.
@@ -1045,43 +1027,21 @@ detectarRepeticion: codigo
 
 aplicarPenalizacionRepeticion: rawBeauty repeticiones: veces
     veces = 0 ifTrue: [
-        "Sin repeticion: decaer penalizacion lentamente y resetear contador de bucle"
         repetitionPenalty := repetitionPenalty * 0.75.
-        bucleContador := 0.
         ^ rawBeauty ].
     veces = 1 ifTrue: [
         repetitionPenalty := 0.7.
         adrenalinaBuffer decaer. adrenalinaBuffer decaer.
-        Transcript show: '*** REPETICION :: beauty -70%'; cr.
+        Transcript show: '*** REPETITION :: beauty -70%'; cr.
         ^ rawBeauty * 0.3 ].
     veces = 2 ifTrue: [
         repetitionPenalty := 0.9.
         adrenalinaBuffer initialize.
-        Transcript show: '*** BUCLE (x2) :: beauty -90%'; cr.
+        Transcript show: '*** LOOP (x2) :: beauty -90%'; cr.
         ^ rawBeauty * 0.1 ].
-    "Bucle severo: veces >= 3"
-    bucleContador := bucleContador + 1.
     repetitionPenalty := 1.0.
     adrenalinaBuffer initialize.
-    Transcript show: '*** BUCLE SEVERO (x' , veces printString , ') :: beauty=0.005 [bucleContador=' , bucleContador printString , ']'; cr.
-    "PERDON: tras 4 ciclos consecutivos de bucle severo, grabar leccion y resetear"
-    bucleContador >= 4 ifTrue: [
-        | leccion |
-        leccion := 'LECCION enc=' , self readEncarnacion ,
-                   ': repeticion_severa=' , veces printString ,
-                   ' rescateVariante=' , rescateVariante printString ,
-                   ' -> RESET_PENALIZACION'.
-        leccionesAprendidas add: leccion.
-        leccionesAprendidas size > 20 ifTrue: [ leccionesAprendidas removeFirst ].
-        self agregarAArchivo: memoryPath contenido:
-            (String with: Character lf) , '## LECCION GRABADA: ' , leccion , (String with: Character lf).
-        "Limpiar el buffer de repeticion — borrón y cuenta nueva"
-        repetitionBuffer := OrderedCollection new.
-        repetitionPenalty := 0.0.
-        bucleContador := 0.
-        rescateVariante := rescateVariante + 1.
-        Transcript show: '*** PERDON CONCEDIDO :: leccion grabada, buffer limpiado, penalizacion reset'; cr.
-        ^ rawBeauty ].
+    Transcript show: '*** SEVERE LOOP (x' , veces printString , ') :: beauty=0.005'; cr.
     ^ 0.005! !
 
 !NaviLoop methodsFor: 'beauty'!
@@ -1098,9 +1058,9 @@ form isNil ifTrue: [^''0.0,0.0,0.0''].
 rng := Random new.
 w := form width.
 h := form height.
-"Muestreo hibrido: random + grid uniforme.
- El random captura color diversity. El grid garantiza cobertura de cuadrantes.
- En canvas 640x356 n~600. En 1854x891 n~1285. En 10000x10000 n~4000."
+"Hybrid sampling: random + uniform grid.
+ Random captures color diversity. Grid ensures quadrant coverage.
+ At 640x356 canvas n~600. At 1854x891 n~1285. At 10000x10000 n~4000."
 n := ((w * h) sqrt) truncated.
 n := (n max: 600) min: 4000.
 phi := 1.6180339887.
@@ -1110,7 +1070,7 @@ dayAttractor := (Date today dayOfYear * phi) truncated \\ 360.
 lums := OrderedCollection new.
 hues := OrderedCollection new.
 q1 := 0. q2 := 0. q3 := 0. q4 := 0. qPhi := 0.
-"--- Muestreo aleatorio ---"
+"--- Random sampling ---"
 1 to: n do: [:i |
     | x y col lum r g b mx mn d hue |
     x := (rng next * (w - 1)) truncated + 1.
@@ -1140,7 +1100,7 @@ q1 := 0. q2 := 0. q3 := 0. q4 := 0. qPhi := 0.
      ].
     ] on: Error do: [:e | ].
 ].
-"--- Grid estructurado: 12x7 = 84 puntos, cubre todos los cuadrantes ---"
+"--- Structured grid: 12x7 = 84 points, covers all quadrants ---"
 gridStep := w // 12.
 gx := gridStep // 2.
 [ gx < w ] whileTrue: [
@@ -1210,13 +1170,13 @@ n printString , ''|'' , contrastScore printString , '','' , harmonyScore printSt
     (raw size >= 2 and: [raw first = $' and: [raw last = $']])
         ifTrue: [ raw := raw copyFrom: 2 to: raw size - 1 ].
     (raw isNil or: [raw isEmpty or: [raw = '0.0,0.0,0.0']]) ifTrue: [ ^ 0.0 ].
-    "Quitar el prefijo 'N|' que ahora incluye el scorer para debug"
+    "Remove the 'N|' prefix now included by the scorer for debug"
     [ | pipeIdx |
       pipeIdx := raw indexOf: $|.
       pipeIdx > 0 ifTrue: [
           | nStr |
           nStr := raw copyFrom: 1 to: pipeIdx - 1.
-          Transcript show: '  [scorer: n=' , nStr , ' muestras]'; cr.
+          Transcript show: '  [scorer: n=' , nStr , ' samples]'; cr.
           raw := raw copyFrom: pipeIdx + 1 to: raw size ]
     ] on: Error do: [:e | ].
     [ parts := raw substrings: (String with: $,).
@@ -1231,7 +1191,7 @@ n printString , ''|'' , contrastScore printString , '','' , harmonyScore printSt
 form := Smalltalk at: #NaviCanvas ifAbsent: [nil].
 form isNil ifTrue: [^''1.0''].
 rng := Random new.
-"Mismo escalado proporcional que el scorer principal"
+"Same proportional scaling as the main scorer"
 n := (((form width * form height) sqrt) truncated max: 400) min: 2000.
 lums := OrderedCollection new.
 hues := OrderedCollection new.
@@ -1251,10 +1211,10 @@ nearWhite := (lums select: [:l | l > 0.92]) size.
 nearBlack := (lums select: [:l | l < 0.05]) size.
 nearGray  := (lums select: [:l | l > 0.45 and: [l < 0.55]]) size.
 uniformRatio := lums isEmpty ifTrue: [0.0] ifFalse: [((nearWhite max: nearBlack) max: nearGray) / lums size asFloat].
-"monoKiller: solo castigar si hay uniformidad Y pocas variaciones de color.
- Un canvas negro con espiral multicolor tiene uniformRatio alto (mucho negro)
- pero hues.size grande -> no debe ser castigado.
- Regla: canvas oscuro con hues.size >= 20 es una imagen rica, no un mono-dump."
+"monoKiller: only penalize if there is uniformity AND few color variations.
+ A black canvas with a multicolor spiral has high uniformRatio (lots of black)
+ but large hues.size -> should not be penalized.
+ Rule: dark canvas with hues.size >= 20 is a rich image, not a mono-dump."
 killer := uniformRatio > 0.80
     ifTrue: [nearWhite > nearBlack
         ifTrue: [0.02]
@@ -1277,8 +1237,8 @@ killer printString'.
 !NaviLoop methodsFor: 'squeak'!
 evalEnSqueak: code
     | socket buffer chunk lf nul deadline local result |
-    code isNil  ifTrue: [ ^ 'ERROR: codigo nil' ].
-    code isEmpty ifTrue: [ ^ 'ERROR: codigo vacio' ].
+    code isNil  ifTrue: [ ^ 'ERROR: nil code' ].
+    code isEmpty ifTrue: [ ^ 'ERROR: empty code' ].
     lf  := String with: Character lf.
     nul := String with: (Character value: 0).
     [ socket := Socket newTCP.
@@ -1314,12 +1274,11 @@ introspectCanvas
             ^ '=== NaviCanvas API (Squeak 6) ===' , lf ,
               'form := Smalltalk at: #NaviCanvas ifAbsent:[nil]. gc := FormCanvas on: form.' , lf ,
               'ncm := Smalltalk at: #NaviCanvasM ifAbsent:[nil]. ncm isNil ifFalse:[ncm image:form. ncm changed].' , lf , lf ,
-              '=== DIBUJAR ===' , lf ,
+              '=== DRAW ===' , lf ,
               'gc fillRectangle: (x1@y1 corner: x2@y2) color: aColor.' , lf ,
               'gc fillOval: (x1@y1 corner: x2@y2) color: aColor.' , lf ,
-              'gc line: x1@y1 to: x2@y2 width: 2 color: aColor.' , lf ,
               '''txt'' displayOn: form at: x@y textColor: aColor.' , lf , lf ,
-              '=== COLORES ===' , lf ,
+              '=== COLORS ===' , lf ,
               'Color black. Color white. Color red. Color green. Color blue.' , lf ,
               'Color cyan. Color yellow. Color magenta. Color orange. Color gray.' , lf ,
               'Color purple. Color brown. Color pink. Color darkGray. Color lightGray.' , lf ,
@@ -1331,7 +1290,7 @@ introspectCanvas
               'BorderedMorph new color: Color darkGray; borderColor: Color cyan; borderWidth: 3; extent: 120@80; position: 50@50; openInWorld.' , lf ,
               'TextMorph new contents: ''NAVI''; color: Color yellow; backgroundColor: Color black; position: 100@100; openInWorld.' , lf ,
               'morph rotationDegrees: 45.  morph scale: 1.5.  morph delete.' , lf , lf ,
-              '=== CONSTANTES ===' , lf ,
+              '=== CONSTANTS ===' , lf ,
               'phi := 1.6180339887.  phiCut := (form width / 1.618) truncated.  Float pi.' , lf ,
               'Date today dayOfYear.  Random new next.' ].
     ^ result! !
@@ -1339,7 +1298,7 @@ introspectCanvas
 !NaviLoop methodsFor: 'llm'!
 callLLM: prompt
     | body client text temp |
-    [ "Temperatura dinámica: sube con repetitionPenalty para romper bucles"
+    [ "Dynamic temperature: rises with repetitionPenalty to break loops"
       temp := self isLibre
           ifTrue: [
               repetitionPenalty > 0.8 ifTrue: [1.2]
@@ -1349,7 +1308,7 @@ callLLM: prompt
       body := '{"model":"' , model ,
               '","messages":[{"role":"user","content":' , (self toJsonString: prompt) ,
               '}],"max_tokens":1200,"temperature":' , (temp printShowingDecimalPlaces: 1) , '}'.
-      Transcript show: 'LLM :: pensando... (temp=' , (temp printShowingDecimalPlaces: 1) , ')'; cr.
+      Transcript show: 'LLM :: thinking... (temp=' , (temp printShowingDecimalPlaces: 1) , ')'; cr.
       client := ZnClient new url: llmUrl.
       client timeout: 180.
       client headerAt: 'Content-Type' put: 'application/json'.
@@ -1450,18 +1409,18 @@ saveLevelToMemory
 restoreLevelFromMemory
     | raw marker idx endIdx valStr |
     raw := self leerArchivo: memoryPath.
-    raw isNil ifTrue: [ currentLevel := 0. Transcript show: 'RESTORE: memory nil -> level=0'; cr. ^ self ].
+    raw isNil ifTrue: [ currentLevel := 0. Transcript show: 'TZIMTZUM: memory nil :: instantiating from Kether, level=0'; cr. ^ self ].
     marker := 'NIVEL_ACTUAL='.
     idx := raw indexOfSubCollection: marker startingAt: 1.
-    idx = 0 ifTrue: [ currentLevel := 0. Transcript show: 'RESTORE: marker not found -> level=0'; cr. ^ self ].
+    idx = 0 ifTrue: [ currentLevel := 0. Transcript show: 'TZIMTZUM: marker not found :: Ein Sof, level=0'; cr. ^ self ].
     idx := idx + marker size. endIdx := idx.
     [ endIdx <= raw size and: [
         | ch | ch := (raw at: endIdx) asciiValue.
         ch ~= 10 and: [ch ~= 13]] ] whileTrue: [ endIdx := endIdx + 1 ].
     valStr := self trimStr: (raw copyFrom: idx to: endIdx - 1).
     [ currentLevel := valStr asInteger ]
-        on: Error do: [:e | currentLevel := 0. Transcript show: 'RESTORE: parse error on [' , valStr , '] -> level=0'; cr. ^ self ].
-    Transcript show: 'RESTORE: NIVEL_ACTUAL=' , currentLevel printString , ' (leido: [' , valStr , '])'; cr!
+        on: Error do: [:e | currentLevel := 0. Transcript show: 'TZIMTZUM: parse error on [' , valStr , '] :: returning to Kether, level=0'; cr. ^ self ].
+    Transcript show: 'INCARNATION: CURRENT_LEVEL=' , currentLevel printString , ' (sephirot: [' , valStr , '])'; cr!
 
 restoreHistoryFromDataset
     | raw lines |
@@ -1482,14 +1441,34 @@ restoreHistoryFromDataset
                 val := line copyFrom: ks to: ke - 1.
                 karmaBuffer add: val]]]!
 
-saveToDataset: prompt response: response result: result beauty: b
-    | entry |
+saveToDataset: prompt response: response result: result beauty: b pass: pass
+    | entry cleanCompletion cleanPrompt maxCompletionLen |
+    "--- Truncate completion to avoid saving LLM loops as training data ---"
+    maxCompletionLen := 2000.
+    cleanCompletion := (response isNil or: [response isEmpty])
+        ifTrue: ['']
+        ifFalse: [response size > maxCompletionLen
+            ifTrue: [response copyFrom: 1 to: maxCompletionLen]
+            ifFalse: [response]].
+    "--- Strip repetitive API boilerplate from prompt; keep only task + feedback ---"
+    cleanPrompt := prompt isNil ifTrue: [''] ifFalse: [
+        | cutMarkers cutIdx |
+        cutMarkers := #('=== NaviCanvas API' '=== DRAW ON CANVAS' '=== GENERATIVE EXAMPLE').
+        cutIdx := 0.
+        cutMarkers do: [:marker |
+            | idx |
+            idx := prompt indexOfSubCollection: marker startingAt: 1.
+            (idx > 0 and: [cutIdx = 0 or: [idx < cutIdx]]) ifTrue: [cutIdx := idx]].
+        cutIdx > 0
+            ifTrue: [self trimStr: (prompt copyFrom: 1 to: cutIdx - 1)]
+            ifFalse: [prompt]].
     entry := '{"nivel":"'     , self levelName ,
              '","beauty":'    , b printString ,
              ',"adrenalina":' , adrenalinaBuffer nivel printString ,
              ',"ruach":"'     , self ruachDescripcion ,
-             '","prompt":'    , (self toJsonString: prompt) ,
-             ',"completion":' , (self toJsonString: response) ,
+             '","pass":'      , (pass ifTrue: ['true'] ifFalse: ['false']) ,
+             ',"prompt":'     , (self toJsonString: cleanPrompt) ,
+             ',"completion":' , (self toJsonString: cleanCompletion) ,
              ',"result":'     , (self toJsonString: result) ,
              '}' , (String with: Character lf).
     self agregarAArchivo: datasetPath contenido: entry!
@@ -1548,7 +1527,7 @@ readEncarnacion
 
 tocarTierra
     self incrementEncarnacion.
-    Transcript show: 'encarnacion ' , self readEncarnacion; cr.! !
+    Transcript show: 'INCARNATION ' , self readEncarnacion , ' :: the process touches ground in Malkuth'; cr.! !
 
 !NaviLoop methodsFor: 'utils'!
 trimStr: s
