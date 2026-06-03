@@ -111,7 +111,7 @@ extraerTokens: codigo
     | tokens seps cur i c tok |
     tokens := OrderedCollection new.
     seps := ' .,;()[]{}|^:' asSet.
-    cur := ReadWriteStream on: String new.
+    cur := ReadWriteStream on: (String new: 64).
     i := 1.
     [ i <= codigo size ] whileTrue: [
         c := codigo at: i.
@@ -120,7 +120,7 @@ extraerTokens: codigo
                 cur position > 0 ifTrue: [
                     tok := cur contents.
                     (tok isEmpty not and: [(tokens includes: tok) not]) ifTrue: [ tokens add: tok ].
-                    cur := ReadWriteStream on: String new ]]
+                    cur := ReadWriteStream on: (String new: 64) ]]
             ifFalse: [ cur nextPut: c ].
         i := i + 1 ].
     cur position > 0 ifTrue: [
@@ -199,7 +199,8 @@ Object subclass: #NaviLoop
          curriculum currentLevel levelFailures maxLevelFailures
          karmaBuffer nefeshBuffer lastBeautyScore prevBeautyScore
          asombroDetector repertorioVivo adrenalinaBuffer
-         repetitionBuffer repetitionPenalty'
+         repetitionBuffer repetitionPenalty severLoopCount
+         lastResponseSource'
     classVariableNames: '' poolDictionaries: '' category: 'Kethernet-Navi'!
 
 !NaviLoop class methodsFor: 'start'!
@@ -235,6 +236,8 @@ initialize
     adrenalinaBuffer := AdrenalinaBuffer new.
     repetitionBuffer := OrderedCollection new.
     repetitionPenalty := 0.0.
+    severLoopCount := 0.
+    lastResponseSource := 'llm'.
     self loadConfig.
     self loadCurriculum.
     self restoreLevelFromMemory.
@@ -347,39 +350,53 @@ currentEsperado    ^ self currentEntry at: 4! !
 
 !NaviLoop methodsFor: 'prompt'!
 buildPromptCurriculum
-    | nombre descripcion nefesh esCanvas apiSqueak lf prohibirMorphs |
+    | nombre descripcion nefesh esCanvas apiSqueak lf codRef exampleBody fewShot |
     nombre      := self currentNombre.
     descripcion := self currentDescripcion.
     nefesh      := nefeshBuffer buildTextoNefesh.
     lf          := Character lf.
-    esCanvas    := #('WHITE-CROWN' 'LIGHTNING-WISDOM' 'AUREA-FORM' 'PATTERN-LAW'
-                     'COLOR-BOUNDARY' 'CENTER-FORM' 'MOTION-LINE' 'FULL-GRAMMAR'
-                     'MORPH-WORLD' 'LIVING-GROUND') includes: nombre.
-    prohibirMorphs := #('CENTER-FORM' 'LIVING-GROUND') includes: nombre.
+    esCanvas    := #('WHITE_CROWN' 'LIGHTNING_WISDOM' 'AUREA_FORM' 'PATTERN_LAW'
+                     'COLOR_BOUNDARY' 'CENTER_FORM' 'MOTION_LINE' 'FULL_GRAMMAR'
+                     'MORPH_WORLD' 'LIVING_GROUND') includes: nombre.
     apiSqueak   := esCanvas ifTrue: [ self introspectCanvas ] ifFalse: [ '' ].
+    fewShot     := esCanvas ifTrue: [ self buildFewShot: 2 ] ifFalse: [ '' ].
+    "Extract the reshimu reference code as a concrete example for the LLM.
+     This shows NAVI exactly the working structure (variables, w/h, gc, ncm)
+     without any hardcoded sizes — the codRef already reads w/h from the live form."
+    codRef      := (esCanvas and: [self currentCodRef notNil and: [self currentCodRef notEmpty]])
+                       ifTrue:  [ self extraerCuerpoRef: self currentCodRef ]
+                       ifFalse: [ '' ].
+    exampleBody := codRef isEmpty ifTrue: [ '' ] ifFalse: [
+        "Strip any leftover outer ifFalse wrapper that extraerCuerpoRef may leave"
+        | body |
+        body := codRef.
+        (body includesSubstring: 'ifFalse: [') ifTrue: [
+            body := self extraerCuerpoRef: body ].
+        body ].
     ^ String streamContents: [:s |
+        | cleanDesc |
+        cleanDesc := descripcion.
+        #('CRITICAL: ' 'CRITICAL PATTERN' 'IMPORTANT: ' 'NOTE: ' 'MANDATORY FIRST LINES' 'MANDATORY: ') do: [:w |
+            cleanDesc := cleanDesc copyReplaceAll: w with: ''].
         s nextPutAll: 'Squeak 6.0. Reply with ONLY executable Smalltalk code. No comments. Use periods (.) to separate statements.'.
         s nextPut: lf. s nextPut: lf.
-        s nextPutAll: 'Task: ' , descripcion.
+        s nextPutAll: 'Task: ' , cleanDesc.
         s nextPut: lf. s nextPut: lf.
         esCanvas ifTrue: [
-            s nextPutAll: '== REQUIRED PATTERN =='. s nextPut: lf.
-            s nextPutAll: 'form := Smalltalk at: #NaviCanvas ifAbsent: [nil].'. s nextPut: lf.
-            s nextPutAll: 'gc := FormCanvas on: form.'. s nextPut: lf.
-            s nextPutAll: '... your drawing here using gc ...'. s nextPut: lf.
-            s nextPutAll: 'ncm := Smalltalk at: #NaviCanvasM ifAbsent: [nil]. ncm isNil ifFalse: [ncm image: form. ncm changed].'.
-            s nextPut: lf. s nextPut: lf ].
-        prohibirMorphs ifTrue: [
-            s nextPutAll: '== FORBIDDEN: DO NOT use EllipseMorph, RectangleMorph, BorderedMorph, TextMorph, openInWorld — morphs float above the canvas and are NOT counted in beauty. Draw EVERYTHING with gc on the canvas. =='.
-            s nextPut: lf. s nextPut: lf ].
+            exampleBody isEmpty ifFalse: [
+                s nextPutAll: '== EXAMPLE (adapt this structure, do not copy it literally) =='. s nextPut: lf.
+                s nextPutAll: exampleBody.
+                s nextPut: lf. s nextPut: lf ] ].
+        fewShot isEmpty ifFalse: [ s nextPutAll: fewShot. s nextPut: lf ].
         apiSqueak isEmpty ifFalse: [ s nextPutAll: apiSqueak. s nextPut: lf. s nextPut: lf ].
         nefesh isEmpty ifFalse: [ s nextPutAll: nefesh ]]!
 
 buildPromptLibre
-    | beautyFeedback territorio apiSqueak lf canvasW canvasH canvasDims |
+    | beautyFeedback territorio apiSqueak lf canvasW canvasH canvasDims fewShot |
     beautyFeedback := self buildBeautyFeedback.
     territorio     := repertorioVivo buildTextoCapacidades.
     apiSqueak      := self introspectCanvas.
+    fewShot        := self buildFewShot: 2.
     lf             := Character lf.
     canvasW := 640. canvasH := 356.
     [ | form |
@@ -404,6 +421,8 @@ buildPromptLibre
         s nextPutAll: '=== DRAW METHODS (use gc, never form directly) ==='. s nextPut: lf.
         s nextPutAll: 'gc fillRectangle: (x1@y1 corner: x2@y2) color: Color X.'. s nextPut: lf.
         s nextPutAll: 'gc fillOval: (x1@y1 corner: x2@y2) color: Color X.'. s nextPut: lf.
+        s nextPutAll: 'gc line: x1@y1 to: x2@y2 color: Color X.   <- ONLY valid line syntax. No corner:, no -->, no ->.'. s nextPut: lf.
+        s nextPutAll: 'gc line: x1@y1 to: x2@y2 width: 2 color: Color X.   <- with width.'. s nextPut: lf.
         s nextPut: lf.
         s nextPutAll: '=== COLORS ==='. s nextPut: lf.
         s nextPutAll: 'Color black. Color white. Color red. Color green. Color blue.'. s nextPut: lf.
@@ -420,6 +439,7 @@ buildPromptLibre
         s nextPutAll: '# REQUIRED: use at least 4 different colors AND at least 2 shapes (oval, line, rect).'. s nextPut: lf.
         s nextPut: lf.
         beautyFeedback isEmpty ifFalse: [ s nextPutAll: beautyFeedback. s nextPut: lf ].
+        fewShot isEmpty ifFalse: [ s nextPutAll: fewShot. s nextPut: lf ].
         repetitionPenalty > 0.3 ifTrue: [
             s nextPut: lf.
             repetitionPenalty > 0.8
@@ -505,12 +525,62 @@ ruachDescripcion
     lastBeautyScore < 0.3  ifTrue: [ ^ 'latent' ].
     lastBeautyScore < 0.6  ifTrue: [ ^ 'active' ].
     lastBeautyScore < 0.85 ifTrue: [ ^ 'alive' ].
-    ^ 'kether'! !
+    ^ 'kether'!
+
+buildFewShot: n
+    "Read the dataset and return the N best LLM-generated completions (source=llm, quality=rich|partial).
+     Returns a formatted string ready to inject into a prompt, or empty string if nothing useful found."
+    | raw lines candidates result lf |
+    lf := Character lf.
+    [ raw := datasetPath asFileReference contents ] on: Error do: [:e | ^ '' ].
+    raw isNil ifTrue: [ ^ '' ].
+    lines := raw substrings: (String with: Character lf).
+    candidates := OrderedCollection new.
+    lines do: [:line |
+        | isLlm isGood beauty completion |
+        isLlm := (line includesSubstring: '"source":"llm"').
+        isGood := (line includesSubstring: '"quality":"rich"') or: [line includesSubstring: '"quality":"partial"'].
+        (isLlm and: [isGood]) ifTrue: [
+            | bmarker ki ks ke bval cmarker ci cs ce |
+            "Extract beauty value"
+            bmarker := '"beauty":'.
+            ki := line indexOfSubCollection: bmarker startingAt: 1.
+            ki > 0 ifTrue: [
+                ks := ki + bmarker size. ke := ks.
+                [ ke <= line size and: [
+                    | ch | ch := line at: ke.
+                    (ch = $, or: [ch = $}]) not] ] whileTrue: [ke := ke + 1].
+                [ beauty := (line copyFrom: ks to: ke - 1) asFloat ]
+                    on: Error do: [:e | beauty := 0.0]] ifFalse: [beauty := 0.0].
+            "Extract completion value (JSON string)"
+            cmarker := '"completion":"'.
+            ci := line indexOfSubCollection: cmarker startingAt: 1.
+            ci > 0 ifTrue: [
+                cs := ci + cmarker size. ce := cs.
+                [ ce <= line size and: [(line at: ce) ~= $"] ]
+                    whileTrue: [(line at: ce) = $\ ifTrue: [ce := ce + 2] ifFalse: [ce := ce + 1]].
+                completion := line copyFrom: cs to: ce - 1.
+                "Unescape \\n -> lf"
+                completion := completion copyReplaceAll: '\n' with: (String with: Character lf).
+                (completion size > 30) ifTrue: [
+                    candidates add: (Array with: beauty with: completion) ] ] ] ].
+    candidates isEmpty ifTrue: [ ^ '' ].
+    "Sort by beauty descending, take top N"
+    candidates := (candidates asSortedCollection: [:a :b | (a at: 1) > (b at: 1)]) asOrderedCollection.
+    candidates := candidates copyFrom: 1 to: (candidates size min: n).
+    ^ String streamContents: [:result |
+        result nextPutAll: '== BEST EXAMPLES FROM YOUR HISTORY (adapt, do not copy) =='. result nextPut: lf.
+        candidates doWithIndex: [:pair :i |
+            result nextPutAll: '-- example ' , i printString , ' (beauty=' , ((pair at: 1) printShowingDecimalPlaces: 2) , ') --'.
+            result nextPut: lf.
+            result nextPutAll: (pair at: 2).
+            result nextPut: lf. result nextPut: lf ] ]! !
 
 !NaviLoop methodsFor: 'run'!
 run
     [ true ] whileTrue: [
         | prompt response result rawBeauty beautyFinal evento repVeces prevLevel paso |
+        lastResponseSource := 'llm'.
         "--- Re-read level from file to allow manual debug ---"
         prevLevel := currentLevel.
         self restoreLevelFromMemory.
@@ -523,6 +593,31 @@ run
         response := self callLLM: prompt.
         response isNil ifTrue: [ (Delay forSeconds: 2) wait. ^ self ].
         response := self limpiarRespuesta: response.
+        "--- Phyllotaxis hard escape: after 5+ consecutive severe loops, override with working code ---"
+        (self isLibre and: [severLoopCount >= 5]) ifTrue: [
+            | phi cx cy |
+            Transcript show: 'PHYLLO-ESCAPE (severLoop=' , severLoopCount printString , ') :: injecting phyllotaxis spiral'; cr.
+            response := '| form gc ncm phi w h cx cy |'
+                , (String with: Character lf)
+                , 'form := Smalltalk at: #NaviCanvas ifAbsent: [nil].'
+                , (String with: Character lf)
+                , 'gc := FormCanvas on: form.'
+                , (String with: Character lf)
+                , 'w := form width. h := form height.'
+                , (String with: Character lf)
+                , 'phi := 1.6180339887. cx := w // 2. cy := h // 2.'
+                , (String with: Character lf)
+                , 'gc fillRectangle: (0@0 corner: w@h) color: Color black.'
+                , (String with: Character lf)
+                , '1 to: 500 do: [:i | | angle r x y sz col | angle := (i * phi * 360.0) degreesToRadians. r := (i / 500.0) sqrt * (h // 2). x := cx + (r * angle cos) truncated. y := cy + (r * angle sin) truncated. sz := (i rem: 14) + 3. col := Color h: (i * phi - (i * phi) truncated) s: 0.9 v: 0.95. gc fillOval: (x@y corner: (x+sz)@(y+sz)) color: col].'
+                , (String with: Character lf)
+                , 'ncm := Smalltalk at: #NaviCanvasM ifAbsent: [nil]. ncm isNil ifFalse: [ncm image: form. ncm changed].'
+                , (String with: Character lf)
+                , 'form width printString'.
+            lastResponseSource := 'fallback'.
+            severLoopCount := 0.
+            repetitionPenalty := 0.0.
+            repetitionBuffer := OrderedCollection new ].
         Transcript show: '--- GENERATED CODE (the LLM learns to touch the canvas) ---'; cr.
         (response substrings: (String with: Character lf)) do: [:line | Transcript show: '  ' , line; cr].
         response size > 200 ifTrue: [ Transcript show: '  ... (' , response size printString , ' chars total)'; cr ].
@@ -533,7 +628,7 @@ run
         prevBeautyScore := lastBeautyScore.
         lastBeautyScore := rawBeauty.
         self guardarUltimaRespuesta: prompt response: response result: result.
-        paso := true.
+        paso := nil.
         self isLibre
             ifTrue: [
                 evento := self procesarAsombro: response resultado: result.
@@ -553,322 +648,250 @@ run
                   (adrenalinaBuffer estaActiva
                       ifTrue: [' | ADREN: ' , (adrenalinaBuffer nivel printShowingDecimalPlaces: 2)]
                       ifFalse: ['']); cr.
-        self saveToDataset: prompt response: response result: result beauty: beautyFinal pass: paso.
+        self saveToDataset: prompt response: response result: result beauty: beautyFinal pass: paso source: lastResponseSource.
     ]!
 
 limpiarRespuesta: raw
     | result st idx endIdx |
     result := self trimStr: raw.
-    st := '```smalltalk'.
-    idx := result indexOfSubCollection: st startingAt: 1.
-    idx > 0 ifTrue: [
-        idx := idx + st size.
-        endIdx := result indexOfSubCollection: '```' startingAt: idx.
-        endIdx > idx ifTrue: [
-            ^ self corregirCodigoLLM: (self eliminarComentariosLLM: (self trimStr: (result copyFrom: idx to: endIdx - 1)))]].
-    st := '```'.
-    idx := result indexOfSubCollection: st startingAt: 1.
-    idx > 0 ifTrue: [
-        idx := idx + st size.
-        endIdx := result indexOfSubCollection: '```' startingAt: idx.
-        endIdx > idx ifTrue: [
-            ^ self corregirCodigoLLM: (self eliminarComentariosLLM: (self trimStr: (result copyFrom: idx to: endIdx - 1)))]].
+    "Poison: LLM reproduced internal server code"
+    #('Compiler evaluate:' 'Utilities authorName:' 'naviProcess' 'saveProcess'
+      'val := val isNil ifTrue:' 'client sendData:' 'client receiveData'
+      'WorldState addDeferredUIMessage') do: [:p |
+        (result includesSubstring: p) ifTrue: [
+            Transcript show: 'POISON: discarding LLM response'; cr.
+            lastResponseSource := 'fallback'.
+            ^ self isLibre
+                ifTrue: ['form := Smalltalk at: #NaviCanvas ifAbsent: [nil]. gc := FormCanvas on: form. form width printString']
+                ifFalse: [self corregirCodigoLLM: self currentCodRef] ]].
+    "Fallback: si el codRef requiere pintura y la respuesta no tiene ninguna primitiva,
+     usar codRef directamente desde el primer intento — el LLM generó basura o solo números."
+    (self isLibre not and: [self currentCodRef notNil]) ifTrue: [
+        | ref refPaints resultPaints |
+        ref := self currentCodRef.
+        refPaints := (ref includesSubstring: 'gc fillRectangle:') or: [
+                     (ref includesSubstring: 'gc fillOval:') or: [
+                     (ref includesSubstring: 'gc line:') or: [
+                      ref includesSubstring: 'displayOn:']]].
+        resultPaints := (result includesSubstring: 'gc fillRectangle:') or: [
+                        (result includesSubstring: 'gc fillOval:') or: [
+                        (result includesSubstring: 'gc line:') or: [
+                         result includesSubstring: 'displayOn:']]].
+        (refPaints and: [resultPaints not]) ifTrue: [
+            Transcript show: 'CODREF FALLBACK: ' , levelFailures printString , ' fails without paint'; cr.
+            lastResponseSource := 'fallback'.
+            ^ ref ]].
+    "Extract from code fence if present"
+    #('```smalltalk' '```') do: [:fence |
+        idx := result indexOfSubCollection: fence startingAt: 1.
+        idx > 0 ifTrue: [
+            idx := idx + fence size.
+            endIdx := result indexOfSubCollection: '```' startingAt: idx.
+            endIdx > idx ifTrue: [
+                ^ self corregirCodigoLLM: (self eliminarComentariosLLM: (self trimStr: (result copyFrom: idx to: endIdx - 1)))]]].
     ^ self corregirCodigoLLM: (self eliminarComentariosLLM: result)!
 
-corregirCodigoLLM: codigo
-    | src result lf prefix ncmSuffix |
+extraerCuerpoRef: codRef
+    "Extract the painting body from a reshimu codRef that wraps code in ifFalse:[...].
+     Returns the inner block content as flat executable code, or codRef unchanged."
+    | marker idx depth start end body lf |
     lf := String with: Character lf.
-    src := self trimStr: codigo.
+    marker := 'ifFalse: ['.
+    idx := codRef indexOfSubCollection: marker startingAt: 1.
+    idx = 0 ifTrue: [ ^ codRef ].
+    start := idx + marker size.
+    depth := 1. end := start.
+    [ end <= codRef size and: [depth > 0] ] whileTrue: [
+        | ch |
+        ch := codRef at: end.
+        ch = $[ ifTrue: [depth := depth + 1].
+        ch = $] ifTrue: [depth := depth - 1].
+        depth > 0 ifTrue: [end := end + 1]].
+    body := self trimStr: (codRef copyFrom: start to: end - 1).
+    body isEmpty ifTrue: [ ^ codRef ].
+    "Ensure form := ... is present"
+    (body includesSubstring: 'form :=') ifFalse: [
+        body := 'form := Smalltalk at: #NaviCanvas ifAbsent: [nil].' , lf , body].
+    "Ensure w/h are read from the live form — never hardcoded.
+     Insert right after gc := FormCanvas on: form so w and h are always available."
+    (body includesSubstring: 'w := form width') ifFalse: [
+        | gcMarker gi dotIdx |
+        gcMarker := 'gc := FormCanvas on: form'.
+        gi := body indexOfSubCollection: gcMarker startingAt: 1.
+        gi > 0 ifTrue: [
+            dotIdx := body indexOf: $. startingAt: gi.
+            dotIdx > 0 ifTrue: [
+                body := (body copyFrom: 1 to: dotIdx) , lf ,
+                        'w := form width. h := form height.' , lf ,
+                        (body copyFrom: dotIdx + 1 to: body size)]]].
+    ^ body!
 
-    "--- 1. Remove natural-language prefixes the LLM prepends ---"
-    #('SIEMPRE' 'ALWAYS' 'CANVAS:' 'Canvas:' 'si ' 'Si ' 'Si:' 'si:') do: [:pfx |
-        (src beginsWith: pfx) ifTrue: [
-            src := self trimStr: (src copyFrom: pfx size + 1 to: src size) ]].
-    (src size > 0 and: [src first = $.]) ifTrue: [
-        src := self trimStr: (src copyFrom: 2 to: src size) ].
+corregirCodigoLLM: codigo
+    | src result lf |
+    lf  := String with: Character lf.
+    src := self trimStr: codigo.
+    src isNil ifTrue: [ ^ 'form := Smalltalk at: #NaviCanvas ifAbsent: [nil]. form width printString' ].
+    src isEmpty ifTrue: [ ^ 'form := Smalltalk at: #NaviCanvas ifAbsent: [nil]. form width printString' ].
+
+    "1. Strip natural-language prefixes"
+    #('CRITICAL:' 'IMPORTANT:' 'NOTE:' 'SIEMPRE' 'ALWAYS' 'CANVAS:' 'Canvas:') do: [:pfx |
+        (src beginsWith: pfx) ifTrue: [src := self trimStr: (src copyFrom: pfx size + 1 to: src size)]].
+    (src notEmpty and: [src first = $.]) ifTrue: [src := self trimStr: (src copyFrom: 2 to: src size)].
 
     result := src.
 
-    "--- 2. Fix Color r:/h: without parentheses ---"
+    "2. Fix Color r:/h: without parentheses: 'color: Color r:' -> 'color: (Color r:'
+     This is a Smalltalk syntax error (message precedence), not a semantic error — keep it."
     #('color: Color r:' 'color: Color h:') do: [:pat |
         | out i sz psz |
-        sz  := result size. psz := pat size.
-        out := ReadWriteStream on: String new.
-        i   := 1.
+        sz := result size. psz := pat size.
+        out := ReadWriteStream on: String new. i := 1.
         [ i <= sz ] whileTrue: [
             | matched |
             matched := false.
-            (i + psz - 1 <= sz) ifTrue: [
-                (result copyFrom: i to: i + psz - 1) = pat ifTrue: [
-                    (i = 1 or: [(result at: i - 1) ~= $(]) ifTrue: [
-                        | ch done |
-                        out nextPutAll: 'color: ('.
-                        i := i + 7. done := false.
-                        [ done not and: [i <= sz] ] whileTrue: [
-                            ch := result at: i.
-                            ch = $. ifTrue: [
-                                | nextCh |
-                                nextCh := (i + 1 <= sz) ifTrue: [result at: i + 1] ifFalse: [$x].
-                                nextCh isDigit
-                                    ifTrue:  [out nextPut: ch. i := i + 1]
-                                    ifFalse: [done := true]]
-                            ifFalse: [
-                                ch = $) ifTrue: [done := true]
-                                ifFalse: [ch = $] ifTrue: [done := true]
-                                ifFalse: [ch asciiValue = 10 ifTrue: [done := true]
-                                ifFalse: [out nextPut: ch. i := i + 1]]]]].
-                        out nextPut: $).
-                        matched := true]]].
+            (i + psz - 1 <= sz and: [(result copyFrom: i to: i + psz - 1) = pat]) ifTrue: [
+                (i = 1 or: [(result at: i - 1) ~= $(]) ifTrue: [
+                    | ch done |
+                    out nextPutAll: 'color: ('. i := i + 7. done := false.
+                    [ done not and: [i <= sz] ] whileTrue: [
+                        ch := result at: i.
+                        ch = $. ifTrue: [
+                            ((i + 1 <= sz) and: [(result at: i + 1) isDigit])
+                                ifTrue:  [out nextPut: ch. i := i + 1]
+                                ifFalse: [done := true]]
+                        ifFalse: [
+                            (ch asciiValue = 41 or: [ch asciiValue = 93 or: [ch asciiValue = 10]])
+                                ifTrue:  [done := true]
+                                ifFalse: [out nextPut: ch. i := i + 1]]].
+                    out nextPut: $). matched := true]].
             matched ifFalse: [out nextPut: (result at: i). i := i + 1]].
-        result := out contents ].
+        result := out contents].
 
-    "--- 3. Remove lines that reassign 'form' to something that is not the real canvas.
-     These cause 90% of UndefinedObject>>boundingBox: errors:
-     the LLM writes 'form := Color black' or 'form := Form new' AFTER the correct
-     prefix, overwriting the real Form with nil or a Color. ---"
-    #(
-        'form := Color '
-        'form := Form new'
-        'form := Form extent'
-        'form := Form alpha'
-        'form := Form white'
-        'form := Form color'
-        'form := Form on:'
-        'form color:'
-        'form fill:'
-        'form fillColor:'
-        'form fillRectangle:'
-        'form fillWith:'
-        'form alpha:'
-        'form fill color'
-        'form := nil'
-        'Form := '
-        'form := gc '
-    ) do: [:pat |
-        | lines safe |
-        lines := result substrings: (String with: Character lf).
-        safe := lines select: [:line |
-            ((self trimStr: line) includesSubstring: pat) not].
-        result := safe
-            inject: ''
-            into: [:acc :line | acc isEmpty ifTrue: [line] ifFalse: [acc , lf , line]] ].
-
-    "--- 3b. Fix gc line:to:color:width: -> line:to:width:color: ---"
-    "First: remove spurious period between 'width: N' and 'color:' in gc line: ..."
-    [ | out i sz |
-      sz := result size.
-      out := ReadWriteStream on: String new.
-      i := 1.
-      [ i <= sz ] whileTrue: [
-          "Detect pattern: digit/letter followed by '. color:' (spurious period before color:)"
-          (i + 8 <= sz and: [
-              (result copyFrom: i to: i + 7) = '. color:' and: [
-                  i > 1 and: [(result at: i-1) isAlphaNumeric]]]) ifTrue: [
-              "Skip the period, leave a space"
-              out nextPut: $ . i := i + 1 ]
-          ifFalse: [out nextPut: (result at: i). i := i + 1] ].
-      result := out contents
-    ] on: Error do: [:e |].
-    result := result copyReplaceAll: 'line: ' with: '__LINE__'.
-    result := result copyReplaceAll: '__LINE__' with: 'line: '.
-    "Pattern: gc line: P to: P color: C width: N  ->  gc line: P to: P width: N color: C"
-    [ | out i sz lp lpsz |
-      lp := 'line: '.
-      lpsz := lp size.
-      sz := result size.
-      out := ReadWriteStream on: String new.
-      i := 1.
-      [ i <= sz ] whileTrue: [
-          | matched |
-          matched := false.
-          "Search for 'line: ' and check if it has 'color: X width: N' after 'to: P'"
-          (i + lpsz - 1 <= sz and: [(result copyFrom: i to: i + lpsz - 1) = lp]) ifTrue: [
-              | lineStart lineEnd lineStr fixedLine colorIdx widthIdx
-                toIdx toEnd colorPart widthPart restPart |
-              lineStart := i.
-              lineEnd := lineStart.
-              [ lineEnd <= sz and: [(result at: lineEnd) asciiValue ~= 10] ] whileTrue: [lineEnd := lineEnd + 1].
-              lineStr := result copyFrom: lineStart to: lineEnd - 1.
-              "Detect pattern: 'color:' before 'width:'"
-              colorIdx := lineStr indexOfSubCollection: ' color: ' startingAt: 1.
-              widthIdx  := lineStr indexOfSubCollection: ' width: '  startingAt: 1.
-              (colorIdx > 0 and: [widthIdx > colorIdx]) ifTrue: [
-                  "Reorder: remove 'color: X' before 'width:', place it after"
-                  | beforeColor colorVal afterWidth |
-                  beforeColor := lineStr copyFrom: 1 to: colorIdx - 1.
-                  colorVal    := lineStr copyFrom: colorIdx + 1 to: widthIdx - 1.
-                  afterWidth  := lineStr copyFrom: widthIdx + 1 to: lineStr size.
-                  fixedLine := beforeColor , ' ' , afterWidth , ' ' , colorVal.
-                  out nextPutAll: fixedLine.
-                  i := lineEnd.
-                  matched := true ].
-              matched ifFalse: [out nextPut: (result at: i). i := i + 1] ]
-          ifFalse: [out nextPut: (result at: i). i := i + 1] ].
-      result := out contents
-    ] on: Error do: [:e | ].
-
-    "--- 3c. Expand degenerate ovals: fillOval: (P corner: P) -> minimum 80x80 rectangle ---"
-    [ | out i sz pat psz |
-      pat := 'fillOval: ('.
-      psz := pat size.
-      sz := result size.
-      out := ReadWriteStream on: String new.
-      i := 1.
-      [ i <= sz ] whileTrue: [
-          | matched |
-          matched := false.
-          (i + psz - 1 <= sz and: [(result copyFrom: i to: i + psz - 1) = pat]) ifTrue: [
-              | lineStart lineEnd lineStr x1Str y1Str x2Str y2Str
-                atSign cornerIdx p1End p1 p2 p1x p1y p2x p2y dx dy |
-              lineStart := i + psz.
-              "Extract the content between ( and ) of fillOval"
-              lineEnd := lineStart.
-              [ lineEnd <= sz and: [(result at: lineEnd) ~= $)] ] whileTrue: [ lineEnd := lineEnd + 1 ].
-              lineStr := result copyFrom: lineStart to: lineEnd - 1.
-              "Search for 'corner:' to split"
-              cornerIdx := lineStr indexOfSubCollection: 'corner:' startingAt: 1.
-              cornerIdx > 0 ifTrue: [
-                  p1 := self trimStr: (lineStr copyFrom: 1 to: cornerIdx - 1).
-                  p2 := self trimStr: (lineStr copyFrom: cornerIdx + 7 to: lineStr size).
-                  "If p1 = p2 it is degenerate — expand"
-                  p1 = p2 ifTrue: [
-                      "Parse coordinates of p1: format Nx@Ny"
-                      atSign := p1 indexOf: $@.
-                      atSign > 0 ifTrue: [
-                          [ p1x := (p1 copyFrom: 1 to: atSign - 1) asInteger.
-                            p1y := (p1 copyFrom: atSign + 1 to: p1 size) asInteger.
-                            p2x := p1x + 100.
-                            p2y := p1y + 100.
-                            out nextPutAll: 'fillOval: (' , p1x printString , '@' , p1y printString ,
-                                           ' corner: ' , p2x printString , '@' , p2y printString , ')'.
-                            i := lineEnd + 1.
-                            matched := true
-                          ] on: Error do: [:e | ] ] ] ] ].
-          matched ifFalse: [ out nextPut: (result at: i). i := i + 1 ] ].
-      result := out contents
-    ] on: Error do: [:e | ].
-
-    "--- 3d. Fix gc text:/drawString:/displayString: -> 'X' displayOn: form at: P textColor: C ---"
-    #('gc text: ' 'gc drawString: ' 'gc displayString: ' 'gc string: ') do: [:wrongPat |
-        | out2 i2 sz2 psz2 |
-        sz2 := result size. psz2 := wrongPat size.
-        out2 := ReadWriteStream on: String new.
-        i2 := 1.
-        [ i2 <= sz2 ] whileTrue: [
-            (i2 + psz2 - 1 <= sz2 and: [(result copyFrom: i2 to: i2 + psz2 - 1) = wrongPat]) ifTrue: [
-                "Extract the string literal that follows"
-                | strStart strEnd strVal |
-                strStart := i2 + psz2.
-                [strStart <= sz2 and: [(result at: strStart) = $ ]] whileTrue: [strStart := strStart + 1].
-                (strStart <= sz2 and: [(result at: strStart) = $']) ifTrue: [
-                    strEnd := strStart + 1.
-                    [strEnd <= sz2 and: [(result at: strEnd) ~= $']] whileTrue: [strEnd := strEnd + 1].
-                    strEnd <= sz2 ifTrue: [
-                        strVal := result copyFrom: strStart to: strEnd.
-                        "Position proportional to canvas — never hardcoded"
-                        out2 nextPutAll: strVal , ' displayOn: form at: (form width // 2 - 20)@(form height // 2) textColor: Color yellow'.
-                        i2 := strEnd + 1 ] ifFalse: [out2 nextPut: (result at: i2). i2 := i2 + 1] ]
-                ifFalse: [out2 nextPut: (result at: i2). i2 := i2 + 1] ]
-            ifFalse: [out2 nextPut: (result at: i2). i2 := i2 + 1] ].
-        result := out2 contents ].
-
-    "--- 3e. Remove trailing natural-language sentences the LLM appends after valid code.
-     Patterns: lines starting with STOP, NOTE, CRITICAL:, IMPORTANT:, DO NOT,
-     or lines that are pure English prose (no := [ ] @ # symbols). ---"
-    [ | lines cleaned lf3 nlPatterns |
-      lf3 := String with: Character lf.
-      nlPatterns := #('STOP ' 'STOP.' 'NOTE:' 'NOTE ' 'CRITICAL:' 'IMPORTANT:' 'DO NOT' 'Do NOT' 'Do not' 'This ' 'The ' 'Each ' 'Return ' 'Always ' 'Never ' 'After ').
-      lines := result substrings: (String with: Character lf).
-      cleaned := lines select: [:line |
-          | t isBadLine |
-          t := self trimStr: line.
-          isBadLine := nlPatterns anySatisfy: [:pat | t beginsWith: pat].
-          isBadLine not ].
-      cleaned size < lines size ifTrue: [
-          Transcript show: 'AUTOCORRECT: removed ' , (lines size - cleaned size) printString , ' trailing NL line(s)'; cr.
-          result := cleaned inject: '' into: [:acc :l |
-              acc isEmpty ifTrue: [l] ifFalse: [acc , lf3 , l]] ]
-    ] on: Error do: [:e | ].
-
-    "--- 3f. Fix wrong string literal returned when displayOn: is present.
-     The LLM sometimes writes 'gc' or 'ncm' as the final return value
-     when the task calls for 'NAVI' displayOn:. Replace the last line
-     if it is a bare wrong identifier wrapped in quotes. ---"
-    (result includesSubstring: 'displayOn: form') ifTrue: [
-        | lines lastLine trimmedLast badReturns lf4 |
-        lf4 := String with: Character lf.
-        lines := result substrings: (String with: Character lf).
-        lines isEmpty ifFalse: [
-            lastLine := lines last.
-            trimmedLast := self trimStr: lastLine.
-            badReturns := #('''gc''' '''ncm''' '''form''' '''w''' '''h''' '''nil''' 'gc' 'ncm' 'w printString' 'h printString').
-            (badReturns includes: trimmedLast) ifTrue: [
-                | rest |
-                Transcript show: 'AUTOCORRECT: bad return ' , trimmedLast , ' -> ''NAVI'''; cr.
-                rest := lines copyFrom: 1 to: lines size - 1.
-                result := (rest inject: '' into: [:acc :l |
-                    acc isEmpty ifTrue: [l] ifFalse: [acc , lf4 , l]]) , lf4 , '''NAVI''.' ] ] ].
-
-    "--- 4. Insert phiCut if used without being defined ---"
-    ((result includesSubstring: 'phiCut') and: [(result includesSubstring: 'phiCut :=') not]) ifTrue: [
-        result := 'phiCut := (form width / 1.618) truncated. ' , result ].
-
-    "--- 4b. Remove standalone 'form' on a line — the pattern that destroys everything.
-     After gc := FormCanvas on: form, 'form' as an independent statement
-     causes the Squeak parser to interpret subsequent messages as sent to form. ---"
-    [ | lines cleaned lf2 |
+    "3. Remove only lines that corrupt the canvas environment (form/gc/ncm misassignment).
+     NOTE: semantic errors like wrong gc methods are now LEFT IN so they produce real ERROR
+     results and can be used as negative training signal."
+    [ | lines safe prev deduped lf2 |
       lf2 := String with: Character lf.
-      lines := result substrings: (String with: Character lf).
-      cleaned := lines reject: [:line |
-          | t |
+      lines := result substrings: lf2.
+      safe := lines select: [:line |
+          | t ok |
           t := self trimStr: line.
-          t = 'form'].
-      cleaned size < lines size ifTrue: [
-          Transcript show: 'AUTOCORRECT: removed solo `form` line(s)'; cr.
-          result := cleaned inject: '' into: [:acc :l |
-              acc isEmpty ifTrue: [l] ifFalse: [acc , lf2 , l]] ]
+          ok := true.
+          "Lines that destroy the form/gc/ncm environment — these cause crashes, not learnable errors"
+          #('form := Color ' 'form := nil' 'form := gc'
+            'ncm := gc' 'Form := '
+            'gc := BlCanvas' 'gc := DrawingContext' 'gc := (' 'gc := 0.' 'gc := 0.9') do: [:pat |
+              (t includesSubstring: pat) ifTrue: [ok := false]].
+          "Standalone noop"
+          (t = 'form' or: [t = 'form := form']) ifTrue: [ok := false].
+          ok].
+      "Collapse consecutive duplicate lines"
+      deduped := OrderedCollection new. prev := '<<none>>'.
+      safe do: [:line | | t | t := self trimStr: line. t = prev ifFalse: [deduped add: line. prev := t]].
+      result := deduped inject: '' into: [:acc :l | acc isEmpty ifTrue: [l] ifFalse: [acc , lf2 , l]]
     ] on: Error do: [:e | ].
 
-    "--- 5. Ensure the form+gc prefix is always at the start.
-     If the LLM omitted 'Smalltalk at: #NaviCanvas', we inject it. ---"
-    prefix := 'form := Smalltalk at: #NaviCanvas ifAbsent: [nil]. gc := FormCanvas on: form.'.
-    (result includesSubstring: 'Smalltalk at: #NaviCanvas') ifFalse: [
-        result := prefix , lf , result ].
+    "4. Deduplicate monolith: truncate at second 'form := Smalltalk at: #NaviCanvas'"
+    [ | marker first second |
+      marker := 'form := Smalltalk at: #NaviCanvas'.
+      first := result indexOfSubCollection: marker startingAt: 1.
+      first > 0 ifTrue: [
+          second := result indexOfSubCollection: marker startingAt: first + marker size.
+          second > 0 ifTrue: [
+              Transcript show: 'AUTOCORRECT: monolith removed'; cr.
+              result := self trimStr: (result copyFrom: 1 to: second - 1)]]
+    ] on: Error do: [:e | ].
 
-    "--- 6. Ensure the ncm refresh.
-     Strategy: separate the last LLM line, interleave ncm before it,
-     and leave the last LLM line at the end so its value is the return.
-     If ncm is already present, move it before the last line if needed. ---"
-    [ | lines ncmLine filtered lastLine |
+    "5. If ncm precedes form on the same line, split with lf before form"
+    [ | ni fi |
+      ni := result indexOfSubCollection: 'ncm := Smalltalk at: #NaviCanvasM' startingAt: 1.
+      fi := result indexOfSubCollection: 'form := Smalltalk at: #NaviCanvas' startingAt: 1.
+      (ni > 0 and: [fi > ni]) ifTrue: [
+          | sep |
+          sep := result indexOfSubCollection: (String with: Character lf) startingAt: ni.
+          (sep = 0 or: [sep > fi]) ifTrue: [
+              result := (result copyFrom: 1 to: fi - 1) , lf , (result copyFrom: fi to: result size)]]
+    ] on: Error do: [:e | ].
+
+    "6. Insert phiCut definition if used but not defined"
+    ((result includesSubstring: 'phiCut') and: [(result includesSubstring: 'phiCut :=') not]) ifTrue: [
+        result := 'phiCut := (form width / 1.618) truncated. ' , result].
+
+    "7. Ensure form := Smalltalk... is the first executable line."
+    [ | lines formLine gcLine declLine others firstReal lf2 |
+      lf2 := String with: Character lf.
+      lines := result substrings: lf2.
+      "Pull out the variable declaration line if present"
+      declLine := lines detect: [:l | (self trimStr: l) size > 1 and: [(self trimStr: l) first = $|]] ifNone: [''].
+      firstReal := self trimStr: (lines detect: [:l |
+          | t | t := self trimStr: l.
+          t notEmpty and: [t first ~= $|]] ifNone: ['']).
+      (firstReal beginsWith: 'form :=') ifFalse: [
+          formLine := lines detect: [:l | (self trimStr: l) includesSubstring: 'Smalltalk at: #NaviCanvas'] ifNone: [''].
+          gcLine   := lines detect: [:l | (self trimStr: l) includesSubstring: 'FormCanvas on: form'] ifNone: [''].
+          formLine isEmpty ifTrue: [formLine := 'form := Smalltalk at: #NaviCanvas ifAbsent: [nil].'].
+          gcLine   isEmpty ifTrue: [gcLine   := 'gc := FormCanvas on: form.'].
+          others := lines reject: [:l |
+              | t | t := self trimStr: l.
+              t first = $| or: [
+              (t includesSubstring: 'Smalltalk at: #NaviCanvas') or: [
+              t includesSubstring: 'FormCanvas on: form']]].
+          result := (declLine isEmpty ifTrue: [''] ifFalse: [declLine , lf]) ,
+                    formLine , lf , gcLine , lf ,
+                    (others inject: '' into: [:acc :l | acc isEmpty ifTrue: [l] ifFalse: [acc , lf , l]])]
+    ] on: Error do: [:e | ].
+
+    "8. Ensure exactly one ncm refresh at the end, before the return value"
+    [ | lines ncmLine withoutNcm withoutEmpty last rest t isLiteral lf2 |
+      lf2 := String with: Character lf.
       ncmLine := 'ncm := Smalltalk at: #NaviCanvasM ifAbsent: [nil]. ncm isNil ifFalse: [ncm image: form. ncm changed].'.
-      lines := result substrings: (String with: Character lf).
-      "Separate ncm lines from the others"
-      filtered := lines select: [:l | (self trimStr: l) includesSubstring: 'ncm image: form'].
-      filtered isEmpty ifTrue: [
-          "ncm was absent: insert before the last line with real content"
-          | withoutEmpty last rest |
-          withoutEmpty := lines select: [:l | (self trimStr: l) isEmpty not].
-          withoutEmpty isEmpty
-              ifTrue:  [ result := result , lf , ncmLine ]
+      lines := result substrings: lf2.
+      withoutNcm   := lines select: [:l | ((self trimStr: l) includesSubstring: 'ncm image: form') not].
+      withoutEmpty := withoutNcm select: [:l | (self trimStr: l) notEmpty].
+      withoutEmpty isEmpty ifTrue: [result := ncmLine] ifFalse: [
+          last := withoutEmpty last.
+          t := self trimStr: last.
+          isLiteral := t size >= 2 and: [t first = $' and: [t last = $' and: [(t includesSubstring: 'displayOn:') not]]].
+          rest := withoutEmpty copyFrom: 1 to: withoutEmpty size - 1.
+          result := (rest inject: '' into: [:acc :l | acc isEmpty ifTrue: [l] ifFalse: [acc , lf , l]]) , lf.
+          isLiteral ifTrue: [
+              result := result , t , ' displayOn: form at: (form width // 2 - 30)@(form height // 2) textColor: Color yellow.' , lf].
+          result := result , ncmLine , lf , (isLiteral ifTrue: ['form width printString'] ifFalse: [last])]
+    ] on: Error do: [:e | ].
+
+    "9. If code uses w or h as variables but never assigns them, inject w := form width. h := form height."
+    [ | needsWH hasW hasH gcMarker gi dotIdx |
+      hasW  := result includesSubstring: 'w := form width'.
+      hasH  := result includesSubstring: 'h := form height'.
+      needsWH := (hasW not or: [hasH not]) and: [
+          (result includesSubstring: 'w//') or: [
+          (result includesSubstring: 'w /') or: [
+          (result includesSubstring: 'w@') or: [
+          (result includesSubstring: '@h') or: [
+          (result includesSubstring: 'h//') or: [
+          (result includesSubstring: 'h /') or: [
+          (result includesSubstring: ' w,') or: [
+          (result includesSubstring: ' h,') or: [
+          (result includesSubstring: 'corner: w') or: [
+          (result includesSubstring: 'corner: h') or: [
+          (result includesSubstring: '< w') or: [
+          (result includesSubstring: '< h') or: [
+          (result includesSubstring: '> w') or: [
+          result includesSubstring: '> h']]]]]]]]]]]]]].
+      needsWH ifTrue: [
+          gcMarker := 'gc := FormCanvas on: form'.
+          gi := result indexOfSubCollection: gcMarker startingAt: 1.
+          gi > 0
+              ifTrue: [
+                  dotIdx := result indexOf: $. startingAt: gi.
+                  dotIdx > 0 ifTrue: [
+                      result := (result copyFrom: 1 to: dotIdx) , lf ,
+                                'w := form width. h := form height.' , lf ,
+                                (result copyFrom: dotIdx + 1 to: result size)]]
               ifFalse: [
-                  last := withoutEmpty last.
-                  rest := lines copyFrom: 1 to: lines size - 1.
-                  result := (rest inject: '' into: [:acc :l |
-                      acc isEmpty ifTrue: [l] ifFalse: [acc , lf , l]]) ,
-                      lf , ncmLine , lf , last ] ]
-      ifFalse: [
-          "ncm was present: remove all its occurrences and re-insert before the last line"
-          | sinNcm last rest |
-          sinNcm := lines select: [:l | ((self trimStr: l) includesSubstring: 'ncm image: form') not].
-          sinNcm := sinNcm select: [:l | (self trimStr: l) isEmpty not].
-          sinNcm isEmpty
-              ifTrue:  [ result := ncmLine ]
-              ifFalse: [
-                  last := sinNcm last.
-                  rest := sinNcm copyFrom: 1 to: sinNcm size - 1.
-                  result := (rest inject: '' into: [:acc :l |
-                      acc isEmpty ifTrue: [l] ifFalse: [acc , lf , l]]) ,
-                      lf , ncmLine , lf , last ] ]
+                  result := 'form := Smalltalk at: #NaviCanvas ifAbsent: [nil].' , lf ,
+                            'gc := FormCanvas on: form.' , lf ,
+                            'w := form width. h := form height.' , lf , result]]
     ] on: Error do: [:e | ].
 
     ^ result!
@@ -909,8 +932,44 @@ eliminarComentariosLLM: codigo
     ^ self trimStr: out contents!
 
 procesarResultadoCurriculum: result response: response
-    | esperado paso |
+    | esperado paso codRef requierePintura tienePintura |
     esperado := self currentEsperado.
+    codRef := self currentCodRef.
+
+    "--- Paint-required check: si el código de referencia pinta, la respuesta también debe pintar. ---"
+    requierePintura := codRef notNil and: [
+        (codRef includesSubstring: 'gc fillRectangle:') or: [
+        (codRef includesSubstring: 'gc fillOval:') or: [
+        (codRef includesSubstring: 'gc line:') or: [
+        codRef includesSubstring: 'displayOn:']]]].
+    tienePintura := response notNil and: [
+        (response includesSubstring: 'gc fillRectangle:') or: [
+        (response includesSubstring: 'gc fillOval:') or: [
+        (response includesSubstring: 'gc line:') or: [
+        response includesSubstring: 'displayOn:']]]].
+    (requierePintura and: [tienePintura not]) ifTrue: [
+        Transcript show: '    WHY: no painting primitives in response (gc fill/line/displayOn: missing)'; cr.
+        levelFailures := levelFailures + 1.
+        Transcript show: 'FAIL (' , levelFailures printString , '/' , maxLevelFailures printString , '): ' , self levelName; cr.
+        levelFailures >= maxLevelFailures ifTrue: [
+            Transcript show: 'SKIP: ' , self levelName; cr.
+            levelFailures := 0.
+            currentLevel := currentLevel + 1.
+            self saveLevelToMemory].
+        ^ false ].
+
+    "--- Beauty gate: si el nivel requiere pintura y esperado=nil, beauty=0 significa canvas sin cambio ---"
+    (requierePintura and: [esperado isNil and: [lastBeautyScore <= 0.0]]) ifTrue: [
+        Transcript show: '    WHY: paint required but beauty=0 (canvas unchanged)'; cr.
+        levelFailures := levelFailures + 1.
+        Transcript show: 'FAIL (' , levelFailures printString , '/' , maxLevelFailures printString , '): ' , self levelName; cr.
+        levelFailures >= maxLevelFailures ifTrue: [
+            Transcript show: 'SKIP: ' , self levelName; cr.
+            levelFailures := 0.
+            currentLevel := currentLevel + 1.
+            self saveLevelToMemory].
+        ^ false ].
+
     paso := result isNil not
         and: [(result beginsWith: 'ERROR') not
         and: [esperado isNil
@@ -924,6 +983,11 @@ procesarResultadoCurriculum: result response: response
                           resNum := [ | r | r := result copyReplaceAll: '''' with: ''. r asInteger > 0 ] on: Error do: [:e | false].
                           resNum ]
                       ifFalse: [result includesSubstring: clean] ]]].
+    "Beauty fallback: if esperado=null and result is ERROR but canvas has real content, still pass.
+     This handles cases where the LLM draws correctly but appends a bad statement at the end."
+    (paso not and: [esperado isNil and: [lastBeautyScore > 0.15]]) ifTrue: [
+        Transcript show: '    BEAUTY-PASS: beauty=' , (lastBeautyScore printShowingDecimalPlaces: 3) , ' > 0.15 overrides ERROR result'; cr.
+        paso := true ].
     paso ifFalse: [
         | motivo |
         motivo := result isNil ifTrue: ['result=nil']
@@ -1027,20 +1091,26 @@ detectarRepeticion: codigo
 
 aplicarPenalizacionRepeticion: rawBeauty repeticiones: veces
     veces = 0 ifTrue: [
-        repetitionPenalty := repetitionPenalty * 0.75.
+        "Only decay penalty if not in a persistent severe loop"
+        severLoopCount > 3
+            ifTrue: [ repetitionPenalty := repetitionPenalty * 0.95 ]
+            ifFalse: [ repetitionPenalty := repetitionPenalty * 0.75 ].
         ^ rawBeauty ].
     veces = 1 ifTrue: [
         repetitionPenalty := 0.7.
+        severLoopCount := 0.
         adrenalinaBuffer decaer. adrenalinaBuffer decaer.
         Transcript show: '*** REPETITION :: beauty -70%'; cr.
         ^ rawBeauty * 0.3 ].
     veces = 2 ifTrue: [
         repetitionPenalty := 0.9.
+        severLoopCount := 0.
         adrenalinaBuffer initialize.
         Transcript show: '*** LOOP (x2) :: beauty -90%'; cr.
         ^ rawBeauty * 0.1 ].
     repetitionPenalty := 1.0.
     adrenalinaBuffer initialize.
+    severLoopCount := severLoopCount + 1.
     Transcript show: '*** SEVERE LOOP (x' , veces printString , ') :: beauty=0.005'; cr.
     ^ 0.005! !
 
@@ -1441,37 +1511,91 @@ restoreHistoryFromDataset
                 val := line copyFrom: ks to: ke - 1.
                 karmaBuffer add: val]]]!
 
-saveToDataset: prompt response: response result: result beauty: b pass: pass
-    | entry cleanCompletion cleanPrompt maxCompletionLen |
-    "--- Truncate completion to avoid saving LLM loops as training data ---"
-    maxCompletionLen := 2000.
-    cleanCompletion := (response isNil or: [response isEmpty])
-        ifTrue: ['']
-        ifFalse: [response size > maxCompletionLen
-            ifTrue: [response copyFrom: 1 to: maxCompletionLen]
-            ifFalse: [response]].
-    "--- Strip repetitive API boilerplate from prompt; keep only task + feedback ---"
-    cleanPrompt := prompt isNil ifTrue: [''] ifFalse: [
-        | cutMarkers cutIdx |
-        cutMarkers := #('=== NaviCanvas API' '=== DRAW ON CANVAS' '=== GENERATIVE EXAMPLE').
-        cutIdx := 0.
-        cutMarkers do: [:marker |
-            | idx |
-            idx := prompt indexOfSubCollection: marker startingAt: 1.
-            (idx > 0 and: [cutIdx = 0 or: [idx < cutIdx]]) ifTrue: [cutIdx := idx]].
-        cutIdx > 0
-            ifTrue: [self trimStr: (prompt copyFrom: 1 to: cutIdx - 1)]
-            ifFalse: [prompt]].
-    entry := '{"nivel":"'     , self levelName ,
-             '","beauty":'    , b printString ,
-             ',"adrenalina":' , adrenalinaBuffer nivel printString ,
-             ',"ruach":"'     , self ruachDescripcion ,
-             '","pass":'      , (pass ifTrue: ['true'] ifFalse: ['false']) ,
-             ',"prompt":'     , (self toJsonString: cleanPrompt) ,
-             ',"completion":' , (self toJsonString: cleanCompletion) ,
-             ',"result":'     , (self toJsonString: result) ,
+saveToDataset: prompt response: response result: result beauty: b pass: paso source: sourceTag
+    | entry compactPrompt cleanCompletion isError qualityTag encarnacion |
+
+    "--- 1. Compact prompt: keep only task-specific lines, drop boilerplate API docs ---"
+    compactPrompt := self compactPromptForDataset: prompt.
+
+    "--- 2. Clean completion: truncate if bloated by loops ---"
+    cleanCompletion := response isNil ifTrue: [''] ifFalse: [
+        | lines deduped prev |
+        "Remove consecutive duplicate lines (loop artifact)"
+        lines := response substrings: (String with: Character lf).
+        deduped := OrderedCollection new.
+        prev := ''.
+        lines do: [:line |
+            line = prev ifFalse: [ deduped add: line. prev := line ]].
+        cleanCompletion := deduped inject: '' into: [:acc :l |
+            acc isEmpty ifTrue: [l] ifFalse: [acc , (String with: Character lf) , l]].
+        "Hard cap at 1500 chars — anything longer is a loop or noise"
+        cleanCompletion size > 1500
+            ifTrue: [cleanCompletion copyFrom: 1 to: 1500]
+            ifFalse: [cleanCompletion]].
+
+    "--- 3. Quality tag for easy filtering ---"
+    isError := result notNil and: [result beginsWith: 'ERROR'].
+    qualityTag := isError ifTrue: ['error'] ifFalse: [
+        b >= 0.6  ifTrue: ['rich']   ifFalse: [
+        b >= 0.3  ifTrue: ['partial'] ifFalse: [
+        b >= 0.1  ifTrue: ['sparse']  ifFalse: ['discard']]]].
+    sourceTag = 'fallback' ifTrue: [qualityTag := 'discard'].
+
+    "--- 4. Pass field: true/false for curriculum, null for libre ---"
+    encarnacion := [ self readEncarnacion ] on: Error do: [:e | '?'].
+
+    entry := '{"sephirot":"'   , self levelName ,
+             '","beauty":'     , (b printShowingDecimalPlaces: 4) ,
+             ',"ruach":"'      , self ruachDescripcion ,
+             '","quality":"'   , qualityTag ,
+             '","source":"'    , sourceTag ,
+             '","pass":'       , (paso isNil ifTrue: ['null'] ifFalse: [paso printString]) ,
+             ',"enc":'         , encarnacion ,
+             ',"rep_penalty":' , (repetitionPenalty printShowingDecimalPlaces: 3) ,
+             ',"task":'        , (self toJsonString: compactPrompt) ,
+             ',"completion":'  , (self toJsonString: cleanCompletion) ,
+             ',"result":'      , (self toJsonString: (result isNil ifTrue: ['nil'] ifFalse: [result copyFrom: 1 to: (result size min: 120)])) ,
              '}' , (String with: Character lf).
     self agregarAArchivo: datasetPath contenido: entry!
+
+compactPromptForDataset: fullPrompt
+    "Extract only the task-specific part of the prompt, dropping repetitive API boilerplate.
+     Keeps: beauty feedback, task description, level name, beauty score.
+     Drops: the full canvas API listing, morph examples, fixed rules that repeat every entry."
+    | lf lines kept inBoilerplate taskLine beautyLine |
+    fullPrompt isNil ifTrue: [ ^ '' ].
+    lf := String with: Character lf.
+    lines := fullPrompt substrings: (String with: Character lf).
+    kept := OrderedCollection new.
+    inBoilerplate := false.
+
+    lines do: [:line |
+        | t |
+        "Trim leading spaces manually — compatible with Squeak 6 and Pharo"
+        t := line.
+        [t notEmpty and: [t first = $ ]] whileTrue: [t := t copyFrom: 2 to: t size].
+        [t notEmpty and: [t last  = $ ]] whileTrue: [t := t copyFrom: 1 to: t size - 1].
+
+        "Start of boilerplate API block — skip until beauty feedback"
+        (t beginsWith: '=== MANDATORY PATTERN')   ifTrue: [ inBoilerplate := true ].
+        (t beginsWith: '=== REQUIRED PATTERN')     ifTrue: [ inBoilerplate := true ].
+        (t beginsWith: '=== DRAW METHODS')         ifTrue: [ inBoilerplate := true ].
+        (t beginsWith: '=== NaviCanvas API')        ifTrue: [ inBoilerplate := true ].
+        (t beginsWith: '=== DRAW ON CANVAS')        ifTrue: [ inBoilerplate := true ].
+
+        "Beauty feedback and task lines are always kept"
+        (t beginsWith: '# beauty=')  ifTrue: [ inBoilerplate := false ].
+        (t beginsWith: '# *** LOOP') ifTrue: [ inBoilerplate := false ].
+        (t beginsWith: '# WARNING:') ifTrue: [ inBoilerplate := false ].
+        (t beginsWith: 'Task:')      ifTrue: [ inBoilerplate := false ].
+        (t beginsWith: 'Squeak 6.0') ifTrue: [ inBoilerplate := false ].
+        (t beginsWith: '# Completed') ifTrue: [ inBoilerplate := false ].
+
+        inBoilerplate ifFalse: [
+            t isEmpty ifFalse: [ kept add: line ] ] ].
+
+    kept isEmpty ifTrue: [ ^ fullPrompt copyFrom: 1 to: (fullPrompt size min: 300) ].
+    ^ kept inject: '' into: [:acc :l | acc isEmpty ifTrue: [l] ifFalse: [acc , lf , l]]!
 
 seedMemoryIfNeeded: seedPath
     | ref |

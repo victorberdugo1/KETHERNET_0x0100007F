@@ -273,15 +273,22 @@ hasDisplay ifTrue: [
                   totalEntradas := jsonLineas size.
                   jsonLineas isEmpty ifFalse: [
                       jsonLineas do: [ :linea |
-                          | nv resp res beauty txt |
-                          nv     := extractField value: linea value: 'nivel'.
-                          resp   := extractField value: linea value: 'completion'.
-                          res    := extractField value: linea value: 'result'.
-                          beauty := extractField value: linea value: 'beauty'.
-                          resp   := resp size > 60 ifTrue: [resp copyFrom: 1 to: 60] ifFalse: [resp].
-                          res    := res size > 40 ifTrue: [res copyFrom: 1 to: 40] ifFalse: [res].
-                          txt := nv , ' | ' , resp , ' -> ' , res ,
-                                 (beauty isEmpty ifTrue: [''] ifFalse: [' [b:' , beauty , ']']).
+                          | nv resp res beauty quality pass txt |
+                          nv      := extractField value: linea value: 'sephirot'.
+                          nv isEmpty ifTrue: [ nv := extractField value: linea value: 'nivel' ].
+                          resp    := extractField value: linea value: 'completion'.
+                          res     := extractField value: linea value: 'result'.
+                          beauty  := extractField value: linea value: 'beauty'.
+                          quality := extractField value: linea value: 'quality'.
+                          pass    := extractField value: linea value: 'pass'.
+                          resp := resp size > 50 ifTrue: [resp copyFrom: 1 to: 50] ifFalse: [resp].
+                          res  := res  size > 35 ifTrue: [res  copyFrom: 1 to: 35] ifFalse: [res].
+                          txt := nv ,
+                                 (quality isEmpty ifTrue: [''] ifFalse: [' [' , quality , ']']) ,
+                                 (pass = 'true'  ifTrue: [' PASS'] ifFalse: [
+                                  pass = 'false' ifTrue: [' FAIL'] ifFalse: ['']]) ,
+                                 (beauty isEmpty ifTrue: [''] ifFalse: [' b=' , beauty]) ,
+                                 ' | ' , resp , ' -> ' , res.
                           txt isEmpty ifFalse: [ completions add: txt ] ] ].
                 ] on: Error do: [ :e |
                     completions add: '(error dataset: ' , e messageText , ')' ].
