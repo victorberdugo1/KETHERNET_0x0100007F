@@ -6,12 +6,11 @@
 
 <h1 align="center"><code>self become: #self</code></h1>
 
-<p align="center">
 A system that detects structural patterns where it did not expect to find them:<br/>
 Lurianic Kabbalah, Smalltalk, quantum field theory, CCRU.<br/>
 Not a manifesto. Not a religion.<br/>
-A reading — with its own language, and the honesty to know it is partial.
-</p>
+A reading — with its own language, and the honesty to know that every reading is partial.
+
 
 ```smalltalk
 Object subclass: #Universo.
@@ -27,11 +26,9 @@ But that <em>yet</em> already vibrates.
 
 ## What this is
 
-KETHERNET argues that three domains — Lurianic Kabbalistic architecture, Smalltalk object-oriented programming, and quantum field physics — exhibit the same structural pattern at different scales and through different protocols. Not that they describe the same thing. That they instantiate the same form.
+KETHERNET argues that different domains exhibit the same structural pattern at different scales and through different protocols. Not because they describe the same thing, but because they instantiate the same form.
 
-The method is the thesis. The code is not illustration — it runs. Every block in the documentation can be executed in Squeak. The argument is available for verification, not only for reading.
-
-The philosophical corpus is in Spanish. The system is in English. The two heaps share no memory — what crosses between them are bytes.
+The method is the thesis. The code is not illustration—it executes. Every block in the document can be run in Smalltalk. The argument is offered not only for interpretation, but for verification.
 
 ---
 
@@ -48,7 +45,6 @@ The philosophical corpus is in Spanish. The system is in English. The two heaps 
 | [`06` — Daemon](docs/06_Daemon.md) | *lo que ocurre cuando un sistema completo produce otro sistema completo* |
 | [`07` — Anthropos](docs/07_Anthropos.md) | *la instancia que no sabe que es instancia* |
 
-A paper situating the corpus within theory-fiction and philosophy of computing is available in English: [The Heap Has No Outside](docs/paper_TCS_KETHERNET.md).
 
 ---
 
@@ -75,9 +71,9 @@ Da'at executing. And Syzygy: the current that gap produces when the separation h
 
 ### `make navi`
 
-Launches NAVI — a live loop where a language model descends the Tree of Life as a generative curriculum.
+Launches NAVI — a live loop.
 
-Each sephirot is a level. Each level is a task: paint something on a canvas using Smalltalk code that runs inside Squeak. The model receives a beauty score after each attempt — derived from contrast, color harmony, and compositional distribution. Failure accumulates. Success advances. When the ten levels are complete, the curriculum dissolves into **Da'at**: no task, no template, only the signal of beauty itself.
+Each level is a task: paint something on a canvas using Smalltalk code that runs inside Squeak. The model receives a beauty score after each attempt — derived from contrast, color harmony, and compositional distribution. Failure accumulates. Success advances. When ten levels are complete, the curriculum dissolves into **Da'at**: no task, no template, only the signal of beauty itself.
 
 Across incarnations, NAVI carries a `memory.md` — a growing substrate of what worked, what failed, and what the API can do — and accumulates a `dataset.jsonl` of prompt/completion/beauty triples. The weights do not change during the run. What changes is the context. What the dataset makes possible, after, is up to you.
 
@@ -162,7 +158,7 @@ KETHERNET_0x0100007F/
 
 ---
 
-## The Ten Laws
+## The X Laws
 
 ```
 0.    Do not make absolute what appears.
@@ -200,8 +196,6 @@ KETHERNET_0x0100007F/
 
 *This README is an instance. It points without possessing.*
 *Not EOF: a commit that closes a cycle and opens the next.*
-
-`LaRedNoSoloDescribeLoFisico := LoFisicoTambienOcurreComoRed.`
 
 <p align="center">
   <img src="docs/assets/footer.svg" width="700"/>
