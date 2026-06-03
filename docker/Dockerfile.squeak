@@ -25,7 +25,7 @@ COPY docker/entrypoint.squeak.sh /usr/local/bin/entrypoint.squeak.sh
 RUN dos2unix /usr/local/bin/entrypoint.squeak.sh && \
     chmod +x /usr/local/bin/entrypoint.squeak.sh
 
-WORKDIR /kethernet
+WORKDIR /squeak
 COPY . .
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.squeak.sh"]

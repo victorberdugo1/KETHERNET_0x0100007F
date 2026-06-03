@@ -32,14 +32,14 @@ daat:
 	docker compose run --rm --name kethernet-squeak -d squeak --gui
 	@echo "DAAT :: Squeak lanzado — esperando Pharo..."
 	@sleep 2
-	docker compose run --rm -it pharo --st /smalltalk/daat.st
+	docker compose run --rm -it pharo --st /pharo/daat.st
 
 # ============================================================
 # NAVI — daat.st no se toca
-# Squeak: kethernet/navi_squeak_daat.st  (servidor :4444)
-# Pharo:  smalltalk/navi_pharo_daat.st   (loop LLM)
+# Squeak: squeak/navi_squeak_daat.st  (servidor :4444)
+# Pharo:  pharo/navi_pharo_daat.st    (loop LLM)
 #
-# FIX 3: memory.md se SIEMPRE sobreescribe desde kethernet/memory.md
+# FIX 3: memory.md se SIEMPRE sobreescribe desde squeak/memory.md
 # para que el volumen persistido no quede varado con una version vieja/vacia.
 # El seed se monta en /seed dentro del contenedor Pharo NAVI.
 # navi_pharo_daat.st llama seedMemoryIfNeeded: '/seed/memory.md'
@@ -47,12 +47,12 @@ daat:
 # ============================================================
 navi:
 	xhost +local:docker 2>/dev/null || true
-	@echo "KETHERNET :: preparando seed en kethernet/..."
-	@test -f kethernet/memory.md || (test -f memory.md && cp memory.md kethernet/memory.md) || echo "# Memoria NAVI" > kethernet/memory.md
-	@test -f kethernet/dataset.json || echo '{"prompt":"inicio","completion":"primera sesion NAVI"}' > kethernet/dataset.json
+	@echo "KETHERNET :: preparando seed en squeak/..."
+	@test -f squeak/memory.md || (test -f memory.md && cp memory.md squeak/memory.md) || echo "# Memoria NAVI" > squeak/memory.md
+	@test -f squeak/dataset.json || echo '{"prompt":"inicio","completion":"primera sesion NAVI"}' > squeak/dataset.json
 	@echo "KETHERNET :: sembrando dataset en volumen navi-data..."
 	docker compose run --rm \
-		-v "$$(pwd)/kethernet:/seed:ro" \
+		-v "$$(pwd)/squeak:/seed:ro" \
 		pharo eval "| src dst | #('dataset.json') do: [:name | src := ('/seed/' , name) asFileReference. dst := ('/navi/' , name) asFileReference. dst exists ifFalse: [dst writeStreamDo: [:f | f nextPutAll: src contents]]]."
 	@echo "KETHERNET :: limpiando contenedor anterior..."
 	-docker rm -f kethernet-squeak 2>/dev/null || true
@@ -69,7 +69,7 @@ navi:
 		--rm \
 		--interactive \
 		--tty \
-		-v "$$(pwd)/kethernet:/seed:ro" \
+		-v "$$(pwd)/squeak:/seed:ro" \
 		pharo --navi
 
 # Inspect: ver el memory.md actual del volumen

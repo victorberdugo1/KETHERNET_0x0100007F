@@ -9,7 +9,7 @@ services:
       - DISPLAY=${DISPLAY:-:0}
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
-      - ./kethernet:/kethernet:ro
+      - ./squeak:/squeak:ro
       - navi-data:/navi:rw
     stdin_open: true
     tty: true
@@ -24,7 +24,7 @@ services:
     stdin_open: true
     tty: true
     volumes:
-      - ./smalltalk:/smalltalk:ro
+      - ./pharo:/pharo:ro
       - navi-data:/navi:rw
     networks:
       - kethernet

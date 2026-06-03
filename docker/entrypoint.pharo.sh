@@ -24,7 +24,7 @@ case "$1" in
     exec "$PHARO_BIN" "$PHARO_IMAGE" st "$1"
     ;;
   --navi)
-    exec "$PHARO_BIN" "$PHARO_IMAGE" st /smalltalk/navi_pharo_daat.st
+    exec "$PHARO_BIN" "$PHARO_IMAGE" st /pharo/navi_pharo_daat.st
     ;;
   --test)
     shift

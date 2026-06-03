@@ -15,7 +15,7 @@ SQUEAK_BIN=$(which squeak)
 case "$1" in
   --gui)
     echo "Squeak GUI + DAAT"
-    exec "$SQUEAK_BIN" "$SQUEAK_IMAGE" /kethernet/daat.st
+    exec "$SQUEAK_BIN" "$SQUEAK_IMAGE" /squeak/daat.st
     ;;
   --gui-clean)
     echo "Squeak GUI limpio"
@@ -31,7 +31,7 @@ case "$1" in
     ;;
   --navi)
     echo "KETHERNET :: Squeak NAVI servidor TCP :4444"
-    exec "$SQUEAK_BIN" "$SQUEAK_IMAGE" /kethernet/navi_squeak_daat.st
+    exec "$SQUEAK_BIN" "$SQUEAK_IMAGE" /squeak/navi_squeak_daat.st
     ;;
   *)
     exec "$SQUEAK_BIN" "$SQUEAK_IMAGE"
