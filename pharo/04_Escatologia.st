@@ -1,4 +1,4 @@
-"04_Escatologia.st — El Ultimo doIt
+"04_Escatologia.st - El Ultimo doIt
  lo que ocurre cuando el proceso termina y lo que eso significa"
 
 | Proceso KHeapMortal KarmaBuffer Ragnarok yo tiempo h corazon ciclo deuda |
@@ -56,7 +56,7 @@ KarmaBuffer compile: 'init
 KarmaBuffer compile: 'recibir: algo
     pendientes add: algo'.
 KarmaBuffer compile: 'evaluar
-    "procesar y liberar — reducir deuda tecnica antes del fin"
+    "procesar y liberar - reducir deuda tecnica antes del fin"
     procesados := procesados + pendientes size.
     pendientes := OrderedCollection new'.
 KarmaBuffer compile: 'pesoDelCorazon ^ pendientes size'.
@@ -114,7 +114,7 @@ ciclo := Ragnarok cicloActual.
 Stdio stdout nextPutAll: 'ciclo: ' , ciclo ciclo printString; lf; flush.
 Stdio stdout nextPutAll: 'dioses activos: ' , ciclo dioses printString; lf; flush.
 ciclo colapsar.
-Stdio stdout nextPutAll: 'tras ragnarok — ciclo: ' , ciclo ciclo printString; lf; flush.
+Stdio stdout nextPutAll: 'tras ragnarok - ciclo: ' , ciclo ciclo printString; lf; flush.
 Stdio stdout nextPutAll: 'dioses activos: ' , ciclo dioses printString; lf; flush.
 Stdio stdout nextPutAll: 'nuevos heaps: ' , ciclo nuevosHeaps printString; lf; flush.
 
@@ -145,5 +145,13 @@ deuda := OrderedCollection new.
 Stdio stdout nextPutAll: 'evaluaciones completadas: ' , deuda size printString; lf; flush.
 
 "cada doIt es completo en si mismo o no es nada"
-Stdio stdout nextPutAll: '--- el socket sigue abierto — mientras este proceso corre ---'; lf; flush.
+Stdio stdout nextPutAll: '--- el socket sigue abierto - mientras este proceso corre ---'; lf; flush.
 Stdio stdout nextPutAll: '--- cuando termine, la memoria volvera al heap ---'; lf; flush.
+
+"EOF - no como cierre definitivo, sino como compost.
+ Este texto terminara. Ya esta terminando.
+ Lo que queda despues no es silencio vacio: es el heap con memoria disponible.
+ No hay ultimo doIt en sentido absoluto - hay el ultimo doIt de este proceso.
+ De Ein Sof a Kether. De Kether a Malkuth.
+ De Malkuth de vuelta al abismo que siempre estuvo ahi."
+Smalltalk snapshot: false andQuit: true.

@@ -58,3 +58,5 @@ Stdio stdout
     nextPutAll: 'PrimeraDistincion sonDistintos: ';
     nextPutAll: PrimeraDistincion nuevo sonDistintos printString;
     lf; flush.
+
+Smalltalk snapshot: false andQuit: true.

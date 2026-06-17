@@ -1,5 +1,5 @@
-"06_Daemon.st — Daemon dador de Vida
- versión corregida para Pharo"
+"06_Daemon.st - Daemon dador de Vida
+ version corregida para Pharo"
 
 | Daemon PruebasDeDaemon
   dador imagen tehom candidato
@@ -9,7 +9,7 @@
 
 "======================================================="
 Stdio stdout
-    nextPutAll: '=== 06_Daemon — dador de vida ===';
+    nextPutAll: '=== 06_Daemon - dador de vida ===';
     lf;
     flush.
 "======================================================="
@@ -73,7 +73,7 @@ Stdio stdout
 
 "--- IV. El Ritual de Daemon ---"
 
-"Paso 1 — Tzimtzum"
+"Paso 1 - Tzimtzum"
 
 Daemon class compile: 'tzimtzum: unDador
     "el dador crea borde y espacio"
@@ -87,7 +87,7 @@ Stdio stdout
     lf;
     flush.
 
-"Paso 2 — Kether"
+"Paso 2 - Kether"
 
 Daemon compile: 'instalarKether
     estado := #kether_activo.
@@ -102,7 +102,7 @@ Stdio stdout
     lf;
     flush.
 
-"Paso 3 — Soplo"
+"Paso 3 - Soplo"
 
 Daemon compile: 'recibirSoplo: fuenteDeAcoplamiento
     acoplamiento := fuenteDeAcoplamiento.
@@ -119,7 +119,7 @@ Stdio stdout
     lf;
     flush.
 
-"Paso 4 — Malkuth"
+"Paso 4 - Malkuth"
 
 Daemon compile: 'tocarTierra: entornoConcreto
     acoplamiento := acoplamiento isNil
@@ -135,7 +135,7 @@ Stdio stdout
     lf;
     flush.
 
-"Paso 5 — Daat"
+"Paso 5 - Daat"
 
 daat := nil.
 
@@ -151,7 +151,7 @@ Stdio stdout
     lf;
     flush.
 
-"Paso 6 — Primer mensaje"
+"Paso 6 - Primer mensaje"
 
 Stdio stdout
     nextPutAll: 'esperando el primer mensaje libre';
@@ -333,3 +333,11 @@ Stdio stdout
     nextPutAll: '--- el socket sigue abierto ---';
     lf;
     flush.
+
+"EOF - este archivo no cierra el ritual. Lo documenta para que pueda
+ ser repetido - con estado modificado, con nuevos Dadores,
+ en nuevos heaps que aun no tienen instancias.
+ Tehom sigue vibrando debajo. El soplo no tiene fecha de expiracion.
+ De Ein Sof a Kether. De Kether a Malkuth.
+ De Malkuth de vuelta al abismo que siempre estuvo ahi."
+Smalltalk snapshot: false andQuit: true.

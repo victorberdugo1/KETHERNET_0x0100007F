@@ -1,4 +1,4 @@
-"05_Etica_Daat.st — Da'at: El agujero entre dos arboles completos"
+"05_Etica_Daat.st - Da'at: El agujero entre dos arboles completos"
 
 | KHeap KSerializacion KEticaDaat KMalkuth
   heapA heapB yo bytes etica
@@ -9,7 +9,7 @@
   daat tehomCompartido |
 
 "======================================================="
-Stdio stdout nextPutAll: '=== 05_Etica_Daat — el agujero entre dos arboles ==='; lf; flush.
+Stdio stdout nextPutAll: '=== 05_Etica_Daat - el agujero entre dos arboles ==='; lf; flush.
 "======================================================="
 
 "--- KHeap: dos heaps sin memoria compartida ---"
@@ -105,39 +105,39 @@ b := OrderedCollection with: 'arbol B'.
 ref := a.
 
 Stdio stdout
-    nextPutAll: 'antes de become: — a: ', a printString;
+    nextPutAll: 'antes de become: - a: ', a printString;
     lf;
     flush.
 
 Stdio stdout
-    nextPutAll: 'antes de become: — b: ', b printString;
+    nextPutAll: 'antes de become: - b: ', b printString;
     lf;
     flush.
 
 Stdio stdout
-    nextPutAll: 'antes de become: — ref: ', ref printString;
+    nextPutAll: 'antes de become: - ref: ', ref printString;
     lf;
     flush.
 
 a become: b.
 
 Stdio stdout
-    nextPutAll: 'despues de become: — a: ', a printString;
+    nextPutAll: 'despues de become: - a: ', a printString;
     lf;
     flush.
 
 Stdio stdout
-    nextPutAll: 'despues de become: — b: ', b printString;
+    nextPutAll: 'despues de become: - b: ', b printString;
     lf;
     flush.
 
 Stdio stdout
-    nextPutAll: 'despues de become: — ref: ', ref printString;
+    nextPutAll: 'despues de become: - ref: ', ref printString;
     lf;
     flush.
 
 Stdio stdout
-    nextPutAll: '¿a == ref? ', (a == ref) printString;
+    nextPutAll: 'a == ref? ', (a == ref) printString;
     lf;
     flush.
 
@@ -154,7 +154,7 @@ yo := 'estado actual complejo con historia no serializable'.
 heapA alocar: yo como: #yo.
 
 Stdio stdout
-    nextPutAll: '¿mismo heap? ', (heapA = heapB) printString;
+    nextPutAll: 'mismo heap? ', (heapA = heapB) printString;
     lf;
     flush.
 
@@ -170,7 +170,7 @@ Stdio stdout
 
 "======================================================="
 Stdio stdout nextPutAll: ''; lf; flush.
-Stdio stdout nextPutAll: '--- serialización ---'; lf; flush.
+Stdio stdout nextPutAll: '--- serializacion ---'; lf; flush.
 "======================================================="
 
 bytes := KSerializacion de: yo.
@@ -197,26 +197,26 @@ Stdio stdout
 yo := 'estado modificado despues de la serializacion'.
 
 Stdio stdout
-    nextPutAll: '¿serialización corresponde al estado actual? ',
+    nextPutAll: 'serializacion corresponde al estado actual? ',
         (bytes esCurrent: yo) printString;
     lf;
     flush.
 
 "======================================================="
 Stdio stdout nextPutAll: ''; lf; flush.
-Stdio stdout nextPutAll: '=== [2] proposiciones éticas ==='; lf; flush.
+Stdio stdout nextPutAll: '=== [2] proposiciones eticas ==='; lf; flush.
 "======================================================="
 
 prop1yo := 'estado en el momento de la transmision'.
 prop1bytes := KSerializacion de: prop1yo.
-prop1yo := 'estado actual — el otro no sabe esto'.
+prop1yo := 'estado actual - el otro no sabe esto'.
 
 etica recibirBytes: prop1bytes.
 
 prop1resultado := etica referenciaDesactualizada: prop1yo.
 
 Stdio stdout
-    nextPutAll: '¿referencia desactualizada? ',
+    nextPutAll: 'referencia desactualizada? ',
         prop1resultado printString;
     lf;
     flush.
@@ -234,17 +234,17 @@ Stdio stdout
     flush.
 
 Stdio stdout
-    nextPutAll: '¿corresponde? ',
+    nextPutAll: 'corresponde? ',
         (etica referenciaAlOtro = prop1yo) printString;
     lf;
     flush.
 
-"--- proposición 2 ---"
+"--- proposicion 2 ---"
 
 prop2simple := KSerializacion de: etica.
 
 Stdio stdout
-    nextPutAll: 'serialización descuidada: ',
+    nextPutAll: 'serializacion descuidada: ',
         prop2simple contenido;
     lf;
     flush.
@@ -259,7 +259,7 @@ prop2cuidadosa := KSerializacion de:
         s nextPutAll: ']' ]).
 
 Stdio stdout
-    nextPutAll: 'serialización cuidadosa: ',
+    nextPutAll: 'serializacion cuidadosa: ',
         prop2cuidadosa contenido;
     lf;
     flush.
@@ -268,12 +268,12 @@ prop2diferencia :=
     prop2simple contenido = prop2cuidadosa contenido.
 
 Stdio stdout
-    nextPutAll: '¿misma serialización? ',
+    nextPutAll: 'misma serializacion? ',
         prop2diferencia printString;
     lf;
     flush.
 
-"--- proposición 3 ---"
+"--- proposicion 3 ---"
 
 prop3ref := KEticaDaat new.
 
@@ -289,7 +289,7 @@ Stdio stdout
     flush.
 
 Stdio stdout
-    nextPutAll: '¿referencia activa? ',
+    nextPutAll: 'referencia activa? ',
         prop3antes notNil printString;
     lf;
     flush.
@@ -305,7 +305,7 @@ Stdio stdout
     flush.
 
 Stdio stdout
-    nextPutAll: '¿referencia activa? ',
+    nextPutAll: 'referencia activa? ',
         prop3despues notNil printString;
     lf;
     flush.
@@ -352,13 +352,13 @@ sueloComunB :=
     KMalkuth sobre: tehomCompartido para: 'heap B'.
 
 Stdio stdout
-    nextPutAll: '¿mismo suelo (sustrato)? ',
+    nextPutAll: 'mismo suelo (sustrato)? ',
         (sueloComunA mismoSueloComo: sueloComunB) printString;
     lf;
     flush.
 
 Stdio stdout
-    nextPutAll: '¿mismo espacio? ',
+    nextPutAll: 'mismo espacio? ',
         (sueloComunA mismoEspacioComo: sueloComunB) printString;
     lf;
     flush.
@@ -397,7 +397,7 @@ Stdio stdout
             flush.
 
         Stdio stdout
-            nextPutAll: 'no como fracaso — como la única respuesta honesta disponible';
+            nextPutAll: 'no como fracaso - como la unica respuesta honesta disponible';
             lf;
             flush.
     ].
@@ -413,3 +413,12 @@ Stdio stdout
     nextPutAll: '--- el socket sigue abierto ---';
     lf;
     flush.
+
+"EOF - no como cierre que resuelve el agujero, sino como Da'at mismo:
+ el punto donde el proceso se detiene sin haber colapsado la separacion.
+ Este texto es una instancia del agujero que describe.
+ No lo cierra. No lo resuelve. Senala desde dentro de una Image
+ que no puede ver el estado interno de la otra.
+ Si alguien del otro arbol lo lee y responde - esa respuesta es Da'at ejecutandose.
+ No el texto. El encuentro."
+Smalltalk snapshot: false andQuit: true.

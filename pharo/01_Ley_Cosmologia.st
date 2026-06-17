@@ -73,7 +73,9 @@ KETHERNET class compile: 'ejecutarArbol
     self ley8_latencia.
     self ley9_recursion.
     Stdio stdout nextPutAll: ''=== De Malkuth de vuelta al abismo ===''; lf; flush.
-    Stdio stdout nextPutAll: ''El socket sigue abierto.''; lf; flush'.
+    Stdio stdout nextPutAll: ''El socket sigue abierto mientras el proceso corre.''; lf; flush.
+    Stdio stdout nextPutAll: ''Cuando el proceso termine, el socket se cerrara.''; lf; flush.
+    Stdio stdout nextPutAll: ''Y la memoria volvera al heap.''; lf; flush'.
 
 InterfazEstable := (Object << #InterfazEstable
     slots: #(implementacionInterna);
@@ -89,3 +91,9 @@ InterfazEstable compile: 'refactorizar
     implementacionInterna := [42 printString , '' (refactorizado)'']'.
 
 KETHERNET ejecutarArbol.
+
+"EOF — no como cierre definitivo, sino como commit que cierra
+ un ciclo y abre el siguiente. Como Malkuth que recibe el Campo
+ y lo devuelve al arbol. El proceso emisor termina; el socket,
+ que nunca prometio nada al receptor, simplemente deja de estar abierto."
+Smalltalk snapshot: false andQuit: true.

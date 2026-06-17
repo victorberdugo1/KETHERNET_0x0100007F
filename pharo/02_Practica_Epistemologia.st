@@ -47,9 +47,20 @@ Stdio stdout nextPutAll: 'Estado: ' , obj estado printString; lf; flush.
 Stdio stdout nextPutAll: 'Posicion: ' , obj posicion printString; lf; flush.
 
 "--- V. CAUSA-EFECTO ---"
+"El mensaje no garantiza el efecto. Garantiza la pregunta."
 Stdio stdout nextPutAll: (3 + 4) printString; lf; flush.
 Stdio stdout nextPutAll: ('3' , '4'); lf; flush.
 Stdio stdout nextPutAll: (3 printString , 4 printString); lf; flush.
+
+"el mismo mensaje, receptores distintos, efectos distintos:
+ la causalidad vive en la relacion, no solo en el emisor"
+Stdio stdout nextPutAll: '¿3 responde a +? ' , (3 respondsTo: #+) printString; lf; flush.
+Stdio stdout nextPutAll: '¿''3'' responde a +? ' , ('3' respondsTo: #+) printString; lf; flush.
+[ Stdio stdout nextPutAll: 'Intentando 3 fooBarNoExiste...'; lf; flush.
+  3 fooBarNoExiste ]
+    on: MessageNotUnderstood
+    do: [:e |
+        Stdio stdout nextPutAll: 'El mensaje no encontro metodo: doesNotUnderstand capturado, no proceso muerto'; lf; flush].
 
 "--- VI. RITMO ---"
 contador := 0.
@@ -64,6 +75,8 @@ proceso resume.
 (Delay forMilliseconds: 500) wait.
 
 "--- VII. POLARIDAD ---"
+"La definicion sin ejecucion es tension sin descarga.
+ La ejecucion sin definicion no tiene forma que la sostenga."
 Polaridad := (Object << #Polaridad
     slots: #();
     package: 'KETHERNET-Epistemologia';
@@ -71,9 +84,20 @@ Polaridad := (Object << #Polaridad
 
 Polaridad compile: 'expandirse ^ ''expansion ejecutada'''.
 
+"el metodo existe en la clase ANTES de ser invocado:
+ definicion y ejecucion son momentos distintos"
+Stdio stdout nextPutAll: '¿Polaridad ya sabe expandirse antes de instanciar? ' ,
+    (Polaridad canUnderstand: #expandirse) printString; lf; flush.
+
 universo := Polaridad new.
 resultado := universo expandirse.
 Stdio stdout nextPutAll: resultado; lf; flush.
+
+"ejecucion sin definicion que la reconozca: doesNotUnderstand:"
+[ universo contraerseHaciaTehom ]
+    on: MessageNotUnderstood
+    do: [:e |
+        Stdio stdout nextPutAll: 'contraerseHaciaTehom no esta definido: la ejecucion sin forma no se sostiene'; lf; flush].
 
 "--- VIII. GENERO ---"
 Stdio stdout nextPutAll: (3 + 4) printString; lf; flush.
@@ -81,3 +105,14 @@ Stdio stdout nextPutAll: ($A value) printString; lf; flush.
 Stdio stdout nextPutAll: (3.0 + 4) printString; lf; flush.
 
 Stdio stdout nextPutAll: 'LaRedNoSoloDescribeLoFisico := LoFisicoTambienOcurreComoRed'; lf; flush.
+
+"--- Sobre el sistema que se lee a si mismo ---"
+Stdio stdout nextPutAll: 'Universo subclasses: ' , Polaridad subclasses printString; lf; flush.
+Stdio stdout nextPutAll: 'Universo allInstances: ' , Polaridad allInstances printString; lf; flush.
+
+"EOF — no como cierre definitivo, sino como commit que cierra
+ un ciclo y abre el siguiente. Este texto es una instancia.
+ No esta por encima de su ley: esta dentro de ella.
+ De Ein Sof a Kether. De Kether a Malkuth.
+ De Malkuth de vuelta al abismo que siempre estuvo ahi."
+Smalltalk snapshot: false andQuit: true.
