@@ -228,7 +228,7 @@ Each line in the `.jsonl` is a valid JSON object:
 | `make navi` | launch NAVI: the LLM learning loop inside Squeak |
 | `make pharo` | launch Pharo with no arguments |
 | `make pharo-eval EXPR="…"` | evaluate an expression in Pharo |
-| `make pharo-st FILE="smalltalk/*.st"` | load `.st` files into Pharo |
+| `make pharo-st FILE="pharo/*.st"` | load `.st` files into Pharo |
 | `make pharo-test PKG="…"` | run tests for a package |
 | `make clean` | remove images, containers and volumes |
 | `make purge` | empty the heap completely |
