@@ -361,6 +361,12 @@ def run_finetune(data_paths: list[str], out_dir: str):
     print(f"  Train: {len(train_ds)}  Eval: {len(eval_ds)}")
 
     print("\n[3/3] Entrenando...")
+    # FIX: en TRL>=0.13 max_seq_length y dataset_text_field van en SFTConfig,
+    # no en SFTTrainer.__init__. warmup_ratio -> warmup_steps para evitar warning.
+    # FIX: en TRL>=0.20 max_seq_length fue eliminado de SFTConfig (deprecado desde
+    # 0.16, ver PR #2306/#2895 de huggingface/trl); el nuevo nombre es max_length.
+    n_train_steps = max(1, (len(train_ds) // (BATCH_SIZE * GRAD_ACCUM)) * EPOCHS)
+    warmup_steps  = max(1, int(n_train_steps * WARMUP_RATIO))
     training_args = SFTConfig(
         output_dir=out_dir,
         num_train_epochs=EPOCHS,
@@ -368,7 +374,7 @@ def run_finetune(data_paths: list[str], out_dir: str):
         per_device_eval_batch_size=BATCH_SIZE,
         gradient_accumulation_steps=GRAD_ACCUM,
         learning_rate=LR,
-        warmup_ratio=WARMUP_RATIO,
+        warmup_steps=warmup_steps,
         lr_scheduler_type="cosine",
         bf16=True,
         fp16=False,
@@ -377,45 +383,30 @@ def run_finetune(data_paths: list[str], out_dir: str):
         eval_strategy="steps",
         eval_steps=20,
         save_strategy="steps",
-        save_steps=50,
+        save_steps=20,
         save_total_limit=2,
         load_best_model_at_end=True,
         metric_for_best_model="eval_loss",
-        max_seq_length=MAX_SEQ_LEN,
-        dataset_text_field="text",
         report_to="none",
         dataloader_num_workers=0,
         gradient_checkpointing=True,
-        # FIX: kwargs necesarios para Qwen2.5 con gradient checkpointing
         gradient_checkpointing_kwargs={"use_reentrant": False},
-        remove_unused_columns=False,  # necesario para que 'weight' llegue al trainer
-        # FIX: packing=False — con packing=True el peso por muestra pierde sentido
+        remove_unused_columns=False,
         packing=False,
-        # FIX: NEFTune — mejora generalización en datasets pequeños sin coste extra
-        # (Jain et al. 2023: "NEFTune: Noisy Embeddings Improve Instruction Finetuning")
         neftune_noise_alpha=5.0,
+        max_length=MAX_SEQ_LEN,
+        dataset_text_field="text",
     )
 
     WeightedTrainer = make_weighted_trainer(SFTTrainer)
 
-    # FIX: processing_class en vez de tokenizer= (deprecado en TRL >= 0.12)
-    # con fallback para versiones antiguas
-    try:
-        trainer = WeightedTrainer(
-            model=model,
-            args=training_args,
-            train_dataset=train_ds,
-            eval_dataset=eval_ds,
-            processing_class=tokenizer,
-        )
-    except TypeError:
-        trainer = WeightedTrainer(
-            model=model,
-            args=training_args,
-            train_dataset=train_ds,
-            eval_dataset=eval_ds,
-            tokenizer=tokenizer,
-        )
+    trainer = WeightedTrainer(
+        model=model,
+        args=training_args,
+        train_dataset=train_ds,
+        eval_dataset=eval_ds,
+        processing_class=tokenizer,
+    )
 
     trainer.train()
     trainer.save_model(out_dir)
@@ -481,6 +472,9 @@ def run_dpo(dpo_data_path: str, sft_lora_dir: str, out_dir: str):
     print(f"  Train: {len(train_ds)}  Eval: {len(eval_ds)}")
 
     print("\n[3/3] Entrenando DPO...")
+    # FIX: warmup_ratio -> warmup_steps (deprecado en transformers v5.2)
+    n_dpo_steps  = max(1, (len(train_ds) // (DPO_BATCH_SIZE * DPO_GRAD_ACCUM)) * DPO_EPOCHS)
+    dpo_warmup   = max(1, int(n_dpo_steps * DPO_WARMUP_RATIO))
     dpo_config = DPOConfig(
         output_dir=out_dir,
         num_train_epochs=DPO_EPOCHS,
@@ -488,12 +482,10 @@ def run_dpo(dpo_data_path: str, sft_lora_dir: str, out_dir: str):
         per_device_eval_batch_size=DPO_BATCH_SIZE,
         gradient_accumulation_steps=DPO_GRAD_ACCUM,
         learning_rate=DPO_LR,
-        warmup_ratio=DPO_WARMUP_RATIO,
+        warmup_steps=dpo_warmup,
         lr_scheduler_type="cosine",
-        # FIX: DPO_BETA 0.1→0.05 para gaps de preferencia pequeños
         beta=DPO_BETA,
         max_length=DPO_MAX_LENGTH,
-        max_prompt_length=DPO_MAX_PROMPT_LENGTH,
         bf16=True,
         fp16=False,
         optim="paged_adamw_8bit",
@@ -501,7 +493,7 @@ def run_dpo(dpo_data_path: str, sft_lora_dir: str, out_dir: str):
         eval_strategy="steps",
         eval_steps=20,
         save_strategy="steps",
-        save_steps=50,
+        save_steps=20,
         save_total_limit=2,
         load_best_model_at_end=True,
         metric_for_best_model="eval_loss",
@@ -511,23 +503,13 @@ def run_dpo(dpo_data_path: str, sft_lora_dir: str, out_dir: str):
         gradient_checkpointing_kwargs={"use_reentrant": False},
     )
 
-    # FIX: processing_class con fallback
-    try:
-        trainer = DPOTrainer(
-            model=model,
-            args=dpo_config,
-            train_dataset=train_ds,
-            eval_dataset=eval_ds,
-            processing_class=tokenizer,
-        )
-    except TypeError:
-        trainer = DPOTrainer(
-            model=model,
-            args=dpo_config,
-            train_dataset=train_ds,
-            eval_dataset=eval_ds,
-            tokenizer=tokenizer,
-        )
+    trainer = DPOTrainer(
+        model=model,
+        args=dpo_config,
+        train_dataset=train_ds,
+        eval_dataset=eval_ds,
+        processing_class=tokenizer,
+    )
 
     trainer.train()
     trainer.save_model(out_dir)

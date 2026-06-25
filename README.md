@@ -115,19 +115,40 @@ When DAAT reward is high (GoL substrate in complex, oscillator-rich state) but p
 
 The full learning loop has two phases that alternate. In the runtime phase, weights are fixed and context accumulates: `memory.md` and `dataset.json` grow with each incarnation. In the substrate phase, the accumulated dataset drives QLoRA fine-tuning (LoRA r=8, 4-bit, NEFTune) on Qwen2.5-3B-Instruct, producing a GGUF Q4_K_M that replaces the running model. The improved model re-enters the runtime phase. Neither phase is optional — context without substrate modification is allostasis without evolution; substrate modification without prior context accumulation has no signal to learn from.
 
-The substrate phase cannot run inside the Docker container during inference. It runs on the host after extracting the dataset:
+The substrate phase cannot run inside the Docker container during inference. It runs on the host, inside `cauldron/`, after extracting the dataset:
 
 ```bash
 # 1. Extract accumulated dataset
 docker cp kethernet-squeak:/navi/dataset.json ./dataset_backup.json
 
 # 2. Build SFT and DPO pairs
-python pharo/build_dataset.py dataset_backup.json --outdir ./out --reshimu pharo/reshimu.json
+python cauldron/build_dataset.py dataset_backup.json --outdir ./out --reshimu cauldron/reshimu.json
 
-# 3. Fine-tune → merge → quantize → re-enter loop
-python pharo/navi_finetune.py --train --data out/sft_rich.jsonl --sephirot out/sft_sephirot.jsonl --out ./lora_out
-python pharo/navi_finetune.py --merge --lora ./lora_out --out ./merged
-python pharo/navi_finetune.py --to-gguf ./merged --out ./gguf_out --llama-cpp-path /path/to/llama.cpp
+# 3. Set up environment
+python -m venv .venv
+.venv\Scripts\activate          # Windows
+# source .venv/bin/activate     # Linux/macOS/WSL2
+pip install torch torchvision torchaudio
+pip install -r cauldron/requirements_finetune.txt
+
+# 4. SFT
+python cauldron/navi_finetune.py --train --data out/sft_rich.jsonl --sephirot out/sft_sephirot.jsonl --out ./lora_out
+
+# 5. DPO
+python cauldron/navi_finetune.py --dpo --sft-lora ./lora_out --dpo-data out/dpo_pairs.jsonl --out ./lora_dpo_out
+
+# 6. Merge
+python cauldron/navi_finetune.py --merge --lora ./lora_dpo_out --out ./merged
+
+# 7. GGUF
+git clone https://github.com/ggml-org/llama.cpp
+python ./llama.cpp/convert_hf_to_gguf.py ./merged --outfile ./gguf_out/navi-3b-f16.gguf --outtype f16
+python cauldron/navi_finetune.py --to-gguf ./merged --llama-cpp-path ./llama.cpp --out ./gguf_out
+./llama-b9357-bin-win-cuda-12.4-x64/llama-quantize.exe ./gguf_out/navi-3b-f16.gguf ./gguf_out/navi-3b-q4_k_m.gguf Q4_K_M
+
+# 8. Re-enter the loop (manual for now)
+docker cp ./gguf_out/navi-3b-q4_k_m.gguf kethernet-squeak:/navi/model.gguf
+# update pharo/navi.config to point at the new model, then restart `make navi`
 ```
 
 The cycle continues. Each iteration of the substrate phase is a generation boundary — a Nefesh-level modification that no amount of context accumulation can substitute.
@@ -162,6 +183,12 @@ The cycle continues. Each iteration of the substrate phase is a generation bound
 KETHERNET_0x0100007F/
 ├── Makefile
 ├── README.md
+├── cauldron
+│   ├── build_dataset.py
+│   ├── navi_finetune.py
+│   ├── navi_finetune_colab.ipynb
+│   ├── requirements_finetune.txt
+│   └── reshimu.json
 ├── docker
 │   ├── Dockerfile.pharo
 │   ├── Dockerfile.squeak

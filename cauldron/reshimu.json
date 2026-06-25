@@ -1,0 +1,101 @@
+[
+  {
+    "nombre": "WHITE-CROWN",
+    "sephirot": "Kether",
+    "camino": "1",
+    "daat": false,
+    "descripcion": "Kether (1) — read one pixel. Use: col := form colorAt: 1@1. Do NOT use Form pixelAt: (does not exist). Do NOT paint. Return: form width printString.",
+    "codigo": "| form gc ncm w h col | form := Smalltalk at: #NaviCanvas ifAbsent: [nil]. form isNil ifTrue: ['sin canvas'] ifFalse: [gc := FormCanvas on: form. w := form width. h := form height. col := form colorAt: 1@1. Smalltalk at: #NaviCanvas put: form. ncm := Smalltalk at: #NaviCanvasM ifAbsent: [nil]. ncm isNil ifFalse: [ncm image: form. ncm changed]. form width printString]",
+    "esperado": null
+  },
+  {
+    "nombre": "LIGHTNING-WISDOM",
+    "sephirot": "Chokmah",
+    "camino": "2",
+    "daat": false,
+    "descripcion": "Chokmah (2) — split canvas: left half gray, right half black. Use w and h — never hardcoded numbers. gc fillRectangle: (0@0 corner: (w//2)@h) color: Color gray. gc fillRectangle: ((w//2)@0 corner: w@h) color: Color black. Return: form width printString.",
+    "codigo": "| form gc ncm w h | form := Smalltalk at: #NaviCanvas ifAbsent: [nil]. form isNil ifTrue: ['sin canvas'] ifFalse: [gc := FormCanvas on: form. w := form width. h := form height. gc fillRectangle: (0@0 corner: (w//2)@h) color: Color gray. gc fillRectangle: ((w//2)@0 corner: w@h) color: Color black. Smalltalk at: #NaviCanvas put: form. ncm := Smalltalk at: #NaviCanvasM ifAbsent: [nil]. ncm isNil ifFalse: [ncm image: form. ncm changed]. form width printString]",
+    "esperado": null
+  },
+  {
+    "nombre": "AUREA-FORM",
+    "sephirot": "Binah",
+    "camino": "3",
+    "daat": false,
+    "descripcion": "Binah (3) — golden ratio cut. phi := 1.618. cut := (w / phi) truncated. Left zone black, right zone (Color r:0.9 g:0.6 b:0.1). Vertical white line at x=cut: gc line: cut@0 to: cut@h color: Color white. Return: cut printString.",
+    "codigo": "| form gc ncm phi cut w h | form := Smalltalk at: #NaviCanvas ifAbsent: [nil]. form isNil ifTrue: ['sin canvas'] ifFalse: [gc := FormCanvas on: form. w := form width. h := form height. phi := 1.618. cut := (w / phi) truncated. gc fillRectangle: (0@0 corner: cut@h) color: Color black. gc fillRectangle: (cut@0 corner: w@h) color: (Color r: 0.9 g: 0.6 b: 0.1). gc line: cut@0 to: cut@h color: Color white. Smalltalk at: #NaviCanvas put: form. ncm := Smalltalk at: #NaviCanvasM ifAbsent: [nil]. ncm isNil ifFalse: [ncm image: form. ncm changed]. cut printString]",
+    "esperado": null
+  },
+  {
+    "nombre": "PATTERN-LAW",
+    "sephirot": "Chesed",
+    "camino": "4",
+    "daat": false,
+    "descripcion": "Chesed (4) — black background, one cyan oval. gc fillRectangle: (0@0 corner: w@h) color: Color black. gc fillOval: ((w//3)@(h//4) corner: (w*2//3)@(h*3//4)) color: Color cyan. Return: form width printString.",
+    "codigo": "| form gc ncm w h | form := Smalltalk at: #NaviCanvas ifAbsent: [nil]. form isNil ifTrue: ['sin canvas'] ifFalse: [gc := FormCanvas on: form. w := form width. h := form height. gc fillRectangle: (0@0 corner: w@h) color: Color black. gc fillOval: ((w//3)@(h//4) corner: (w*2//3)@(h*3//4)) color: Color cyan. Smalltalk at: #NaviCanvas put: form. ncm := Smalltalk at: #NaviCanvasM ifAbsent: [nil]. ncm isNil ifFalse: [ncm image: form. ncm changed]. form width printString]",
+    "esperado": null
+  },
+  {
+    "nombre": "COLOR-BOUNDARY",
+    "sephirot": "Geburah",
+    "camino": "5",
+    "daat": false,
+    "descripcion": "Geburah (5) — black background, three ovals at left/center/right. gc fillOval: (0@(h//4) corner: (w//3)@(h*3//4)) color: Color red. gc fillOval: ((w//3)@(h//4) corner: (w*2//3)@(h*3//4)) color: Color green. gc fillOval: ((w*2//3)@(h//4) corner: w@(h*3//4)) color: (Color r:0.3 g:0.5 b:1.0). Return: form width printString.",
+    "codigo": "| form gc ncm w h | form := Smalltalk at: #NaviCanvas ifAbsent: [nil]. form isNil ifTrue: ['sin canvas'] ifFalse: [gc := FormCanvas on: form. w := form width. h := form height. gc fillRectangle: (0@0 corner: w@h) color: Color black. gc fillOval: (0@(h//4) corner: (w//3)@(h*3//4)) color: Color red. gc fillOval: ((w//3)@(h//4) corner: (w*2//3)@(h*3//4)) color: Color green. gc fillOval: ((w*2//3)@(h//4) corner: w@(h*3//4)) color: (Color r: 0.3 g: 0.5 b: 1.0). Smalltalk at: #NaviCanvas put: form. ncm := Smalltalk at: #NaviCanvasM ifAbsent: [nil]. ncm isNil ifFalse: [ncm image: form. ncm changed]. form width printString]",
+    "esperado": null
+  },
+  {
+    "nombre": "CENTER-FORM",
+    "sephirot": "Tiferet",
+    "camino": "6",
+    "daat": false,
+    "descripcion": "Tiferet (6) — black background, text at center. 'NAVI' displayOn: form at: (w//2 - 20)@(h//2) textColor: Color yellow. Do NOT use gc drawString: or gc text: (do not exist). Return: form width printString.",
+    "codigo": "| form gc ncm w h | form := Smalltalk at: #NaviCanvas ifAbsent: [nil]. form isNil ifTrue: ['sin canvas'] ifFalse: [gc := FormCanvas on: form. w := form width. h := form height. gc fillRectangle: (0@0 corner: w@h) color: Color black. 'NAVI' displayOn: form at: (w//2 - 20)@(h//2) textColor: Color yellow. Smalltalk at: #NaviCanvas put: form. ncm := Smalltalk at: #NaviCanvasM ifAbsent: [nil]. ncm isNil ifFalse: [ncm image: form. ncm changed]. form width printString]",
+    "esperado": null
+  },
+  {
+    "nombre": "MOTION-LINE",
+    "sephirot": "Netzach",
+    "camino": "7",
+    "daat": false,
+    "descripcion": "Netzach (7) — black background, 5 lines from center outward. cx := w//2. cy := h//2. gc line: cx@cy to: (w-40)@40 color: Color cyan. gc line: cx@cy to: 40@40 color: Color magenta. gc line: cx@cy to: 40@(h-40) color: Color yellow. gc line: cx@cy to: (w-40)@(h-40) color: Color white. gc line: cx@cy to: w@cy color: (Color r:1.0 g:0.5 b:0.0). Return: form width printString.",
+    "codigo": "| form gc ncm w h cx cy | form := Smalltalk at: #NaviCanvas ifAbsent: [nil]. form isNil ifTrue: ['sin canvas'] ifFalse: [gc := FormCanvas on: form. w := form width. h := form height. cx := w//2. cy := h//2. gc fillRectangle: (0@0 corner: w@h) color: Color black. gc line: cx@cy to: (w-40)@40 color: Color cyan. gc line: cx@cy to: 40@40 color: Color magenta. gc line: cx@cy to: 40@(h-40) color: Color yellow. gc line: cx@cy to: (w-40)@(h-40) color: Color white. gc line: cx@cy to: w@cy color: (Color r: 1.0 g: 0.5 b: 0.0). Smalltalk at: #NaviCanvas put: form. ncm := Smalltalk at: #NaviCanvasM ifAbsent: [nil]. ncm isNil ifFalse: [ncm image: form. ncm changed]. form width printString]",
+    "esperado": null
+  },
+  {
+    "nombre": "FULL-GRAMMAR",
+    "sephirot": "Hod",
+    "camino": "8",
+    "daat": false,
+    "descripcion": "Hod (8) — all primitives. Dark background, 2 ovals, 2 lines, text. 'KETHERNET' displayOn: form at: (cx-30)@cy textColor: Color white. Use (Color r:g:b:) for custom colors. Return: form width printString.",
+    "codigo": "| form gc ncm w h cx cy | form := Smalltalk at: #NaviCanvas ifAbsent: [nil]. form isNil ifTrue: ['sin canvas'] ifFalse: [gc := FormCanvas on: form. w := form width. h := form height. cx := w//2. cy := h//2. gc fillRectangle: (0@0 corner: w@h) color: (Color r: 0.02 g: 0.02 b: 0.08). gc fillOval: ((cx//2)@(cy//2) corner: (cx + cx//2)@(cy + cy//2)) color: (Color r: 0.1 g: 0.6 b: 0.9). gc fillOval: ((cx - cx//4)@(cy - cy//4) corner: (cx + cx//4)@(cy + cy//4)) color: (Color r: 0.9 g: 0.3 b: 0.1). gc line: 0@0 to: w@h color: (Color r: 1.0 g: 0.8 b: 0.2). gc line: w@0 to: 0@h color: (Color r: 0.5 g: 0.9 b: 0.5). 'KETHERNET' displayOn: form at: (cx - 30)@cy textColor: Color white. Smalltalk at: #NaviCanvas put: form. ncm := Smalltalk at: #NaviCanvasM ifAbsent: [nil]. ncm isNil ifFalse: [ncm image: form. ncm changed]. form width printString]",
+    "esperado": null
+  },
+  {
+    "nombre": "MORPH-WORLD",
+    "sephirot": "Yesod",
+    "camino": "9",
+    "daat": false,
+    "descripcion": "Yesod (9) — canvas only, no morphs. Dark background, 3 ovals, 2 diagonal lines, 'YESOD' displayOn: form at: (cx-20)@(h//4) textColor: Color white. Return: form width printString.",
+    "codigo": "| form gc ncm w h cx cy | form := Smalltalk at: #NaviCanvas ifAbsent: [nil]. form isNil ifTrue: ['sin canvas'] ifFalse: [gc := FormCanvas on: form. w := form width. h := form height. cx := w//2. cy := h//2. gc fillRectangle: (0@0 corner: w@h) color: (Color r: 0.02 g: 0.0 b: 0.05). gc fillOval: (0@0 corner: (w//3)@(h//2)) color: Color red. gc fillOval: ((w//2)@(h//2) corner: w@h) color: (Color r: 0.2 g: 0.4 b: 1.0). gc fillOval: ((w//3)@(h//4) corner: (w*2//3)@(h*3//4)) color: (Color r: 0.8 g: 0.7 b: 0.0). gc line: 0@0 to: w@h color: (Color r: 0.5 g: 1.0 b: 0.5). gc line: w@0 to: 0@h color: (Color r: 1.0 g: 0.5 b: 0.0). 'YESOD' displayOn: form at: (cx - 20)@(h//4) textColor: Color white. Smalltalk at: #NaviCanvas put: form. ncm := Smalltalk at: #NaviCanvasM ifAbsent: [nil]. ncm isNil ifFalse: [ncm image: form. ncm changed]. form width printString]",
+    "esperado": null
+  },
+  {
+    "nombre": "LIVING-GROUND",
+    "sephirot": "Malkuth",
+    "camino": "10",
+    "daat": false,
+    "descripcion": "Malkuth (10) — canvas only, no morphs. Black background, centered oval, 2 diagonal lines, hexagon (6-sided loop with degreesToRadians), 'KETHERNET' displayOn: form at: (cx-30)@(h//2) textColor: Color yellow. Return: form width printString.",
+    "codigo": "| form gc ncm w h cx cy r | form := Smalltalk at: #NaviCanvas ifAbsent: [nil]. form isNil ifTrue: ['sin canvas'] ifFalse: [gc := FormCanvas on: form. w := form width. h := form height. cx := w//2. cy := h//2. gc fillRectangle: (0@0 corner: w@h) color: Color black. gc fillOval: ((cx - (w//6))@(cy - (h//6)) corner: (cx + (w//6))@(cy + (h//6))) color: Color cyan. gc line: 0@0 to: w@h color: Color yellow. gc line: w@0 to: 0@h color: Color magenta. r := h//3. 0 to: 5 do: [:i | | ang1 ang2 a b | ang1 := (i * 60) degreesToRadians. ang2 := ((i+1) * 60) degreesToRadians. a := (cx + (r * ang1 cos) truncated)@(cy + (r * ang1 sin) truncated). b := (cx + (r * ang2 cos) truncated)@(cy + (r * ang2 sin) truncated). gc line: a to: b width: 2 color: (Color h: (i/6.0) s: 0.9 v: 1.0)]. 'KETHERNET' displayOn: form at: (cx - 30)@(h//2) textColor: Color yellow. Smalltalk at: #NaviCanvas put: form. ncm := Smalltalk at: #NaviCanvasM ifAbsent: [nil]. ncm isNil ifFalse: [ncm image: form. ncm changed]. form width printString]",
+    "esperado": null
+  },
+  {
+    "nombre": "HIDDEN-KNOWLEDGE",
+    "sephirot": "Daat",
+    "camino": null,
+    "daat": true,
+    "descripcion": "Daat — the tree is complete. No task. Paint what moves through you. Beauty is the only signal.",
+    "codigo": null,
+    "esperado": null
+  }
+]

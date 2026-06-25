@@ -830,7 +830,7 @@ buildPromptLibre
         s nextPutAll: '    x := cx + (r * angle cos) truncated.'. s nextPut: lf.
         s nextPutAll: '    y := cy + (r * angle sin) truncated.'. s nextPut: lf.
         s nextPutAll: '    sz := (i rem: 12) + 4.'. s nextPut: lf.
-        s nextPutAll: '    col := Color h: (i * phi - (i * phi) truncated) s: 0.85 v: 0.95.'. s nextPut: lf.
+        s nextPutAll: '    col := Color h: ((i * phi - (i * phi) truncated) * 360.0) s: 0.85 v: 0.95.'. s nextPut: lf.
         s nextPutAll: '    gc fillOval: (x@y corner: (x+sz)@(y+sz)) color: col].'. s nextPut: lf.
         s nextPutAll: 'ncm := Smalltalk at: #NaviCanvasM ifAbsent: [nil].'. s nextPut: lf.
         s nextPutAll: 'ncm isNil ifFalse: [ncm image: form. ncm changed].'. s nextPut: lf.
@@ -1039,7 +1039,7 @@ runCycle
             , (String with: Character lf)
             , 'gc fillRectangle: (0@0 corner: w@h) color: Color black.'
             , (String with: Character lf)
-            , '1 to: 500 do: [:i | | angle r x y sz col | angle := (i * phi * 360.0) degreesToRadians. r := (i / 500.0) sqrt * (h // 2). x := cx + (r * angle cos) truncated. y := cy + (r * angle sin) truncated. sz := (i rem: 14) + 3. col := Color h: (i * phi - (i * phi) truncated) s: 0.9 v: 0.95. gc fillOval: (x@y corner: (x+sz)@(y+sz)) color: col].'
+            , '1 to: 500 do: [:i | | angle r x y sz col | angle := (i * phi * 360.0) degreesToRadians. r := (i / 500.0) sqrt * (h // 2). x := cx + (r * angle cos) truncated. y := cy + (r * angle sin) truncated. sz := (i rem: 14) + 3. col := Color h: ((i * phi - (i * phi) truncated) * 360.0) s: 0.9 v: 0.95. gc fillOval: (x@y corner: (x+sz)@(y+sz)) color: col].'
             , (String with: Character lf)
             , 'ncm := Smalltalk at: #NaviCanvasM ifAbsent: [nil]. ncm isNil ifFalse: [ncm image: form. ncm changed].'
             , (String with: Character lf)
@@ -1216,6 +1216,28 @@ corregirCodigoLLM: codigo
         | goodRecv |
         goodRecv := 'gc' , (badRecv copyFrom: 5 to: badRecv size).
         result := result copyReplaceAll: badRecv with: goodRecv].
+
+    "2a2. 'form fill: <color>' is not understood by Form (the LLM confuses it with
+     other Smalltalk canvas APIs). Rewrite to a full-canvas gc fillRectangle: so it
+     becomes the semantic equivalent the LLM clearly intended."
+    [ | out i sz pat patSz |
+      pat := 'form fill:'. patSz := pat size.
+      sz := result size.
+      out := ReadWriteStream on: String new. i := 1.
+      [ i <= sz ] whileTrue: [
+          | matched |
+          matched := false.
+          (i + patSz - 1 <= sz and: [(result copyFrom: i to: i + patSz - 1) = pat]) ifTrue: [
+              | j stmtEnd colorExpr |
+              j := i + patSz.
+              [ j <= sz and: [(result at: j) = $ ] ] whileTrue: [ j := j + 1 ].
+              stmtEnd := result indexOf: $. startingAt: j ifAbsent: [sz + 1].
+              colorExpr := self trimStr: (result copyFrom: j to: stmtEnd - 1).
+              out nextPutAll: 'gc fillRectangle: (0@0 corner: w@h) color: ' , colorExpr.
+              i := stmtEnd. matched := true].
+          matched ifFalse: [out nextPut: (result at: i). i := i + 1]].
+      result := out contents
+    ] on: Error do: [:e | ].
     #('gc fillRectangle:' 'gc fillOval:') do: [:sel |
         | out i sz selSz |
         sz := result size. selSz := sel size.
