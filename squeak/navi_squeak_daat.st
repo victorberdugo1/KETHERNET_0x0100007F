@@ -8,6 +8,11 @@ logBlock := [:msg |
     Transcript show: msg; cr.
 ].
 
+"FIX: inicializar todos los globales a nil ANTES de usarlos.
+ Las lineas anteriores referenciaban canvasForm/canvasMorph/canvasWin
+ antes de que fueran declaradas (estan dentro del bloque hasDisplay ifTrue:
+ mas abajo). Eso causaba MessageNotUnderstood en modo headless y corrompia
+ NaviCanvas con un UndefinedObject en modo display."
 Smalltalk at: #NaviCanvas    put: nil.
 Smalltalk at: #NaviCanvasM   put: nil.
 Smalltalk at: #NaviCanvasWin put: nil.
@@ -15,10 +20,6 @@ Smalltalk at: #NaviButtons   put: nil.
 Smalltalk at: #NaviWindow    put: nil.
 Smalltalk at: #NaviTitle     put: nil.
 Smalltalk at: #NaviLog       put: nil.
-Smalltalk at: #NaviCanvas put: canvasForm.
-Smalltalk at: #NaviCanvasM put: canvasMorph.
-Smalltalk at: #NaviCanvasWin put: canvasWin.
-Smalltalk at: #NaviButtons put: OrderedCollection new.
 
 hasDisplay ifTrue: [
     | win titleMorph logMorph logText memWin memMorph memTitle memProcess jsonWin jsonMorph jsonTitle jsonProcess
@@ -501,9 +502,10 @@ naviProcess := [
                             apiLf ,
                             '=== NAMED COLORS ===' , apiLf ,
                             'Color black. Color white. Color red. Color green. Color blue.' , apiLf ,
-                            'Color cyan. Color yellow. Color magenta. Color orange. Color gray.' , apiLf ,
-                            'Color purple. Color brown. Color pink. Color tan.' , apiLf ,
-                            'Color darkGray. Color lightGray. Color veryLightGray.' , apiLf ,
+                            'Color cyan. Color yellow. Color magenta. Color orange. Color gray. Color darkGray.' , apiLf ,
+                            '\"NO existen: Color purple, pink, brown, tan, lightGray, veryLightGray — usar (Color r: g: b:)\"' , apiLf ,
+                            '(Color r: 0.5 g: 0.0 b: 0.5).  \"purple\"   (Color r: 1.0 g: 0.6 b: 0.8).  \"pink\"' , apiLf ,
+                            '(Color r: 0.4 g: 0.2 b: 0.0).  \"brown\"    Color gray lighter.             \"lightGray\"' , apiLf ,
                             apiLf ,
                             '=== CUSTOM COLORS ===' , apiLf ,
                             '(Color r: 0.9 g: 0.2 b: 0.5).   "RGB: 0.0..1.0, parentheses required"' , apiLf ,
