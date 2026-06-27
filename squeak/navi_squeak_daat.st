@@ -122,7 +122,7 @@ hasDisplay ifTrue: [
     canvasWin position: 22@44.
     [
     | lastExtent |
-    lastExtent := 640@356.
+    lastExtent := 1@1.   "sentinel: any real canvas will differ"
     [ canvasWin owner notNil ] whileTrue: [
         [ | winExt newW newH newExtent |
           winExt := canvasWin extent.
@@ -515,10 +515,10 @@ naviProcess := [
                             'aColor alpha: 0.7.   "transparency (depth 32 only)"' , apiLf ,
                             apiLf ,
                             '=== MORPHS (float above the canvas) ===' , apiLf ,
-                            'EllipseMorph new color: Color red; extent: 80@60; position: 200@150; openInWorld.' , apiLf ,
-                            'RectangleMorph new color: Color blue; borderColor: Color white; borderWidth: 2; extent: 100@60; position: 300@200; openInWorld.' , apiLf ,
-                            'BorderedMorph new color: Color darkGray; borderColor: Color cyan; borderWidth: 3; extent: 120@80; position: 50@50; openInWorld.' , apiLf ,
-                            'TextMorph new contents: ''NAVI''; color: Color yellow; backgroundColor: Color black; position: 100@100; openInWorld.' , apiLf ,
+                            'EllipseMorph new color: Color red; extent: 80@60; position: ' , (canvasW // 4) printString , '@' , (canvasH // 4) printString , '; openInWorld.' , apiLf ,
+                            'RectangleMorph new color: Color blue; borderColor: Color white; borderWidth: 2; extent: 120@60; position: ' , (canvasW * 3 // 4) printString , '@' , (canvasH // 4) printString , '; openInWorld.' , apiLf ,
+                            'BorderedMorph new color: Color darkGray; borderColor: Color cyan; borderWidth: 3; extent: 100@80; position: ' , (canvasW // 2) printString , '@' , (canvasH // 2) printString , '; openInWorld.' , apiLf ,
+                            'TextMorph new contents: ''NAVI''; color: Color yellow; backgroundColor: Color black; position: ' , (canvasW // 8) printString , '@' , (canvasH // 8) printString , '; openInWorld.' , apiLf ,
                             'ImageMorph new image: form; position: 0@0; openInWorld.   "canvas as floating morph"' , apiLf ,
                             apiLf ,
                             '=== MANIPULATE MORPHS ===' , apiLf ,
