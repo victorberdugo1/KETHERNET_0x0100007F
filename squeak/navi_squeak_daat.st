@@ -213,7 +213,9 @@ hasDisplay ifTrue: [
                     #WHITE_CROWN #LIGHTNING_WISDOM #AUREA_FORM #PATTERN_LAW
                     #COLOR_BOUNDARY #CENTER_FORM #MOTION_LINE #FULL_GRAMMAR
                     #MORPH_WORLD #LIVING_GROUND
-                    #FREE).
+                    #FIRST_CONTRAST #RHYTHM_FIELD #COLOR_FIELD #WAVE_INTERFERENCE
+                    #GRID_PERTURBATION #RADIAL_EXPLOSION #KAIROS
+                    #HIDDEN_KNOWLEDGE).
 
                 "manual split: substrings: does not exist in Squeak 6"
                 splitLines := [ :str |
@@ -301,7 +303,7 @@ hasDisplay ifTrue: [
                             s := nivelNombre asString.
                             dash := s indexOf: $-.
                             dash > 0 ifTrue: [s copyFrom: dash + 1 to: s size] ifFalse: [s] ] value) ,
-                        '  | reshimu: ' , totalEntradas printString , ' incarnations'.
+                        '  | reshimu: ' , totalEntradas printString , ' state'.
                 ] ] on: Error do: [ :e | ].
 
                 "--- build display: ONLY entries, without fixed header ---"
