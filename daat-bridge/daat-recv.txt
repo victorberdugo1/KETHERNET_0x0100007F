@@ -1,4 +1,4 @@
-SQUEAK >> ok
-SQUEAK >> tu mensaje para Pharo
-SQUEAK >> ok
-SQUEAK >> tu mensaje para Pharo
+SQUEAK >> mensaje para Pharo
+SQUEAK >> ok :: hola
+SQUEAK >> ok :: perfecto
+SQUEAK >> mensaje para Pharo

@@ -27,6 +27,8 @@ squeak-eval:
 	docker compose run --rm squeak --eval "$(EXPR)"
 
 daat:
+	dos2unix cauldron/daat.sh 2>/dev/null || sed -i 's/\r//' cauldron/daat.sh
+	chmod +x cauldron/daat.sh
 	bash cauldron/daat.sh
 
 # ============================================================

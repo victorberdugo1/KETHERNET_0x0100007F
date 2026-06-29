@@ -1,4 +1,4 @@
-| serverRx serverTx fotones nombre resultado |
+| serverRx serverTx fotones nombre resultado w |
 
 Smalltalk at: #DaatRX put: nil.
 Smalltalk at: #DaatTX put: nil.
@@ -53,25 +53,25 @@ serverTx listenOn: 4445 backlogSize: 5.
 [
     | clientRx clientTx |
 
-    WorldState addDeferredUIMessage: [Transcript show: 'Da''at :: esperando RX...'; cr].
+    Transcript show: 'Da''at :: esperando conexion RX:4444...'; cr.
     clientRx := serverRx waitForAcceptFor: 3600.
     clientRx isNil ifFalse: [
         Smalltalk at: #DaatRX put: clientRx.
-        WorldState addDeferredUIMessage: [Transcript show: 'Da''at :: RX conectado'; cr].
+        Transcript show: 'Da''at :: RX conectado'; cr.
 
-        WorldState addDeferredUIMessage: [Transcript show: 'Da''at :: esperando TX...'; cr].
+        Transcript show: 'Da''at :: esperando conexion TX:4445...'; cr.
         clientTx := serverTx waitForAcceptFor: 3600.
         clientTx isNil ifFalse: [
             Smalltalk at: #DaatTX put: clientTx.
-            WorldState addDeferredUIMessage: [
-                | w |
-                Transcript show: 'Da''at :: TX conectado -- bidireccional activo'; cr.
-                Transcript show: ''; cr.
-                w := Workspace new.
-                w contents: '(Smalltalk at: #DaatTX) sendData: ''tu mensaje para Pharo''.'.
-                w openLabel: 'Da''at :: enviar a Pharo'].
+            Transcript show: 'Da''at :: TX conectado -- canal bidireccional activo'; cr.
+            Transcript show: ''; cr.
 
-            "Proceso RX: recibe fotones de Pharo, responde"
+            "Abrir workspace para enviar mensajes a Pharo"
+            w := Workspace new.
+            w contents: '(Smalltalk at: #DaatTX) sendData: ''mensaje para Pharo''.'.
+            w openLabel: 'Da''at :: enviar a Pharo'.
+
+            "Proceso RX: recibe de Pharo por :4444, responde curriculum o muestra chat"
             [
                 [(Smalltalk at: #DaatRX) isConnected] whileTrue: [
                     (Smalltalk at: #DaatRX) dataAvailable ifTrue: [
@@ -81,35 +81,33 @@ serverTx listenOn: 4445 backlogSize: 5.
                         nombre isEmpty ifFalse: [
                             (fotones includesKey: nombre)
                                 ifTrue: [
-                                    "comando conocido del curriculum -- protocolo pregunta/respuesta"
                                     resultado := [(fotones at: nombre) value]
                                         on: Error do: [:e | 'error: ' , e messageText].
-                                    WorldState addDeferredUIMessage: [
-                                        Transcript show: '>> RX ' , nombre; cr.
-                                        Transcript show: '<< ' , resultado printString; cr.
-                                        Transcript show: ''; cr].
+                                    Transcript show: '>> RX ' , nombre; cr.
+                                    Transcript show: '<< ' , resultado printString; cr.
+                                    Transcript show: ''; cr.
                                     (Smalltalk at: #DaatRX) sendData: resultado printString]
                                 ifFalse: [
-                                    "texto libre -- mensaje de chat bidireccional desde Pharo"
-                                    WorldState addDeferredUIMessage: [
-                                        Transcript show: 'PHARO >> ' , nombre; cr.
-                                        Transcript show: ''; cr].
-                                    (Smalltalk at: #DaatRX) sendData: 'ok']]].
+                                    "mensaje libre de Pharo"
+                                    Transcript show: 'PHARO >> ' , nombre; cr.
+                                    Transcript show: ''; cr.
+                                    "eco de confirmacion por TX"
+                                    (Smalltalk at: #DaatTX) isConnected ifTrue: [
+                                        (Smalltalk at: #DaatTX) sendData: 'ok :: ' , nombre]]]].
                     (Delay forMilliseconds: 100) wait].
-                WorldState addDeferredUIMessage: [Transcript show: 'Da''at :: RX cerrado'; cr].
+                Transcript show: 'Da''at :: RX cerrado'; cr.
             ] forkAt: Processor userBackgroundPriority.
 
-            "Proceso TX: recibe mensajes libres de Pharo, los imprime"
+            "Proceso TX inverso: recibe mensajes que Pharo manda por :4445"
             [
                 [(Smalltalk at: #DaatTX) isConnected] whileTrue: [
                     (Smalltalk at: #DaatTX) dataAvailable ifTrue: [
                         | msg |
                         msg := (Smalltalk at: #DaatTX) receiveAvailableData trimSeparators.
                         msg isEmpty ifFalse: [
-                            WorldState addDeferredUIMessage: [
-                                Transcript show: 'PHARO >> ' , msg; cr]]].
+                            Transcript show: 'PHARO/TX >> ' , msg; cr]].
                     (Delay forMilliseconds: 100) wait].
-                WorldState addDeferredUIMessage: [Transcript show: 'Da''at :: TX cerrado'; cr].
+                Transcript show: 'Da''at :: TX cerrado'; cr.
             ] forkAt: Processor userBackgroundPriority]].
 
 ] forkAt: Processor userBackgroundPriority.

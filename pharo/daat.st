@@ -1,7 +1,7 @@
 | socketRx socketTx conectado intentos fotones respuesta nombre msg buzonTX buzonRX contenido |
 
-Stdio stdout nextPutAll: 'Da''at :: Region III -- Pharo heap'; lf.
-Stdio stdout nextPutAll: 'PHARO_STATUS conectando'; lf.
+Stdio stdout nextPutAll: 'Da''at :: Region III -- Pharo heap'; lf; flush.
+Stdio stdout nextPutAll: 'PHARO_STATUS conectando'; lf; flush.
 
 conectado := false.
 intentos := 0.
@@ -17,7 +17,7 @@ intentos := 0.
     ].
 ].
 conectado ifFalse: [
-    Stdio stdout nextPutAll: 'PHARO_STATUS timeout_rx'; lf.
+    Stdio stdout nextPutAll: 'PHARO_STATUS timeout_rx'; lf; flush.
     Smalltalk exit: 1.
 ].
 
@@ -35,11 +35,11 @@ intentos := 0.
     ].
 ].
 conectado ifFalse: [
-    Stdio stdout nextPutAll: 'PHARO_STATUS timeout_tx'; lf.
+    Stdio stdout nextPutAll: 'PHARO_STATUS timeout_tx'; lf; flush.
     Smalltalk exit: 1.
 ].
 
-Stdio stdout nextPutAll: 'PHARO_STATUS listo'; lf.
+Stdio stdout nextPutAll: 'PHARO_STATUS listo'; lf; flush.
 
 fotones := #(
     #('handshake'                    'handshake'    800)
@@ -56,25 +56,25 @@ fotones := #(
 
 fotones doWithIndex: [:foton :i |
     nombre := foton second.
-    Stdio stdout nextPutAll: 'CURRICULUM_SEND ' , (foton first); lf.
+    Stdio stdout nextPutAll: 'CURRICULUM_SEND ' , (foton first); lf; flush.
     socketRx sendData: nombre.
     (Delay forMilliseconds: (foton third)) wait.
     socketRx dataAvailable ifTrue: [
         respuesta := socketRx receiveAvailableData trim.
         respuesta isEmpty ifFalse: [
-            Stdio stdout nextPutAll: 'SQUEAK >> ' , respuesta; lf.
+            Stdio stdout nextPutAll: 'SQUEAK >> ' , respuesta; lf; flush.
         ].
     ].
 ].
 
-Stdio stdout nextPutAll: 'PHARO_STATUS curriculum_done'; lf.
+Stdio stdout nextPutAll: 'PHARO_STATUS curriculum_done'; lf; flush.
 
 buzonTX := '/daat-bridge/daat-send.txt' asFileReference.
 buzonRX := '/daat-bridge/daat-recv.txt' asFileReference.
 buzonTX exists ifFalse: [ buzonTX writeStreamDo: [:f | f nextPutAll: ''] ].
 buzonRX exists ifFalse: [ buzonRX writeStreamDo: [:f | f nextPutAll: ''] ].
 
-"Listener RX: respuestas de Squeak -> daat-recv.txt"
+"Listener RX: respuestas de Squeak por :4444 -> stdout + daat-recv.txt"
 [
     [socketRx isConnected] whileTrue: [
         [socketRx waitForDataFor: 0.5]
@@ -82,7 +82,7 @@ buzonRX exists ifFalse: [ buzonRX writeStreamDo: [:f | f nextPutAll: ''] ].
         socketRx dataAvailable ifTrue: [
             respuesta := socketRx receiveAvailableData trim.
             respuesta isEmpty ifFalse: [
-                Stdio stdout nextPutAll: 'SQUEAK >> ' , respuesta; lf.
+                Stdio stdout nextPutAll: 'SQUEAK >> ' , respuesta; lf; flush.
                 [
                     buzonRX writeStreamDo: [:f |
                         f setToEnd.
@@ -96,7 +96,7 @@ buzonRX exists ifFalse: [ buzonRX writeStreamDo: [:f | f nextPutAll: ''] ].
     priority: Processor userBackgroundPriority;
     resume.
 
-"Listener TX inverso: mensajes libres de Squeak -> daat-recv.txt"
+"Listener TX inverso: mensajes que Squeak manda por :4445 -> stdout + daat-recv.txt"
 [
     [socketTx isConnected] whileTrue: [
         [socketTx waitForDataFor: 0.5]
@@ -104,7 +104,7 @@ buzonRX exists ifFalse: [ buzonRX writeStreamDo: [:f | f nextPutAll: ''] ].
         socketTx dataAvailable ifTrue: [
             msg := socketTx receiveAvailableData trim.
             msg isEmpty ifFalse: [
-                Stdio stdout nextPutAll: 'SQUEAK >> ' , msg; lf.
+                Stdio stdout nextPutAll: 'SQUEAK >> ' , msg; lf; flush.
                 [
                     buzonRX writeStreamDo: [:f |
                         f setToEnd.
@@ -118,13 +118,13 @@ buzonRX exists ifFalse: [ buzonRX writeStreamDo: [:f | f nextPutAll: ''] ].
     priority: Processor userBackgroundPriority;
     resume.
 
-"Vigilante buzon TX: lee daat-send.txt cada 300ms y manda a Squeak"
+"Vigilante buzon TX: lee daat-send.txt cada 300ms y manda a Squeak por :4444"
 [socketRx isConnected and: [socketTx isConnected]] whileTrue: [
     [
-        contenido := buzonTX contents trim.
+        contenido := (buzonTX readStreamDo: [:f | f contents]) trim.
         contenido isEmpty ifFalse: [
             socketRx sendData: contenido.
-            Stdio stdout nextPutAll: 'DAAT_SENT ' , contenido; lf.
+            Stdio stdout nextPutAll: 'DAAT_SENT ' , contenido; lf; flush.
             [
                 buzonTX delete.
                 buzonTX writeStreamDo: [:f | f nextPutAll: ''].
@@ -134,4 +134,4 @@ buzonRX exists ifFalse: [ buzonRX writeStreamDo: [:f | f nextPutAll: ''] ].
     (Delay forMilliseconds: 300) wait.
 ].
 
-Stdio stdout nextPutAll: 'PHARO_STATUS cerrado'; lf.
+Stdio stdout nextPutAll: 'PHARO_STATUS cerrado'; lf; flush.
