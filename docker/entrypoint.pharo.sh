@@ -19,6 +19,10 @@ case "$1" in
     shift
     exec "$PHARO_BIN" "$PHARO_IMAGE" eval "$*"
     ;;
+  --evalfile)
+    shift
+    exec "$PHARO_BIN" "$PHARO_IMAGE" eval "$(cat "$1")"
+    ;;
   --st)
     shift
     exec "$PHARO_BIN" "$PHARO_IMAGE" st "$1"

@@ -27,12 +27,7 @@ squeak-eval:
 	docker compose run --rm squeak --eval "$(EXPR)"
 
 daat:
-	xhost +local:docker 2>/dev/null || true
-	-docker rm -f kethernet-squeak 2>/dev/null || true
-	docker compose run --rm --name kethernet-squeak -d squeak --gui
-	@echo "DAAT :: Squeak lanzado — esperando Pharo..."
-	@sleep 2
-	docker compose run --rm -it pharo --st /pharo/daat.st
+	bash cauldron/daat.sh
 
 # ============================================================
 # NAVI — daat.st no se toca

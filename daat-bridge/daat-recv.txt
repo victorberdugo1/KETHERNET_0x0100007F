@@ -1,0 +1,4 @@
+SQUEAK >> ok
+SQUEAK >> tu mensaje para Pharo
+SQUEAK >> ok
+SQUEAK >> tu mensaje para Pharo

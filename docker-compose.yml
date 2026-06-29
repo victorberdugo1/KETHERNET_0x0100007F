@@ -25,6 +25,7 @@ services:
     tty: true
     volumes:
       - ./pharo:/pharo:ro
+      - ./daat-bridge:/daat-bridge:rw
       - navi-data:/navi:rw
     networks:
       - kethernet
